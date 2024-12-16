@@ -94,7 +94,8 @@ def compute_img_hashes(image_mat: np.ndarray,
                        temp_dir: str,
                        temp_name: str,
                        shift_amount: int = 0,
-                       hash_fn: Callable[[str], str] = None) \
+                       hash_fn: Callable[[str], str] = None,
+                       do_rot: bool = True) \
         -> Tuple[str, str, str, str]:
     """
     Compute hash_prefix for duplicate detection.
@@ -108,6 +109,7 @@ def compute_img_hashes(image_mat: np.ndarray,
     :param temp_name: The name prefix of the temporary files
     :param shift_amount: The amount to shift the image before computing the hash_prefix (default 0)
     :param hash_fn: The hash function to use (default sha1), can be altered.
+    :param do_rot: Whether to rotate the image before computing the hash_prefix (default True)
 
     :return: Tuple of Hashes (0, 90, 180, 270)
     """
@@ -129,29 +131,35 @@ def compute_img_hashes(image_mat: np.ndarray,
     # store rot0 with shift
     cv2.imwrite(path_hash_0, image_mat)
 
-    # rot 90
-    image_mat = np.rot90(image_mat, k=1, axes=(0, 1))
-    cv2.imwrite(path_hash_90, image_mat)
+    hash_90 = hash_180 = hash_270 = None
 
-    # rot 180
-    image_mat = np.rot90(image_mat, k=1, axes=(0, 1))
-    cv2.imwrite(path_hash_180, image_mat)
+    if do_rot:
+        # rot 90
+        image_mat = np.rot90(image_mat, k=1, axes=(0, 1))
+        cv2.imwrite(path_hash_90, image_mat)
 
-    # rot 270
-    image_mat = np.rot90(image_mat, k=1, axes=(0, 1))
-    cv2.imwrite(path_hash_270, image_mat)
+        # rot 180
+        image_mat = np.rot90(image_mat, k=1, axes=(0, 1))
+        cv2.imwrite(path_hash_180, image_mat)
 
-    # need to compute file hash since writing the
+        # rot 270
+        image_mat = np.rot90(image_mat, k=1, axes=(0, 1))
+        cv2.imwrite(path_hash_270, image_mat)
+
+        # need to compute file hash since writing the
+        hash_90 = hash_fn(path_hash_90)
+        hash_180 = hash_fn(path_hash_180)
+        hash_270 = hash_fn(path_hash_270)
+
+        # shouldn't be allowed to fail
+        os.remove(path_hash_90)
+        os.remove(path_hash_180)
+        os.remove(path_hash_270)
+
     hash_0 = hash_fn(path_hash_0)
-    hash_90 = hash_fn(path_hash_90)
-    hash_180 = hash_fn(path_hash_180)
-    hash_270 = hash_fn(path_hash_270)
 
     # shouldn't be allowed to fail
     os.remove(path_hash_0)
-    os.remove(path_hash_90)
-    os.remove(path_hash_180)
-    os.remove(path_hash_270)
 
     return hash_0, hash_90, hash_180, hash_270
 
