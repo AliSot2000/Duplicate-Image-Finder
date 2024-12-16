@@ -676,7 +676,7 @@ class FastDifPy(GracefulWorker):
                     target_size=(self.config.compression_target, self.config.compression_target),
                     log_level=self.config.log_level_children,
                     timeout=self.config.child_proc_timeout,
-                    has_dir_b=self.config.root_dir_b is not None,
+                    has_dir_b=len(self.config.part_b) > 0,
                     plot_dir=self.config.second_loop.plot_output_dir,
                     ram_cache=self.ram_cache,
                     plot_threshold=self.config.second_loop.plot_threshold,
@@ -1218,7 +1218,7 @@ class FastDifPy(GracefulWorker):
 
                 batch_size = min(self.db.get_partition_entry_count(True) // 4, self.config.batch_size_max_sl)
             else:
-                if self.config.root_dir_b is not None:
+                if len(self.config.part_b) > 0:
                     batch_size = min(self.db.get_partition_entry_count(True),
                                      self.db.get_partition_entry_count(False),
                                      self.config.batch_size_max_sl)
@@ -1253,7 +1253,7 @@ class FastDifPy(GracefulWorker):
                                                                               "config for internal_second_loop")
 
         # Prepare the blocks according to the config
-        if self.config.root_dir_b is not None:
+        if len(self.config.part_b) > 0:
             self.dir_a_count = self.db.get_partition_entry_count(False)
             self.dir_b_count = self.db.get_partition_entry_count(True)
             self.blocks = build_start_blocks_ab(self.dir_a_count, self.dir_b_count, self.config.second_loop.batch_size)
@@ -1322,7 +1322,7 @@ class FastDifPy(GracefulWorker):
             log_queue=self.logging_queue,
             compare_fn=self.cpu_diff,
             target_size=(self.config.compression_target, self.config.compression_target),
-            has_dir_b=self.config.root_dir_b is not None,
+            has_dir_b=len(self.config.part_b) > 0,
             ram_cache=self.ram_cache,
             plot_dir=self.config.second_loop.plot_output_dir,
             thumb_dir=self.config.thumb_dir,
@@ -1490,7 +1490,7 @@ class FastDifPy(GracefulWorker):
 
         py, hy, ay, ky = self.db.get_rows_directory(start=block.y,
                                                     batch_size=self.config.second_loop.batch_size,
-                                                    part_b=self.config.root_dir_b is not None,
+                                                    part_b=len(self.config.part_b) > 0,
                                                     do_hash=self.config.second_loop.skip_matching_hash,
                                                     aspect=self.config.second_loop.match_aspect_by is not None,
                                                     path=self.config.second_loop.make_diff_plots)
