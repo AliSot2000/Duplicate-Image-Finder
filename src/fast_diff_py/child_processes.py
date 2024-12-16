@@ -261,7 +261,7 @@ class SecondLoopWorker(ChildProcess):
     has_dir_b: bool
     target_size: Optional[Tuple[int, int]] = None
 
-    ram_cache: Dict[int, BatchCache]
+    ram_cache: Dict[int, bytes]
     make_plots: bool = False
     plot_dir: Optional[str] = None
     plot_threshold: Optional[float] = None

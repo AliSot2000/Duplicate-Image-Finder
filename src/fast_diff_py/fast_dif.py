@@ -41,7 +41,7 @@ class FastDifPy(GracefulWorker):
 
     # Attrs related to running the loop
     manager: mp.Manager = mp.Manager()
-    ram_cache: Optional[Dict[int, BatchCache]] = None
+    ram_cache: Optional[Dict[int, bytes]] = None
 
     # The key in the first dict is the same as the ram_cache key
     # The second dict contains a key for each row in the block. The 'key' int is the key_a of the dif_table
