@@ -249,12 +249,17 @@ class SQLiteDB(BaseSQliteDB):
 
         self.debug_execute_many(update_success_stmt, update_success)
 
-    def get_dir_entry_count(self, part_b: bool) -> int:
+    def get_partition_entry_count(self, part_b: bool, only_allowed: bool = True) -> int:
         """
         Get the number of entries in the directory table
+
+        :param part_b: Whether to get the count for partition b or partition a
+        :param only_allowed: Whether to only count the allowed entries
         """
         _part_b = 1 if part_b else 0
         stmt = "SELECT COUNT(*) FROM directory WHERE part_b = ?"
+        if only_allowed:
+            stmt += " AND allowed = 1"
         self.debug_execute(stmt, (_part_b,))
         return self.sq_cur.fetchone()[0]
 

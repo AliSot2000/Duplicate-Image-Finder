@@ -811,7 +811,7 @@ class FastDifPy(GracefulWorker):
             self.logger.warning("Shift amount is 0, but hash computation is requested. "
                                 "Only exact Matches will be found")
 
-        todo = self.db.get_dir_entry_count(False) + self.db.get_dir_entry_count(True)
+        todo = self.db.get_partition_entry_count(False) + self.db.get_partition_entry_count(True)
         rtc = FirstLoopRuntimeConfig.model_validate(cfg.model_dump())
 
         # We are in a case where we have less than the number of CPUs
@@ -834,8 +834,8 @@ class FastDifPy(GracefulWorker):
         """
         Function used to print the amount storage used by the thumbnails.
         """
-        dir_a_count = self.db.get_dir_entry_count(False)
-        dir_b_count = self.db.get_dir_entry_count(True)
+        dir_a_count = self.db.get_partition_entry_count(False)
+        dir_b_count = self.db.get_partition_entry_count(True)
 
         if do_print:
             self.logger.info(f"Entries in {self.config.root_dir_a}: {dir_a_count}")
@@ -1156,19 +1156,19 @@ class FastDifPy(GracefulWorker):
 
         # One direction is constrained beyond the other
         if batch_size is None:
-            if self.db.get_dir_entry_count(False) < cpu_proc + gpu_proc:
+            if self.db.get_partition_entry_count(False) < cpu_proc + gpu_proc:
                 # Very small case, we don't need full speed.
-                if self.db.get_dir_entry_count(True) < cpu_proc + gpu_proc:
+                if self.db.get_partition_entry_count(True) < cpu_proc + gpu_proc:
                     parallel = False
 
-                batch_size = min(self.db.get_dir_entry_count(True) // 4, self.config.batch_size_max_sl)
+                batch_size = min(self.db.get_partition_entry_count(True) // 4, self.config.batch_size_max_sl)
             else:
                 if self.config.root_dir_b is not None:
-                    batch_size = min(self.db.get_dir_entry_count(True),
-                                     self.db.get_dir_entry_count(False),
+                    batch_size = min(self.db.get_partition_entry_count(True),
+                                     self.db.get_partition_entry_count(False),
                                      self.config.batch_size_max_sl)
                 else:
-                    batch_size = min(self.db.get_dir_entry_count(False),
+                    batch_size = min(self.db.get_partition_entry_count(False),
                                      self.config.batch_size_max_sl)
 
         args = {"cpu_proc": cpu_proc,
@@ -1199,12 +1199,12 @@ class FastDifPy(GracefulWorker):
 
         # Prepare the blocks according to the config
         if self.config.root_dir_b is not None:
-            self.dir_a_count = self.db.get_dir_entry_count(False)
-            self.dir_b_count = self.db.get_dir_entry_count(True)
+            self.dir_a_count = self.db.get_partition_entry_count(False)
+            self.dir_b_count = self.db.get_partition_entry_count(True)
             self.blocks = build_start_blocks_ab(self.dir_a_count, self.dir_b_count, self.config.second_loop.batch_size)
             self.logger.info(f"Created Blocks for A and B, number of blocks: {len(self.blocks)}")
         else:
-            self.dir_a_count = self.db.get_dir_entry_count(False)
+            self.dir_a_count = self.db.get_partition_entry_count(False)
             self.blocks = build_start_blocks_a(self.dir_a_count, self.config.second_loop.batch_size)
             self.logger.info(f"Created Blocks for A , number of blocks: {len(self.blocks)}")
 
