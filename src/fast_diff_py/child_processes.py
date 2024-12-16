@@ -201,6 +201,19 @@ class FirstLoopWorker(ChildProcess):
             else:
                 self.hash_fn = util.hash_np
 
+    @property
+    def old(self):
+        return self.__old
+
+    @old.setter
+    def old(self, value: bool):
+        if value:
+            self.logger.warning("Using old hashing method. "
+                                "This method is deprecated and will be removed in the future.")
+
+        self.__old = value
+
+
     def prep_logging(self, level: int = logging.DEBUG, q: mp.Queue = None):
         """
         Prepare the logging for the child process
