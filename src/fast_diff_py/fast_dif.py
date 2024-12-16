@@ -372,11 +372,17 @@ class FastDifPy(GracefulWorker):
 
         :raises FileNotFoundError: If any of the paths do not exist
         """
-        if not os.path.exists(self.config.root_dir_a):
-            raise FileNotFoundError(f"Directory {self.config.root_dir_a} does not exist")
+        b = []
+        a = [self.config.part_a] if isinstance(self.config.part_a, str) else self.config.part_a
+        if self.config.part_b is not None:
+            b = [self.config.part_b] if isinstance(self.config.part_b, str) else self.config.part_b
 
-        if self.config.root_dir_b is not None and not os.path.exists(self.config.root_dir_b):
-            raise FileNotFoundError(f"Directory {self.config.root_dir_b} does not exist")
+        all_paths = a + b
+
+        # Check all paths
+        for p in all_paths:
+            if not os.path.exists(p):
+                raise FileNotFoundError(f"Directory {self.config.part_a} does not exist")
 
         if not os.path.exists(self.config.db_path):
             raise FileNotFoundError(f"DB Path {self.config.db_path} does not exist")
