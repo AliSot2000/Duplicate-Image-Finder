@@ -1446,15 +1446,15 @@ class FastDifPy(GracefulWorker):
 
         # Case when we have a dir_b
         px, hx, ax, kx = self.db.get_rows_directory(start=block.x,
-                                                    size=self.config.second_loop.batch_size,
-                                                    dir_b=False,
+                                                    batch_size=self.config.second_loop.batch_size,
+                                                    part_b=False,
                                                     do_hash=self.config.second_loop.skip_matching_hash,
                                                     aspect=self.config.second_loop.match_aspect_by is not None,
                                                     path=self.config.second_loop.make_diff_plots)
 
         py, hy, ay, ky = self.db.get_rows_directory(start=block.y,
-                                                    size=self.config.second_loop.batch_size,
-                                                    dir_b=self.config.root_dir_b is not None,
+                                                    batch_size=self.config.second_loop.batch_size,
+                                                    part_b=self.config.root_dir_b is not None,
                                                     do_hash=self.config.second_loop.skip_matching_hash,
                                                     aspect=self.config.second_loop.match_aspect_by is not None,
                                                     path=self.config.second_loop.make_diff_plots)
