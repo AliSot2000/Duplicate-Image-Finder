@@ -340,7 +340,6 @@ class SecondLoopWorker(ChildProcess):
                  has_dir_b: bool = False,
                  ram_cache: Dict[int, bytes] = None,
                  plot_dir: str = None,
-                 thumb_dir: str = None,
                  plot_threshold: float = None,
                  hash_short_circuit: bool = False,
                  match_aspect_by: Optional[float] = None,
@@ -362,7 +361,6 @@ class SecondLoopWorker(ChildProcess):
         self.ram_cache = ram_cache
         self.plot_dir = plot_dir
         self.plot_threshold = plot_threshold
-        self.thumb_dir = thumb_dir
         self.make_plots = make_plots
 
         self.delta_fn = compare_fn
