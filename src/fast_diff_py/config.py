@@ -95,11 +95,10 @@ class Config(BaseModel):
                                     description="The target size of compressed images i.e. "
                                                 "size = (compression_target * compression_target)")
 
-    root_dir_a: str = Field(...,
-                            description="The root directory of the first set of images")
-    root_dir_b: Optional[str] = Field(None,
-                                      description="The root directory of the second set of images,"
-                                                  " should one be provided")
+    part_a: List[str] | str = Field(...,
+                                    description="Directory or List of Directories to be added to partition a")
+    part_b: Optional[List[str] | str] = Field(None,
+                                              description="Directory or List of Directories to be added to partition b")
 
     recurse: bool = Field(True, 
                           description="Whether to recurse into directories that are in root_dir_a and root_dir_B")
