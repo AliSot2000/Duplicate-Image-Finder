@@ -44,9 +44,7 @@ fdo = FastDifPy(dir_a=paths["wbl_a"], dir_b=["wbl_b"], cpu_proc=16, batch_size=1
 fdo.db.create_directory_table_and_index()
 if fdo.config.first_loop.compute_hash:
     fdo.db.create_hash_table_and_index()
-fdo.perform_index()
-fdo.cond_switch_a_b()
-fdo.db.set_keys_zero_index()
+fdo.full_index()
 fdo.print_fs_usage()
 fdo.db.commit()
 fdo.first_loop()
