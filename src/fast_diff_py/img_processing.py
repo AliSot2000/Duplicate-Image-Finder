@@ -164,13 +164,15 @@ def compute_img_hashes(image_mat: np.ndarray,
     return hash_0, hash_90, hash_180, hash_270
 
 
-def compute_image_diff(image_a: np.ndarray, image_b: np.ndarray, use_gpu: bool = False) -> float:
+def compute_image_diff(image_a: np.ndarray, image_b: np.ndarray, use_gpu: bool = False,
+                       do_rot: bool = True) -> float:
     """
     Compute the mean squared error between two images. This is the standard implementation of this process
 
     :param image_a: The first image to compare
     :param image_b: The second image to compare
     :param use_gpu: Whether to use the GPU for the computation
+    :param do_rot: Whether to rotate the image before computing the hash_prefix (default True)
 
     :return: The mean squared error between the two images
     """
@@ -178,18 +180,20 @@ def compute_image_diff(image_a: np.ndarray, image_b: np.ndarray, use_gpu: bool =
         import fast_diff_py.img_processing_gpu as gpu
         delta = gpu.mse_gpu(image_a, image_b)
 
-        # Rotate image three times to find the best match
-        for i in range(3):
-            image_a = np.rot90(image_a, k=1, axes=(0, 1))
-            delta = min(gpu.mse_gpu(image_a, image_b), delta)
+        if do_rot:
+            # Rotate image three times to find the best match
+            for i in range(3):
+                image_a = np.rot90(image_a, k=1, axes=(0, 1))
+                delta = min(gpu.mse_gpu(image_a, image_b), delta)
 
     else:
         delta = mse(image_a, image_b)
 
-        # Rotate image three times to find the best match
-        for i in range(3):
-            image_a = np.rot90(image_a, k=1, axes=(0, 1))
-            delta = min(mse(image_a, image_b), delta)
+        if do_rot:
+            # Rotate image three times to find the best match
+            for i in range(3):
+                image_a = np.rot90(image_a, k=1, axes=(0, 1))
+                delta = min(mse(image_a, image_b), delta)
 
     return delta
 
