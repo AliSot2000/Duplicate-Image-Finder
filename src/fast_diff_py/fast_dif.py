@@ -504,13 +504,22 @@ class FastDifPy(GracefulWorker):
 
         self.logger.debug("Beginning indexing")
 
-        # Index the directories
-        self.__recursive_index(path=self.config.root_dir_a, dir_a=True)
-        if self.config.root_dir_b is not None:
-            self.__recursive_index(path=self.config.root_dir_b, dir_a=False)
+        # Fetching the list of dirs
+        pa = self.config.part_a if isinstance(self.config.part_a, list) else [self.config.part_a]
+        pb = self.config.part_b if isinstance(self.config.part_b, list) else [self.config.part_b]
+
+        all_parts = pa + pb
+        for i in range(len(all_parts)):
+            # Exit on stop
+            if not self.run:
+                break
 
     def __recursive_index(self, path: str = None,
                           dir_a: bool = True,
+            p = os.path.abspath(all_parts[i])
+            self.logger.info(f"Indexing Directory: {p}")
+            part_a = i < len(pa)
+            self.__recursive_index(p, part_a=part_a, dir_index=i)
                           ignore_thumbnail: bool = True,
                           dir_count: int = 0):
         """
