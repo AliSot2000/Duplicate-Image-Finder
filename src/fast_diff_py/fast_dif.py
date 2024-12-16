@@ -72,10 +72,9 @@ class FastDifPy(GracefulWorker):
         if not self.config.retain_progress:
             return
 
-        if self.config.config_path is None:
-            path = os.path.join(self.config.root_dir_a, ".task.json")
-        else:
-            path = self.config.config_path
+        assert self.config.config_path is not None, "Config Path needs to be set before writing config"
+
+        path = self.config.config_path
 
         with open(path, "w") as file:
             file.write(cfg)
