@@ -319,10 +319,10 @@ class SecondLoopWorker(ChildProcess):
     make_plots: bool = False
     plot_dir: Optional[str] = None
     plot_threshold: Optional[float] = None
-    delta_fn: Callable[[np.ndarray[np.uint8], np.ndarray[np.uint8]], float]
+    delta_fn: Callable[[np.ndarray[np.uint8], np.ndarray[np.uint8], bool], float]
     match_aspect_by: Optional[float] = None
     match_hash: bool = False
-
+    do_rot: bool = True
 
     cache_key: Optional[int] = None
     cache: Optional[BatchCache] = None
