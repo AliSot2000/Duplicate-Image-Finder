@@ -453,7 +453,7 @@ class FastDifPy(GracefulWorker):
                 continue
 
             # for directories, continue the recursion
-            if os.path.isdir(full_path):
+            if os.path.isdir(full_path) and self.config.recurse:
                 dirs.append(full_path)
 
             if os.path.isfile(full_path):
