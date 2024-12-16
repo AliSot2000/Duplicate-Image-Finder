@@ -3,6 +3,7 @@ import datetime
 import logging
 import multiprocessing as mp
 import os
+import pickle
 import queue
 import traceback
 from logging.handlers import QueueHandler
@@ -329,7 +330,7 @@ class SecondLoopWorker(ChildProcess):
         """
         if self.cache_key != cache_key and self.ram_cache is not None:
             self.cache_key = cache_key
-            self.cache = copy.deepcopy(self.ram_cache[self.cache_key])
+            self.cache = pickle.loads(copy.deepcopy(self.ram_cache[self.cache_key]))
 
     def match_aspect_ratio_by(self, x: Tuple[int, int], y: Tuple[int, int]) -> bool:
         """

@@ -4,6 +4,7 @@ import multiprocessing as mp
 import os.path
 import shutil
 import time
+import pickle
 from logging.handlers import QueueListener
 from typing import List, Union, Callable, Dict, Optional, Tuple
 
@@ -1326,7 +1327,9 @@ class FastDifPy(GracefulWorker):
 
         self.logger.info(f"Created Cache with key: {self.config.second_loop.cache_index}")
 
-        self.ram_cache[self.config.second_loop.cache_index] = bc
+        ci = self.config.second_loop.cache_index
+        self.ram_cache[ci] = pickle.dumps(bc)
+        print("Added cache")
 
     def prune_cache_batch(self):
         """
