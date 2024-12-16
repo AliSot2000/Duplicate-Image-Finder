@@ -496,6 +496,11 @@ class SQLiteDB(BaseSQliteDB):
         - path_b
         - dif
         """
+        # INFO:
+        #  1 -> success, dif = actual dif
+        #  2 -> matching hash, dif = 0.0
+        #  3 -> matching aspect, if no match, dif = -1.0
+
         if include_hash_match:
             stmt = ("SELECT a.path, b.path, d.dif "
                     "FROM dif_table AS d "
