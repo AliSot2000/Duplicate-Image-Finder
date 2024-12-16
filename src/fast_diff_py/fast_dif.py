@@ -388,19 +388,17 @@ class FastDifPy(GracefulWorker):
     # Indexing
     # ==================================================================================================================
 
-    def full_index(self):
+    def index_preamble(self):
         """
-        Full index performs all actions associated with indexing the files
+        Setting up everything to be able to index the directories
         """
         # Create the table
         self.db.create_directory_table_and_index()
 
-        # Index the directories
-        self.perform_index()
-
-        if not self.run:
-            return
-
+    def index_epilogue(self):
+        """
+        Finish indexing operation - checkin partition sizes and switching partitions if necessary, and writing to disk.
+        """
         # Switch the directories if necessary
         self.cond_switch_a_b()
 
@@ -408,6 +406,20 @@ class FastDifPy(GracefulWorker):
         self.db.set_keys_zero_index()
 
         self.commit()
+
+    def full_index(self):
+        """
+        Full index performs all actions associated with indexing the files
+        """
+        self.index_preamble()
+
+        # Index the directories
+        self.perform_index()
+
+        if not self.run:
+            return
+
+        self.index_epilogue()
 
     def check_directories(self) -> bool:
         """
