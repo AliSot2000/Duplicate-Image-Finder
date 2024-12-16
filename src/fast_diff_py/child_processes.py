@@ -117,7 +117,18 @@ class ChildProcess(GracefulWorker):
 
 class FirstLoopWorker(ChildProcess):
     processing_fn: Callable[[PreprocessArg], PreprocessResult] = None
-    old = False
+
+    do_hash: bool
+    compress: bool
+    shift_amount: int
+    thumb_dir: str
+    target_size: Tuple[int, int]
+    do_rot: bool
+
+    hash_fn: Callable[[str], str] | Callable[[np.ndarray[np.uint8]], str]
+
+    # Whether to use the old hashing method or the new one
+    __old: bool = False
 
     def __init__(self, identifier: int,
                  compress: bool,
