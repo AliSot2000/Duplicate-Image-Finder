@@ -50,13 +50,15 @@ def load_std_image(img_path: str, target_size: Tuple[int, int], resize: bool = T
 
 def hash_np_array(image_mat: np.ndarray,
                   hash_fn: Callable[[np.ndarray[np.uint8]], str],
-                  shift_amount: int = 0) -> Tuple[str, str, str, str]:
+                  shift_amount: int = 0,
+                  do_rot: bool = True) -> Tuple[str, str, str, str]:
     """
     Compute a hash of an image matrix
 
     :param image_mat: The image matrix to compute the hash for
     :param hash_fn: The hash function to use
     :param shift_amount: The amount to shift the image before computing the hash (default 0)
+    :param do_rot: Whether to rotate the image before computing the hash (default True)
 
     :return: The hash of the image matrix
     """
@@ -70,17 +72,20 @@ def hash_np_array(image_mat: np.ndarray,
 
     hash_0 = hash_fn(image_mat)
 
-    # Rot 90
-    image_mat = np.rot90(image_mat, k=1, axes=(0, 1))
-    hash_90 = hash_fn(image_mat)
+    hash_90 = hash_180 = hash_270 = None
 
-    # Rot 180
-    image_mat = np.rot90(image_mat, k=1, axes=(0, 1))
-    hash_180 = hash_fn(image_mat)
+    if do_rot:
+        # Rot 90
+        image_mat = np.rot90(image_mat, k=1, axes=(0, 1))
+        hash_90 = hash_fn(image_mat)
 
-    # Rot 270
-    image_mat = np.rot90(image_mat, k=1, axes=(0, 1))
-    hash_270 = hash_fn(image_mat)
+        # Rot 180
+        image_mat = np.rot90(image_mat, k=1, axes=(0, 1))
+        hash_180 = hash_fn(image_mat)
+
+        # Rot 270
+        image_mat = np.rot90(image_mat, k=1, axes=(0, 1))
+        hash_270 = hash_fn(image_mat)
 
     return hash_0, hash_90, hash_180, hash_270
 
