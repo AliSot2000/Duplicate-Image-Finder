@@ -293,11 +293,13 @@ class FirstLoopWorker(ChildProcess):
                                                               temp_dir=self.thumb_dir,
                                                               temp_name=f"{self.identifier}_temp.png",
                                                               shift_amount=self.shift_amount,
-                                                              hash_fn=self.hash_fn)
+                                                              hash_fn=self.hash_fn,
+                                                              do_rot=self.do_rot)
             else:
                 h0, h90, h180, h270 = imgp.hash_np_array(image_mat=img,
                                                          hash_fn=self.hash_fn,
-                                                         shift_amount=self.shift_amount)
+                                                         shift_amount=self.shift_amount,
+                                                         do_rot=self.do_rot)
             imgp.store_image(img, os.path.join(self.thumb_dir, f"{arg.key}.png"))
 
             return PreprocessResult(key=arg.key,
