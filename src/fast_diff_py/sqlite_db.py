@@ -141,6 +141,36 @@ class SQLiteDB(BaseSQliteDB):
         self.debug_execute(stmt)
         return self.sq_cur.fetchone() is not None
 
+    def bulk_insert_file_external(self,
+                                  paths: List[str],
+                                  allowed: List[int],
+                                  size: List[int],
+                                  created: List[float],
+                                  part_a: bool):
+        """
+        Insert a list of files into the database
+
+        :param paths: The paths to the files
+        :param allowed: Whether the file is allowed for the comparison
+        :param size: The sizes of the files
+        :param created: The creation time of the files (unix timestamp)
+        :param part_a: Whether this is partition A or partition B
+
+        """
+        part = 0 if part_a else 1
+        args = [(paths[i],
+                 os.path.basename(paths[i]),
+                 allowed[i],
+                 size[i],
+                 created[i],
+                 part)
+                for i in range(len(paths))]
+
+        self.debug_execute_many(
+            stmt="INSERT INTO directory (path, filename, allowed, file_size, created, part_b) VALUES (?, ?, ?, ?, ?, ?)",
+            args=args)
+
+    # TODO update the bulk insert to include the hash values
     def bulk_insert_file(self, path: str, filenames: List[str], dir_b: bool = False):
         """
         Insert a folder of files into the database
