@@ -103,7 +103,10 @@ class Config(BaseModel):
 
     recurse: bool = Field(True, 
                           description="Whether to recurse into directories that are in root_dir_a and root_dir_B")
-                             
+
+    rotate: bool = Field(True,
+                        description="Whether to rotate the images during the comparison process")
+
     thumb_dir: Optional[str] = Field(None,
                             description="The directory to store the thumbnails")
 
