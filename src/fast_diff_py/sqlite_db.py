@@ -217,7 +217,7 @@ class SQLiteDB(BaseSQliteDB):
 
         :param batch_size: How many rows to fetch at once
         """
-        stmt = ("SELECT key, path FROM directory WHERE success = -1 LIMIT ?")
+        stmt = ("SELECT key, path FROM directory WHERE success = -1 AND allowed = 1 LIMIT ?")
         self.debug_execute(stmt, (batch_size,))
 
         if self.debug:
@@ -227,7 +227,7 @@ class SQLiteDB(BaseSQliteDB):
 
         # Update to processing
         stmt = ("UPDATE directory SET success = -2 WHERE key IN "
-                "(SELECT key FROM directory WHERE success = -1 LIMIT ?)")
+                "(SELECT key FROM directory WHERE success = -1 AND allowed = 1 LIMIT ?)")
         self.debug_execute(stmt, (batch_size,))
 
         return results
