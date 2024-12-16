@@ -335,10 +335,10 @@ class SecondLoopWorker(ChildProcess):
                  res_queue: mp.Queue,
                  log_queue: mp.Queue,
 
-                 compare_fn: Callable[[np.ndarray[np.uint8], np.ndarray[np.uint8]], float],
+                 compare_fn: Callable[[np.ndarray[np.uint8], np.ndarray[np.uint8], bool], float],
                  target_size: Tuple[int, int],
                  has_dir_b: bool = False,
-                 ram_cache: Dict[int, BatchCache] = None,
+                 ram_cache: Dict[int, bytes] = None,
                  plot_dir: str = None,
                  thumb_dir: str = None,
                  plot_threshold: float = None,
