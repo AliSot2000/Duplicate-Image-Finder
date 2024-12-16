@@ -456,22 +456,30 @@ class FastDifPy(GracefulWorker):
 
         :return: True if they are subdirectories of each other
         """
-        if self.config.root_dir_b is None:
-            return False
-
         # Take absolute paths just to be sure
-        abs_a = os.path.abspath(self.config.root_dir_a)
-        abs_b = os.path.abspath(self.config.root_dir_b)
+        abs_a = os.path.abspath(dir_a)
+        abs_b = os.path.abspath(dir_b)
 
-        dir_a = os.path.dirname(abs_a)
-        dir_b = os.path.dirname(abs_b)
+        p_dir_a = os.path.dirname(abs_a)
+        p_dir_b = os.path.dirname(abs_b)
 
         # Same directory, make sure we don't have the same name
-        if dir_a == dir_b:
-            return os.path.basename(abs_a) == os.path.basename(abs_b)
+        if p_dir_a == p_dir_b and os.path.basename(abs_a) == os.path.basename(abs_b):
+            self.logger.error(f"Found identical directories in set of directories: {dir_a}, {dir_b}")
+            return True
 
-        # Otherwise check the prefixes
-        return abs_a.startswith(abs_b) or abs_b.startswith(abs_a)
+        # Otherwise check the prefixes if we do recurse
+        if self.config.recurse:
+            if abs_a.startswith(abs_b):
+                self.logger.error(f"Found directory which is subdirectory of another. "
+                                  f"Parent Directory: {dir_b}, child: {dir_a}")
+                return True
+
+            if abs_b.startswith(abs_a):
+                self.logger.error(f"Found directory which is subdirectory of another. "
+                                  f"Parent Directory: {dir_a}, child: {dir_b}")
+                return True
+
 
     def perform_index(self):
         """
