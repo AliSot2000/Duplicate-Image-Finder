@@ -347,6 +347,42 @@ class SecondLoopWorker(ChildProcess):
 
                  log_level: int = logging.DEBUG,
                  timeout: int = 30):
+        """
+        Initialize the Second Loop Worker
+
+        :param identifier: The identifier of the worker
+        :param log_level: The log level of the worker
+        :param log_queue: The queue to log to
+        :param cmd_queue: The command queue (arguments for the processing function)
+        :param res_queue: The result queue (results of the processing function)
+        :param timeout: The timeout for the worker
+
+        :param compare_fn: Function that takes thw two images and a bool and computes a metric of difference
+        :param target_size: The target size of the images
+        :param has_dir_b: Whether we have a directory b
+        :param ram_cache: The ram cache to use
+        :param plot_dir: The directory to store the plots in
+        :param plot_threshold: The threshold for the plot (can be different from the threshold for the comparison)
+        :param hash_short_circuit: Whether to short circuit if the hashes match (hash matches -> no comparison)
+        :param match_aspect_by: == 1, match the pixel in x and y, > 1, match the aspect ratio by a factor
+        :param make_plots: Whether to make plots of the differences
+
+        Info about match_aspect_by:
+        If a value > 1.0 is chosen, the computation performed is the following:
+        For image a and image b, the x / y ration is computed. The inverse is taken if the ratio is smaller than 1.
+        Those normalized values are then compared as follows:
+        a * factor >= b >= a / factor
+        If b is not in the interval, the images are considered not-matching
+
+        Info about compare_fn:
+        The function should take three arguments:
+        - The first image as a numpy nd.array
+        - The second image as a numpy nd.array
+        - A boolean whether to rotate the image before comparing
+        Rotation is to be understood as rotating the image by 90 degrees three times and comparing the result.
+        And taking the min in the default implementation. You can provide any function which takes these three
+        arguments.
+        """
 
         super().__init__(identifier=identifier,
                          log_queue=log_queue,
