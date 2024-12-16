@@ -483,7 +483,7 @@ class FastDifPy(GracefulWorker):
             return
 
         self.config.root_dir_a, self.config.root_dir_b = self.config.root_dir_b, self.config.root_dir_a
-        self.db.swap_dir_b()
+        self.db.swap_part_b()
 
     def __recursive_index(self, path: str = None,
                           dir_a: bool = True,

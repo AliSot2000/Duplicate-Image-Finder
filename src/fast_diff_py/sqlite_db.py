@@ -237,7 +237,7 @@ class SQLiteDB(BaseSQliteDB):
         """
         self.debug_execute("UPDATE directory SET key = key - (SELECT MIN(key) FROM directory)")
 
-    def swap_dir_b(self):
+    def swap_part_b(self):
         """
         Swap the definition of dir_a and dir_b
         Needed for performance improvements
