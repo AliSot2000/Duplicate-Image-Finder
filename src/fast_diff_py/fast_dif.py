@@ -165,6 +165,70 @@ class FastDifPy(GracefulWorker):
         self.ql = QueueListener(self.logging_queue, handler, respect_handler_level=True)
         self.ql.start()
 
+    def populate_partition(self, paths: List[str], part_a: bool = True, check_ext: bool = False):
+        """
+        Populate the directory table. If the integrated file discovery methods with root_dir_a and root_dir_b are not
+        sufficient, the two partitions can be populated manually.
+
+        The function checks if the file exists in the file system. Correct extension can be verified as well if needed.
+
+        :param paths: List of File Paths
+        :param part_a: Whether to populate partition A or B
+        :param check_ext: Whether to check the extension of the files, (useful for debugging)
+
+        :return: The number of files added
+        """
+        count = 0
+
+        fpaths = []
+        allowed = []
+        fsize = []
+        create = []
+
+        for f in paths:
+            # File doesn't exist
+            if not os.path.exists(f):
+                self.logger.warning(f"File {f} does not exist")
+
+                fpaths.append(f)
+                allowed.append(0)
+                fsize.append(-1)
+                create.append(-1)
+                continue
+
+            # Get the stats
+            stats = os.stat(f)
+            fpaths.append(f)
+            fsize.append(stats.st_size)
+            create.append(stats.st_ctime)
+
+            # Precondition: File Exists
+            if check_ext and os.path.splitext(f)[1].lower() not in self.config.allowed_file_extensions:
+                self.logger.warning(f"File {f} has an unsupported extension")
+                allowed.append(0)
+            else:
+                allowed.append(1)
+
+            # Write to db
+            if len(fpaths) > self.config.batch_size_dir:
+                self.db.bulk_insert_file_external(fpaths, allowed, fsize, create, part_a)
+                count += len(fpaths)
+
+                fpaths = []
+                allowed = []
+                fsize = []
+                create = []
+
+        if len(fpaths) > 0:
+            self.db.bulk_insert_file_external(fpaths, allowed, fsize, create, part_a)
+            count += len(fpaths)
+
+        return count
+
+    # ==================================================================================================================
+    # INIT
+    # ==================================================================================================================
+
     def __init__(self, dir_a: str = None, dir_b: str = None, config: Config = None,
                  default_cfg_path: str = None, purge: bool = False, **kwargs):
         """
