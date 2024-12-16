@@ -49,7 +49,7 @@ flc = FirstLoopConfig(compute_hash=True, compress=True, parallel=True)
 config = cfg.Config(delete_db=False,
                     delete_thumb=False,
                     first_loop=flc,
-                    root_dir_a=paths["path_a"], root_dir_b=paths["path_c"],
+                    part_a=paths["path_a"], part_b=paths["path_c"],
                     db_path="/home/alisot2000/Desktop/SAMPLE_MIRA/dir_a/.fast_diff.db")
 fdo = FastDifPy(dir_a=paths["path_a"])
 fdo.config.first_loop = flc
