@@ -344,6 +344,7 @@ class SecondLoopWorker(ChildProcess):
                  hash_short_circuit: bool = False,
                  match_aspect_by: Optional[float] = None,
                  make_plots: bool = False,
+                 do_rot: bool = True,
 
                  log_level: int = logging.DEBUG,
                  timeout: int = 30):
@@ -366,6 +367,7 @@ class SecondLoopWorker(ChildProcess):
         :param hash_short_circuit: Whether to short circuit if the hashes match (hash matches -> no comparison)
         :param match_aspect_by: == 1, match the pixel in x and y, > 1, match the aspect ratio by a factor
         :param make_plots: Whether to make plots of the differences
+        :param do_rot: Whether to rotate the images before comparing
 
         Info about match_aspect_by:
         If a value > 1.0 is chosen, the computation performed is the following:
@@ -402,6 +404,7 @@ class SecondLoopWorker(ChildProcess):
         self.delta_fn = compare_fn
         self.match_hash = hash_short_circuit
         self.match_aspect_by = match_aspect_by
+        self.do_rot = do_rot
 
         if make_plots:
             if plot_threshold is None or plot_dir is None:
