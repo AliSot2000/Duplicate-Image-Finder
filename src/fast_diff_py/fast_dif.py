@@ -172,7 +172,7 @@ class FastDifPy(GracefulWorker):
         Initialization follows the following structure:
         - First source of truth is the config parameter. If it is provided, the object is initialized with the config.
         - Second source of truth is the default_cfg_path. If it is provided, the object is initialized with the config
-        - Third source of truth is the .task.json file in the a root directory. If it is present, the object is
+        - Third source of truth is the .task.json file in the 'a root' directory. If it is present, the object is
         initialized with the config.
 
         :param dir_a: The first directory to compare (if no config and default_cfg_path is provided,
