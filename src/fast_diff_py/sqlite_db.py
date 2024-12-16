@@ -271,42 +271,60 @@ class SQLiteDB(BaseSQliteDB):
         self.debug_execute(stmt)
         return self.sq_cur.fetchone()[0]
 
+    def repopulate_directory_table(self):
         """
-        stmt = "SELECT MIN(key) FROM directory WHERE part_b = 1"
-        self.debug_execute(stmt)
-        return self.sq_cur.fetchone()[0]
+        Populate the directory table in a specific order to make sure we don't have holes when we're building the
+        caches etc.
 
-    # INFO: Needs to be called before loop 1
-    def set_keys_zero_index(self):
-        """
-        Update the keys of the directory table such that they start at 0 instead of 1
-        """
-        self.debug_execute("UPDATE directory SET key = key - (SELECT MIN(key) FROM directory)")
+        What should happen:
+        First the smaller partition of partition A and partition B is inserted
+        Then the larger partition of partition A and partition B is inserted
+        Lastly the not allowed entries are inserted
 
-    def swap_part_b(self):
+        Then the keys are updated so they are zero-indexed
+
+        Then the old table is dropped and the new table is renamed
+
+        And lastly the indexes are recreated
         """
-        Swap the definition of dir_a and dir_b
-        Needed for performance improvements
-        """
-        # Create a temp table
-        self.create_directory_table_and_index(True)
+        self.create_directory_table_and_index(temp=True)
         tmp_tbl = self.__get_directory_table_names(True)
         d_tbl = self.__get_directory_table_names(False)
 
         # Inserting the directory_b entries first
-        stmt = (f"INSERT INTO {tmp_tbl} (path, filename, error, success, px, py, dir_b, hash_0, hash_90, hash_180, hash_270)"
+        stmt_b = (f"INSERT INTO {tmp_tbl} (path, filename, error, success, px, py, dir_b, hash_0, hash_90, hash_180, hash_270)"
                 f" SELECT path, filename, error, success, px, py, 0 AS dir_b, hash_0, hash_90, hash_180, hash_270 "
-                f"FROM {d_tbl} WHERE dir_b = 1")
+                f"FROM {d_tbl} WHERE parat_b = 1 AND allowed = 1")
 
-        self.debug_execute(stmt)
-
-        stmt = (f"INSERT INTO {tmp_tbl} (path, filename, error, success, px, py, dir_b, hash_0, hash_90, hash_180, hash_270)"
+        stmt_a = (f"INSERT INTO {tmp_tbl} (path, filename, error, success, px, py, dir_b, hash_0, hash_90, hash_180, hash_270)"
                 f" SELECT path, filename, error, success, px, py, 1 AS dir_b, hash_0, hash_90, hash_180, hash_270 "
-                f"FROM {d_tbl} WHERE dir_b = 0")
+                f"FROM {d_tbl} WHERE part_b = 0 AND allowed = 1")
 
-        self.debug_execute(stmt)
 
-        # Dropping old table and index
+        # Determine the order in which we get the keys for the allowed entries
+        dac = self.get_partition_entry_count(part_b=False, only_allowed=True)
+        dbc = self.get_partition_entry_count(part_b=True, only_allowed=True)
+
+        # Make sure the smaller allowed partition is first
+        if dac < dbc:
+            self.debug_execute(stmt_a)
+            self.debug_execute(stmt_b)
+
+        else:
+            self.debug_execute(stmt_b)
+            self.debug_execute(stmt_a)
+
+        # Writing the remaining not allowed entries
+        stmt_r = (f"INSERT INTO {tmp_tbl} (path, filename, error, success, px, py, dir_b, hash_0, hash_90, hash_180, hash_270)"
+                f" SELECT path, filename, error, success, px, py, 0 AS dir_b, hash_0, hash_90, hash_180, hash_270 "
+                f"FROM {d_tbl} WHERE allowed = 1 ORDER BY part_b ASC")
+
+        # Add the non-allowed entries
+        self.debug_execute(stmt_r)
+
+        # Set keys to zero-index
+        self.debug_execute(f"UPDATE {tmp_tbl} SET key = key - (SELECT MIN(key) FROM {tmp_tbl})")
+
         # INFO Index is dropped with table
         self.debug_execute(f"DROP TABLE {d_tbl}")
 
