@@ -30,7 +30,6 @@ dependencies = [
 
 [project.optional-dependencies]
 gpu= ["cupy"]
-mariadb = ["mariadb"]
 
 [project.scripts]
 dif = "fast_diff_py.dif:main"
