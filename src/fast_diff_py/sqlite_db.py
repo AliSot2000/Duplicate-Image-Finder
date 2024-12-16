@@ -287,6 +287,14 @@ class SQLiteDB(BaseSQliteDB):
         self.debug_execute(stmt)
         return self.sq_cur.fetchone()[0]
 
+    def get_directory_stats(self, index: int, allowed: bool = True):
+        """
+        Get the number of entries for a given directory and a given alloed state
+        """
+        stmt = "SELECT COUNT(*) FROM directory WHERE dir_index = ? AND allowed = ?"
+        self.debug_execute(stmt, (index, 1 if allowed else 0))
+        return self.sq_cur.fetchone()[0]
+
     def repopulate_directory_table(self):
         """
         Populate the directory table in a specific order to make sure we don't have holes when we're building the
