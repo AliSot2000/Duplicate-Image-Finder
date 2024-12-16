@@ -9,7 +9,7 @@ from logging.handlers import QueueListener
 from typing import List, Union, Callable, Dict, Optional, Tuple
 
 import numpy as np
-
+import fast_diff_py.img_processing as imgp
 from fast_diff_py.base_process import GracefulWorker
 from fast_diff_py.cache import ImageCache, BatchCache
 from fast_diff_py.child_processes import FirstLoopWorker, SecondLoopWorker
