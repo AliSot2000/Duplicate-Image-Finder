@@ -185,11 +185,13 @@ class FirstLoopWorker(ChildProcess):
         if do_hash is False and compress is False:
             raise ValueError("At least one of do_hash or compress must be True")
 
+        self.old = old
         self.do_hash = do_hash
         self.compress = compress
         self.shift_amount = shift_amount
         self.thumb_dir = thumb_dir
         self.target_size = target_size
+        self.do_rot = do_rot
 
         if hash_fn is not None:
             self.hash_fn = hash_fn
