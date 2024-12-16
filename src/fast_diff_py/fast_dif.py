@@ -303,6 +303,8 @@ class FastDifPy(GracefulWorker):
                 self.reconnect_to_existing()
 
             else:
+                if dir_b is None:
+                    dir_b = []
                 self.config = Config(part_a=dir_a, part_b=dir_b, **kwargs)
                 self.add_defaults_to_config()
                 self.clean_and_init()
