@@ -53,9 +53,9 @@ class FastDifPy(GracefulWorker):
     dir_a_count: Optional[int] = None
     dir_b_count: Optional[int] = None
 
-    hash_fn: Callable = None
-    cpu_diff: Callable[[np.ndarray[np.uint8], np.ndarray[np.uint8]], float] = None
-    gpu_diff: Callable[[np.ndarray[np.uint8], np.ndarray[np.uint8]], float] = None
+    hash_fn: Optional[Callable[[str], str] | Callable[[np.ndarray[np.uint8]], str]] = None
+    cpu_diff: Optional[Callable[[np.ndarray[np.uint8], np.ndarray[np.uint8], bool], float]] = None
+    gpu_diff: Optional[Callable[[np.ndarray[np.uint8], np.ndarray[np.uint8], bool], float]] = None
 
     # ==================================================================================================================
     # Util
