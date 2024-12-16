@@ -303,7 +303,7 @@ class FastDifPy(GracefulWorker):
                 self.reconnect_to_existing()
 
             else:
-                self.config = Config(root_dir_a=dir_a, root_dir_b=dir_b, **kwargs)
+                self.config = Config(part_a=dir_a, part_b=dir_b, **kwargs)
                 self.add_defaults_to_config()
                 self.clean_and_init()
 
@@ -322,11 +322,11 @@ class FastDifPy(GracefulWorker):
         - config_path
         """
         if self.config.db_path is None:
-            self.config.db_path = os.path.join(self.config.root_dir_a, ".fast_diff.db")
+            self.config.db_path = os.path.join(self.config.part_a, ".fast_diff.db")
             self.logger.info(f"DB Path not provided. Using {self.config.db_path}")
 
         if self.config.thumb_dir is None:
-            self.config.thumb_dir = os.path.join(self.config.root_dir_a, ".temp_thumb")
+            self.config.thumb_dir = os.path.join(self.config.part_a, ".temp_thumb")
             self.logger.info(f"Thumbnail Directory not provided. Using {self.config.thumb_dir}")
 
         if self.config.config_path is None:
