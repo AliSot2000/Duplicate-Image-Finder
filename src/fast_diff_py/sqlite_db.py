@@ -297,7 +297,7 @@ class SQLiteDB(BaseSQliteDB):
         self.debug_execute(stmt)
 
         # Dropping old table and index
-        # INFO Index is dropped wiht table
+        # INFO Index is dropped with table
         self.debug_execute(f"DROP TABLE {d_tbl}")
 
         # Renaming the temp table and index
