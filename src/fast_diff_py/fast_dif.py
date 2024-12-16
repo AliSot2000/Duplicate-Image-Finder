@@ -514,12 +514,13 @@ class FastDifPy(GracefulWorker):
             if not self.run:
                 break
 
-    def __recursive_index(self, path: str = None,
-                          dir_a: bool = True,
             p = os.path.abspath(all_parts[i])
             self.logger.info(f"Indexing Directory: {p}")
             part_a = i < len(pa)
             self.__recursive_index(p, part_a=part_a, dir_index=i)
+
+    def __recursive_index(self, path: str,
+                          part_a: bool = True,
                           ignore_thumbnail: bool = True,
                           dir_count: int = 0):
         """
@@ -532,17 +533,16 @@ class FastDifPy(GracefulWorker):
         If the number of files in ram is greater than `batch_size`, the function will write to the db early.
 
         :param ignore_thumbnail: If any directory at any level, starting with .temp_thumb should be ignored.
-        :param dir_a: True -> Index dir A. False -> Index dir B
+        :param part_a: True -> Index dir A. False -> Index dir B
         :param dir_count: The number of directories in all upper stages of the recursion.
+        :param path: The path to index
+        :param dir_index: The index of the directory in the list of directories (maybe need for reconstruction,
+        available in the db
 
         :return:
         """
         if not self.run:
             return
-
-        # load the path to index from
-        if path is None:
-            path = self.config.root_dir_a if dir_a else self.config.root_dir_b
 
         dirs = []
         files = []
@@ -567,14 +567,16 @@ class FastDifPy(GracefulWorker):
                 dirs.append(full_path)
 
             if os.path.isfile(full_path):
-                # check if the file is supported, then add it to the database
-                if os.path.splitext(full_path)[1].lower() in self.config.allowed_file_extensions:
-                    files.append(file_name)
+                allowed = 1 if os.path.splitext(full_path)[1].lower() in self.config.allowed_file_extensions else 0
+                stats = os.stat(full_path)
+                size = stats.st_size
+                create = stats.st_ctime
+                files.append((file_name, allowed, size, create))
 
             # let the number of files grow to a batch size
             if len(files) > self.config.batch_size_dir:
                 # Store files in the db
-                self.db.bulk_insert_file(path, files, not dir_a)
+                self.db.bulk_insert_file_internal(path, files, part_b=not part_a, index=dir_index)
                 self._enqueue_counter += len(files)
                 self.logger.info(f"Indexed {self._enqueue_counter} files")
                 files = []
@@ -584,27 +586,27 @@ class FastDifPy(GracefulWorker):
                 # Dump the files
                 self._enqueue_counter += len(files)
                 self.logger.info(f"Indexed {self._enqueue_counter} files")
-                self.db.bulk_insert_file(path, files, not dir_a)
+                self.db.bulk_insert_file_internal(path, files, part_b=not part_a, index=dir_index)
                 files = []
 
                 # Recurse through the directories
                 while len(dirs) > 0:
                     d = dirs.pop()
                     self.__recursive_index(path=d,
-                                           dir_a=dir_a,
+                                           part_a=part_a,
                                            ignore_thumbnail=ignore_thumbnail,
                                            dir_count=dir_count + len(dirs))
 
         # Store files in the db
         self._enqueue_counter += len(files)
         self.logger.info(f"Indexed {self._enqueue_counter} files")
-        self.db.bulk_insert_file(path, files, not dir_a)
+        self.db.bulk_insert_file_internal(path, files, part_b=not part_a, index=dir_index)
 
         # Recurse through the directories
         while len(dirs) > 0:
             d = dirs.pop()
             self.__recursive_index(path=d,
-                                   dir_a=dir_a,
+                                   part_a=part_a,
                                    ignore_thumbnail=ignore_thumbnail,
                                    dir_count=dir_count + len(dirs))
 
