@@ -522,7 +522,8 @@ class FastDifPy(GracefulWorker):
     def __recursive_index(self, path: str,
                           part_a: bool = True,
                           ignore_thumbnail: bool = True,
-                          dir_count: int = 0):
+                          dir_count: int = 0,
+                          dir_index: int = -1):
         """
         Recursively index the directories. This function is called by the index_the_dirs function.
 
