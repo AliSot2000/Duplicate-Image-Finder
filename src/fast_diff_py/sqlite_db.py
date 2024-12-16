@@ -45,12 +45,16 @@ class SQLiteDB(BaseSQliteDB):
                 f"success INTEGER DEFAULT -1 CHECK ({tbl_name}.success IN (-2, -1, 0, 1)), "
                 f"px INTEGER DEFAULT -1 CHECK ({tbl_name}.px >= -1), "
                 f"py INTEGER DEFAULT -1 CHECK ({tbl_name}.py >= -1), "
-                f"dir_b INTEGER DEFAULT 0 CHECK ({tbl_name}.dir_b IN (0, 1)), "
+                f"allowed INTEGER DEFAULT 0 CHECK ({tbl_name}.allowed IN (0, 1)), "
+                f"file_size INTEGER DEFAULT -1 CHECK ({tbl_name}.file_size >= -1), "
+                f"created REAL DEFAULT -1 CHECK ({tbl_name}.created >= -1), "
+                f"dir_index INTEGER DEFAULT -1 CHECK ({tbl_name}.dir_index >= -1), "
+                f"part_b INTEGER DEFAULT 0 CHECK ({tbl_name}.part_b IN (0, 1)), "
                 f"hash_0 INTEGER, "
                 f"hash_90 INTEGER, "
                 f"hash_180 INTEGER, "
                 f"hash_270 INTEGER,  "
-                f"UNIQUE (path, dir_b))")
+                f"UNIQUE (path, part_b))")
 
         self.debug_execute(stmt, )
         if not temp:
