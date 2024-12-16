@@ -1325,7 +1325,6 @@ class FastDifPy(GracefulWorker):
             has_dir_b=len(self.config.part_b) > 0,
             ram_cache=self.ram_cache,
             plot_dir=self.config.second_loop.plot_output_dir,
-            thumb_dir=self.config.thumb_dir,
             hash_short_circuit=self.config.second_loop.skip_matching_hash,
             match_aspect_by=self.config.second_loop.match_aspect_by,
             plot_threshold=self.config.second_loop.plot_threshold,
