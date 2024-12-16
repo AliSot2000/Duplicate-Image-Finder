@@ -152,6 +152,28 @@ class FirstLoopWorker(ChildProcess):
         :param identifier: The identifier of the worker
         :param log_level: The log level of the worker
         :param log_queue: The queue to log to
+        :param cmd_queue: The command queue (arguments for the processing function)
+        :param res_queue: The result queue (results of the processing function)
+        :param timeout: The timeout for the worker
+
+        :param compress: Whether to compress the images
+        :param do_hash: Whether to hash the images
+        :param target_size: The target size of the images
+        :param shift_amount: The amount to shift the image before hashing
+        :param thumb_dir: The directory to store the thumbnails
+        :param hash_fn: The hash function to use
+        :param do_rot: Whether to rotate the images before hashing
+        :param old: Whether to use the old hashing method per default.
+
+        Info about hash_fn:
+        The hash function can be one of two types:
+        - A function that takes a string and returns a string (old hashing method)
+        - A function that takes a numpy array and returns a string (new hashing method)
+
+        The old hashing method has been deprecated and is using the file system for hashing. It takes the path to the
+        compressed image as an argument, computes the hash and returns it. The new hashing method takes a numpy array
+        and computes the hash of that. The old method was slower and only used because I couldn't find a way to hash
+        the numpy arrays consistently with rotation.
         """
         super().__init__(identifier=identifier,
                          log_queue=log_queue,
