@@ -1133,8 +1133,8 @@ class FastDifPy(GracefulWorker):
         Set up the second loop
         """
         # Instantiate new Config
-        if not isinstance(self.config.second_loop, SecondLoopRuntimeConfig):
-            self.config.second_loop = SecondLoopRuntimeConfig.model_validate(self.config.second_loop.model_dump())
+        assert isinstance(self.config.second_loop, SecondLoopRuntimeConfig), ("second loop config should be runtime "
+                                                                              "config for internal_second_loop")
 
         # Prepare the blocks according to the config
         if self.config.root_dir_b is not None:
