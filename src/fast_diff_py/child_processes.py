@@ -563,7 +563,7 @@ class SecondLoopWorker(ChildProcess):
 
                     # Make a plot if necessary
                     if self.make_plots and diff < self.plot_threshold:
-                        self.make_plot(diff=0,
+                        self.make_plot(diff=diff,
                                        x_path=arg.x_path,
                                        y_path=arg.y_path[i - start],
                                        x=arg.x,
