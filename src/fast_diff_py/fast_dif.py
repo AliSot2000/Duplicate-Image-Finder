@@ -542,13 +542,16 @@ class FastDifPy(GracefulWorker):
         else:
             workers = []
             if self.cpu_diff is None:
-                import fast_diff_py.img_processing as imgp
-                self.cpu_diff = imgp.mse
+                self.cpu_diff = lambda ia, ib, dr: imgp.compute_image_diff(image_a=ia,
+                                                                           image_b=ib,
+                                                                           use_gpu=False,
+                                                                           do_rot=dr)
 
             if self.config.second_loop.gpu_proc > 0 and self.gpu_diff is None:
-                import fast_diff_py.img_processing_gpu as imgpg
-                self.gpu_diff = imgpg.mse_gpu
-
+                self.cpu_diff = lambda ia, ib, dr: imgp.compute_image_diff(image_a=ia,
+                                                                           image_b=ib,
+                                                                           use_gpu=True,
+                                                                           do_rot=dr)
             for i in range(self.config.second_loop.cpu_proc + self.config.second_loop.gpu_proc):
                 workers.append(SecondLoopWorker(
                     identifier=i,
