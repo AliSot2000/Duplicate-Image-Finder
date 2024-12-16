@@ -262,7 +262,7 @@ class SQLiteDB(BaseSQliteDB):
         """
         Get the index belonging to dir_b
         """
-        stmt = "SELECT MIN(key) FROM directory WHERE dir_b = 1"
+        stmt = "SELECT MIN(key) FROM directory WHERE part_b = 1"
         self.debug_execute(stmt)
         return self.sq_cur.fetchone()[0]
 
