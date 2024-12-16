@@ -522,7 +522,7 @@ class SecondLoopWorker(ChildProcess):
                             continue
 
                     # Compute the diff and add it to the results
-                    diff = self.delta_fn(img_a, img_b)
+                    diff = self.delta_fn(img_a, img_b, self.do_rot)
 
                     # Make a plot if necessary
                     if self.make_plots and diff < self.plot_threshold:
