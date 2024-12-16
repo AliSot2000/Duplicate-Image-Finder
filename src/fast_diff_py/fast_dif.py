@@ -885,10 +885,29 @@ class FastDifPy(GracefulWorker):
 
         return rtc
 
-    def print_fs_usage(self, do_print: bool = True) -> int:
+    def print_fs_usage(self, do_print: bool = True, verbose: bool = False) -> int:
         """
         Function used to print the amount storage used by the thumbnails.
+
+        :param do_print: Whether to print the results to log
+        :param verbose: Whether to print also info per directory
         """
+        if verbose:
+            a = [self.config.part_a] if isinstance(self.config.part_a, str) else self.config.part_a
+            b = [self.config.part_b] if isinstance(self.config.part_b, str) else self.config.part_b
+            all_dirs  = a + b
+
+            for i in range(len(all_dirs)):
+                self.logger.info("Directory: " + all_dirs[i])
+
+                allowed = self.db.get_directory_stats(i, True)
+                disallowed = self.db.get_directory_stats(i, False)
+                self.logger.info(f"Allowed Files: {allowed}")
+                self.logger.info(f"Disallowed Files: {disallowed}")
+
+                dfp = allowed * self.config.compression_target * self.config.compression_target * 3
+                self.logger.info(f"Disk Footprint of Directory: {sizeof_fmt(dfp)}")
+
         dir_a_count = self.db.get_partition_entry_count(False)
         dir_b_count = self.db.get_partition_entry_count(True)
 
