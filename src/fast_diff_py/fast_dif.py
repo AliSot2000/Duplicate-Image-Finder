@@ -466,26 +466,6 @@ class FastDifPy(GracefulWorker):
         if self.config.root_dir_b is not None:
             self.__recursive_index(path=self.config.root_dir_b, dir_a=False)
 
-        if self.run:
-            self.config.state = Progress.INDEXED_DIRS
-            self.logger.info("Done Indexing Directories")
-        self.commit()
-
-    def cond_switch_a_b(self):
-        """
-        Conditionally switch directory a to directory b and vice versa. Needed for performance improvements.
-        """
-        # not necessary, if there's no dir b
-        if self.config.root_dir_b is None:
-            return
-
-        # If directory a has already less or equal number to directory b, skip
-        if self.db.get_dir_entry_count(False) <= self.db.get_dir_entry_count(True):
-            return
-
-        self.config.root_dir_a, self.config.root_dir_b = self.config.root_dir_b, self.config.root_dir_a
-        self.db.swap_part_b()
-
     def __recursive_index(self, path: str = None,
                           dir_a: bool = True,
                           ignore_thumbnail: bool = True,
