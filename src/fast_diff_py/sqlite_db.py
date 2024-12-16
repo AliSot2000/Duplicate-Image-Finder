@@ -249,13 +249,13 @@ class SQLiteDB(BaseSQliteDB):
 
         self.debug_execute_many(update_success_stmt, update_success)
 
-    def get_dir_entry_count(self, dir_b: bool) -> int:
+    def get_dir_entry_count(self, part_b: bool) -> int:
         """
         Get the number of entries in the directory table
         """
-        dir_b = 1 if dir_b else 0
-        stmt = "SELECT COUNT(*) FROM directory WHERE dir_b = ?"
-        self.debug_execute(stmt, (dir_b,))
+        _part_b = 1 if part_b else 0
+        stmt = "SELECT COUNT(*) FROM directory WHERE part_b = ?"
+        self.debug_execute(stmt, (_part_b,))
         return self.sq_cur.fetchone()[0]
 
     def get_b_offset(self) -> int:
