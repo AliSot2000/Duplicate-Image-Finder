@@ -374,10 +374,8 @@ class FastDifPy(GracefulWorker):
 
         :raises FileNotFoundError: If any of the paths do not exist
         """
-        b = []
         a = [self.config.part_a] if isinstance(self.config.part_a, str) else self.config.part_a
-        if self.config.part_b is not None:
-            b = [self.config.part_b] if isinstance(self.config.part_b, str) else self.config.part_b
+        b = [self.config.part_b] if isinstance(self.config.part_b, str) else self.config.part_b
 
         all_paths = a + b
 
