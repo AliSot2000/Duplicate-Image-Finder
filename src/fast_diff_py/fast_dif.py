@@ -321,16 +321,18 @@ class FastDifPy(GracefulWorker):
         - thumb_dir
         - config_path
         """
+        rp = self.config.part_a if isinstance(self.config.part_a, str) else self.config.part_a[0]
+
         if self.config.db_path is None:
-            self.config.db_path = os.path.join(self.config.part_a, ".fast_diff.db")
+            self.config.db_path = os.path.join(rp, ".fast_diff.db")
             self.logger.info(f"DB Path not provided. Using {self.config.db_path}")
 
         if self.config.thumb_dir is None:
-            self.config.thumb_dir = os.path.join(self.config.part_a, ".temp_thumb")
+            self.config.thumb_dir = os.path.join(rp, ".temp_thumb")
             self.logger.info(f"Thumbnail Directory not provided. Using {self.config.thumb_dir}")
 
         if self.config.config_path is None:
-            self.config.config_path = os.path.join(self.config.root_dir_a, ".task.json")
+            self.config.config_path = os.path.join(rp, ".task.json")
             self.logger.info(f"Config Path not provided. Using {self.config.config_path}")
 
     def clean_and_init(self):
