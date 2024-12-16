@@ -97,7 +97,7 @@ class Config(BaseModel):
 
     part_a: List[str] | str = Field(...,
                                     description="Directory or List of Directories to be added to partition a")
-    part_b: Optional[List[str] | str] = Field(None,
+    part_b: List[str] | str = Field([],
                                               description="Directory or List of Directories to be added to partition b")
 
     recurse: bool = Field(True, 
