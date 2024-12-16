@@ -497,7 +497,7 @@ class SecondLoopWorker(ChildProcess):
                     self.fetch_y += (datetime.datetime.now(datetime.UTC) - s).total_seconds()
 
                     # Check hash
-                    if self.match_hash is not None and self.match_hash:
+                    if self.match_hash:
                         if self.determine_hash_match(arg.x_hashes, arg.y_hashes[i - start]):
                             diffs.append((arg.x, i, 2, 0.0))
 
