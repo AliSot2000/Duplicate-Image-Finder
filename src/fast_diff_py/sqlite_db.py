@@ -129,27 +129,6 @@ class SQLiteDB(BaseSQliteDB):
         self.debug_execute("CREATE INDEX directory_hash_180_index ON directory (hash_180)")
         self.debug_execute("CREATE INDEX directory_hash_270_index ON directory (hash_270)")
 
-    def create_allowed_project_table(self):
-        """
-        Create the table for the allowed projects
-        """
-        self.debug_execute("CREATE TABLE only_allowed "
-                           "(key INTEGER PRIMARY KEY AUTOINCREMENT, "
-                           "dt_key INTEGER NOT NULL)")
-
-    def create_allowed_projection_index(self):
-        """
-        Create the index for the allowed projects
-        """
-        self.debug_execute("CREATE INDEX only_allowed_key_index ON only_allowed (key)")
-        self.debug_execute("CREATE INDEX only_allowed_dir_table_key_index ON only_allowed (dt_key)")
-
-    def drop_allowed_projection(self):
-        """
-        Drop the allowed projection table
-        """
-        self.debug_execute("DROP TABLE IF EXISTS only_allowed")
-
     # ==================================================================================================================
     # Dir Table
     # ==================================================================================================================
