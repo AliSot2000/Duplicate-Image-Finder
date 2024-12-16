@@ -170,19 +170,35 @@ class SQLiteDB(BaseSQliteDB):
             stmt="INSERT INTO directory (path, filename, allowed, file_size, created, part_b) VALUES (?, ?, ?, ?, ?, ?)",
             args=args)
 
-    # TODO update the bulk insert to include the hash values
-    def bulk_insert_file(self, path: str, filenames: List[str], dir_b: bool = False):
+    def bulk_insert_file_internal(self,
+                                  path: str,
+                                  files: List[Tuple[str, int, int, float]],
+                                  index: int,
+                                  part_b: bool = False):
         """
         Insert a folder of files into the database
 
         :param path: The path to the folder
-        :param filenames: The list of filenames
-        :param dir_b: Whether this is the B directory or not
+        :param files: List of file info (filename, allowed, file_size, created)
+        :param index: The index of the directory (in the config)
+        :param part_b: Whether this is the B directory or not
         """
-        stmt = "INSERT INTO directory (path, filename, dir_b) VALUES (?, ?, ?)"
-        _dir_b = 1 if dir_b else 0
-        tgt = [(os.path.join(path, f), f, _dir_b) for f in filenames]
-        self.debug_execute_many(stmt, tgt)
+        stmt = ("INSERT INTO directory (path, filename, allowed, file_size, created, part_b, dir_index) "
+                "VALUES (?, ?, ?, ?, ?, ?, ?)")
+        _part_b = 1 if part_b else 0
+
+        args = [
+            (os.path.join(path, files[i][0]),
+             files[i][0],
+             files[i][1],
+             files[i][2],
+             files[i][3],
+             _part_b,
+             index)
+            for i in range(len(files))
+        ]
+
+        self.debug_execute_many(stmt, args)
 
     def reset_preprocessing(self):
         """
