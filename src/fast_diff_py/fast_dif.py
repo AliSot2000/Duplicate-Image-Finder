@@ -399,11 +399,12 @@ class FastDifPy(GracefulWorker):
         """
         Finish indexing operation - checkin partition sizes and switching partitions if necessary, and writing to disk.
         """
-        # Switch the directories if necessary
-        self.cond_switch_a_b()
+        self.db.repopulate_directory_table()
 
-        # Set the keys to zero index
-        self.db.set_keys_zero_index()
+        # When run is set, we're done indexing
+        if self.run:
+            self.config.state = Progress.INDEXED_DIRS
+            self.logger.info("Done Indexing Directories")
 
         self.commit()
 
