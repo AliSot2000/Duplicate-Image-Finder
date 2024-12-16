@@ -131,15 +131,19 @@ class FirstLoopWorker(ChildProcess):
     __old: bool = False
 
     def __init__(self, identifier: int,
-                 compress: bool,
-                 do_hash: bool,
-                 target_size: Tuple[int, int],
                  cmd_queue: mp.Queue,
                  res_queue: mp.Queue,
                  log_queue: mp.Queue,
+
+                 compress: bool,
+                 do_hash: bool,
+                 target_size: Tuple[int, int],
                  shift_amount: int = None,
                  thumb_dir: str = None,
                  hash_fn: Callable = None,
+                 do_rot: bool = True,
+                 old: bool = False,
+
                  log_level: int = logging.DEBUG,
                  timeout: int = 30):
         """
