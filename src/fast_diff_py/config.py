@@ -114,8 +114,14 @@ class Config(BaseModel):
                                     description="The names of the directories or files to ignore")
     ignore_paths: List[str] = Field([],
                                     description="The paths of the directories or files to ignore")
-    allowed_file_extensions: List[str] = Field([".jpg", ".jpeg", ".png", ".bmp", ".tiff", ".tif", ".gif", ".webp"],
-                                               description="The allowed file extensions for the images")
+    allowed_file_extensions: List[str] = Field(
+        default=['.apng', '.bw', '.cdf', '.cur', '.dcx', '.dds', '.dib', '.emf', '.eps', '.fli', '.flc', '.fpx',
+                 '.ftex', '.fits', '.gd', '.gd2', '.gif', '.gbr', '.icb', '.icns', '.iim', '.ico', '.im', '.imt',
+                 '.j2k', '.jfif', '.jfi', '.jif', '.jp2', '.jpe', '.jpeg', '.jpg', '.jpm', '.jpf', '.jpx', '.jpeg',
+                 '.mic', '.mpo', '.msp', '.nc', '.pbm', '.pcd', '.pcx', '.pgm', '.png', '.ppm', '.psd', '.pixar',
+                 '.ras', '.rgb', '.rgba', '.sgi', '.spi', '.spider', '.sun', '.tga', '.tif', '.tiff', '.vda', '.vst',
+                 '.wal', '.webp', '.xbm', '.xpm'],
+        description="The allowed file extensions for the images")
 
     batch_size_dir: int = Field(1000,
                                 description="The batch size for the directory processing. "
