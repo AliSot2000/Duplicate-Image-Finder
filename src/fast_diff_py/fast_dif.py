@@ -425,6 +425,33 @@ class FastDifPy(GracefulWorker):
 
     def check_directories(self) -> bool:
         """
+        Check directories aren't subdirectories of eachother
+        """
+        a = self.config.root_dir_a if isinstance(self.config.root_dir_a, list)  else [self.config.root_dir_a]
+        b = self.config.root_dir_b if isinstance(self.config.root_dir_b, list)  else [self.config.root_dir_b]
+
+        idx_a = [i for i in range(len(a))]
+        idx_b = [i for i in range(len(b))]
+
+        # only check within dir a
+        if len(b) == 0:
+            for ix_a, ix_b in itertools.product(idx_a, idx_a):
+
+                # Only check upper triangular matrix of combinations of directories
+                if ix_a < ix_b and self.check_dir_pair(a[ix_a], a[ix_b]):
+                    return True
+
+            return False
+
+        else:
+            for ix_a, ix_b in itertools.product(idx_a, idx_b):
+                if self.check_dir_pair(a[ix_a], b[ix_b]):
+                    return True
+
+            return False
+
+    def check_dir_pair(self, dir_a: str, dir_b: str) -> bool:
+        """
         Check they if they are subdirectories of each other.
 
         :return: True if they are subdirectories of each other
