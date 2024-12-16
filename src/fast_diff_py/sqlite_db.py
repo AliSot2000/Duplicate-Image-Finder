@@ -271,6 +271,11 @@ class SQLiteDB(BaseSQliteDB):
         self.debug_execute(stmt)
         return self.sq_cur.fetchone()[0]
 
+        """
+        stmt = "SELECT MIN(key) FROM directory WHERE part_b = 1"
+        self.debug_execute(stmt)
+        return self.sq_cur.fetchone()[0]
+
     # INFO: Needs to be called before loop 1
     def set_keys_zero_index(self):
         """
