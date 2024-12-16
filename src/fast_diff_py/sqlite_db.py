@@ -431,9 +431,6 @@ class SQLiteDB(BaseSQliteDB):
     # Diff Table
     # ==================================================================================================================
 
-    # TODO:
-    #  Add a function which short circuits hash and aspect ratio comparison
-
     def bulk_insert_diff_success(self, args: List[Tuple[int, int, int, float]]):
         """
         Insert the results of the diff into the database
