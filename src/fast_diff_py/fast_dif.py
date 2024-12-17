@@ -174,7 +174,7 @@ class FastDifPy(GracefulWorker):
         if delta is None:
             delta = self.config.second_loop.diff_threshold
 
-        for h, d in self.db.get_cluster(delta, dir_a, matching_hash):
+        for h, d in self.db.get_all_cluster(delta, dir_a, matching_hash):
             yield h, d
 
     def reduce_diff(self, threshold: float):
