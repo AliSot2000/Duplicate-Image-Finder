@@ -502,7 +502,49 @@ class SQLiteDB(BaseSQliteDB):
 
         return lookup
 
-    # TODO Extract duplicates based on hash
+    def get_hash_cluster_count(self) -> int:
+        """
+        Get the number of clusters which have a matching hash. Keep in mind, that an image has 4 hashes for all 4
+        rotations. So the best lower bound for the actual number of clusters is /4.
+
+        :return: The number of clusters
+        """
+        self.debug_execute("SELECT COUNT(*) FROM hash_table WHERE count > 1")
+        return self.sq_cur.fetchone()[0]
+
+    def get_ith_hash_cluster(self, i: int, include_deleted: bool = True) -> Tuple[str, List[str]]:
+        """
+        Get the ith cluster of hashes
+
+        :param i: The index of the cluster
+        :param include_deleted: Whether to include deleted entries (files marked as deleted in the db)
+
+        :return: hash, List of file paths with that hash. Ordered by file_size desc, created asc
+
+        :raises IndexError: If the index is out of bounds and the hash couldn't be found.
+
+        => Check the number of clusters with get_hash_cluster_count
+        """
+        self.debug_execute("SELECT hash FROM hash_table WHERE count > 1 LIMIT 1 OFFSET ?", (i,))
+        tgt_hash = self.sq_cur.fetchone()
+
+        if tgt_hash is None:
+            raise IndexError("Index out of bound.")
+
+        if include_deleted:
+            stmt = ("SELECT path FROM directory "
+                    "WHERE hash_0 = ? OR hash_90 = ? OR hash_180 = ? OR hash_270 = ? "
+                    "ORDER BY file_size DESC, created ASC")
+        else:
+            stmt = ("SELECT path FROM directory "
+                    "WHERE (hash_0 = ? OR hash_90 = ? OR hash_180 = ? OR hash_270 = ?) AND deleted = 0 "
+                    "ORDER BY file_size DESC, created ASC")
+
+        # Get the files from the cluster
+        self.debug_execute(stmt, (tgt_hash[0], tgt_hash[0], tgt_hash[0], tgt_hash[0]))
+        files = [row[0] for row in self.sq_cur.fetchall()]
+
+        return str(tgt_hash[0]), files
 
     # ==================================================================================================================
     # Diff Table
