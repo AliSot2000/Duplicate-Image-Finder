@@ -1335,12 +1335,12 @@ class FastDifPy(GracefulWorker):
 
         # Prepare the blocks according to the config
         if len(self.config.part_b) > 0:
-            self.dir_a_count = self.db.get_partition_entry_count(False)
-            self.dir_b_count = self.db.get_partition_entry_count(True)
+            self.dir_a_count = self.db.get_partition_entry_count(part_b=False, only_allowed=True)
+            self.dir_b_count = self.db.get_partition_entry_count(part_b=True, only_allowed=True)
             self.blocks = build_start_blocks_ab(self.dir_a_count, self.dir_b_count, self.config.second_loop.batch_size)
             self.logger.info(f"Created Blocks for A and B, number of blocks: {len(self.blocks)}")
         else:
-            self.dir_a_count = self.db.get_partition_entry_count(False)
+            self.dir_a_count = self.db.get_partition_entry_count(part_b=False, only_allowed=True)
             self.blocks = build_start_blocks_a(self.dir_a_count, self.config.second_loop.batch_size)
             self.logger.info(f"Created Blocks for A , number of blocks: {len(self.blocks)}")
 
