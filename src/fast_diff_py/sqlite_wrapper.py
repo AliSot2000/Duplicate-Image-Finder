@@ -133,12 +133,12 @@ class BaseSQliteDB:
         - Close the connection
         - clear the variables
         """
-        self.sq_con.commit()
         self.sq_con.close()
 
         for cur in self.__extra_cur.values():
             cur.close()
 
+        self.sq_con.commit()
         self.db_path = None
 
         self.sq_con = None
