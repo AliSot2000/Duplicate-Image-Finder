@@ -53,7 +53,8 @@ class SQLiteDB(BaseSQliteDB):
                 f"hash_0 INTEGER, "
                 f"hash_90 INTEGER, "
                 f"hash_180 INTEGER, "
-                f"hash_270 INTEGER,  "
+                f"hash_270 INTEGER, "
+                f"deleted INTEGER DEFAULT 0 CHECK ({tbl_name}.deleted IN (0, 1)), "
                 f"UNIQUE (path, part_b))")
 
         self.debug_execute(stmt, )
