@@ -229,6 +229,18 @@ class FastDifPy(GracefulWorker):
 
         return count
 
+    def purge_preexisting_directory_table(self):
+        """
+        Purge the preexisting directory table.
+
+        Wrapper around db.drop_directory_table
+
+        Function is needed for recovering the progress already made (when the process was halted mid indexing)
+        """
+        if self.db.dir_table_exists():
+            self.logger.info("Purging Preexisting Directory Table")
+            self.db.drop_directory_table()
+
     # ==================================================================================================================
     # INIT
     # ==================================================================================================================
