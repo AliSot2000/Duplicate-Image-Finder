@@ -101,6 +101,10 @@ class Config(BaseModel):
     part_b: List[str] | str = Field([],
                                               description="Directory or List of Directories to be added to partition b")
 
+    dir_index_lookup: Optional[List[str]] = Field(None,
+                                                    description="Lookup from directory given in partition a and "
+                                                                "partition b to the index in the directory table")
+
     recurse: bool = Field(True, 
                           description="Whether to recurse into directories that are in root_dir_a and root_dir_B")
 

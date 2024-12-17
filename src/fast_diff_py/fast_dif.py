@@ -573,6 +573,8 @@ class FastDifPy(GracefulWorker):
 
             self.__recursive_index(p, part_a=part_a, dir_index=i, ignore_thumbnail=ignore_thumbs)
 
+        self.config.dir_index_lookup = all_parts
+
     def __recursive_index(self, path: str,
                           part_a: bool = True,
                           ignore_thumbnail: bool = True,
