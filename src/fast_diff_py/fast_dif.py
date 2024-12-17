@@ -100,6 +100,24 @@ class FastDifPy(GracefulWorker):
         if self.ql is not None:
             self.ql.stop()
 
+    def test_cleanup(self):
+        """
+        Handle the cleanup in case
+        """
+        if self.db is not None:
+            self.db.cleanup()
+
+        if self.config.thumb_dir is not None:
+            if os.path.exists(self.config.thumb_dir):
+                shutil.rmtree(self.config.thumb_dir)
+
+        if self.config.config_path is not None:
+            if os.path.exists(self.config.config_path):
+                os.remove(self.config.config_path)
+
+        if self.ql is not None:
+            self.ql.stop()
+
     def start_logging(self):
         """
         Start the logging process. This is done by starting the QueueListener
