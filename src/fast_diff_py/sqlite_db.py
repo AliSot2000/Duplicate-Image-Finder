@@ -315,33 +315,49 @@ class SQLiteDB(BaseSQliteDB):
         tmp_tbl = self.__get_directory_table_names(True)
         d_tbl = self.__get_directory_table_names(False)
 
-        # Inserting the directory_b entries first
-        stmt_b = (f"INSERT INTO {tmp_tbl} (path, filename, error, success, px, py, dir_b, hash_0, hash_90, hash_180, hash_270)"
-                f" SELECT path, filename, error, success, px, py, 0 AS dir_b, hash_0, hash_90, hash_180, hash_270 "
-                f"FROM {d_tbl} WHERE parat_b = 1 AND allowed = 1")
-
-        stmt_a = (f"INSERT INTO {tmp_tbl} (path, filename, error, success, px, py, dir_b, hash_0, hash_90, hash_180, hash_270)"
-                f" SELECT path, filename, error, success, px, py, 1 AS dir_b, hash_0, hash_90, hash_180, hash_270 "
-                f"FROM {d_tbl} WHERE part_b = 0 AND allowed = 1")
-
-
         # Determine the order in which we get the keys for the allowed entries
         dac = self.get_partition_entry_count(part_b=False, only_allowed=True)
         dbc = self.get_partition_entry_count(part_b=True, only_allowed=True)
 
         # Make sure the smaller allowed partition is first
         if dac < dbc:
-            self.debug_execute(stmt_a)
-            self.debug_execute(stmt_b)
+            # Inserting the directory_b entries first
+            stmt_asc= (f"INSERT INTO {tmp_tbl} "
+                       f"(path, filename, error, success, px, py, allowed, file_size, created, dir_index, part_b, "
+                       f"hash_0, hash_90, hash_180, hash_270) "
+                       f"SELECT path, filename, error, success, px, py, allowed, file_size, created, dir_index, part_b, "
+                       f"hash_0, hash_90, hash_180, hash_270 "
+                       f"FROM {d_tbl} WHERE allowed = 1 ORDER BY part_b ASC")
 
+            self.debug_execute(stmt_asc)
+
+        # Need to swap
         else:
-            self.debug_execute(stmt_b)
-            self.debug_execute(stmt_a)
+            # Inserting the directory_b entries first
+            stmt_b_a = (f"INSERT INTO {tmp_tbl} "
+                        f"(path, filename, error, success, px, py, allowed, file_size, created, dir_index, part_b, "
+                        f"hash_0, hash_90, hash_180, hash_270) "
+                        f"SELECT path, filename, error, success, px, py, allowed, file_size, created, dir_index, 0 AS part_b, "
+                        f"hash_0, hash_90, hash_180, hash_270 "
+                        f"FROM {d_tbl} WHERE part_b = 1 AND allowed = 1")
+
+            stmt_a_b = (f"INSERT INTO {tmp_tbl} "
+                        f"(path, filename, error, success, px, py, allowed, file_size, created, dir_index, part_b, "
+                        f"hash_0, hash_90, hash_180, hash_270) "
+                        f"SELECT path, filename, error, success, px, py, allowed, file_size, created, dir_index, 1 AS part_b, "
+                        f"hash_0, hash_90, hash_180, hash_270 "
+                        f"FROM {d_tbl} WHERE part_b = 0 AND allowed = 1")
+
+            self.debug_execute(stmt_b_a)
+            self.debug_execute(stmt_a_b)
 
         # Writing the remaining not allowed entries
-        stmt_r = (f"INSERT INTO {tmp_tbl} (path, filename, error, success, px, py, dir_b, hash_0, hash_90, hash_180, hash_270)"
-                f" SELECT path, filename, error, success, px, py, 0 AS dir_b, hash_0, hash_90, hash_180, hash_270 "
-                f"FROM {d_tbl} WHERE allowed = 1 ORDER BY part_b ASC")
+        stmt_r = (f"INSERT INTO {tmp_tbl} "
+                  f"(path, filename, error, success, px, py, allowed, file_size, created, dir_index, part_b, "
+                  f"hash_0, hash_90, hash_180, hash_270) "
+                    f"SELECT path, filename, error, success, px, py, allowed, file_size, created, dir_index, part_b, "
+                  f"hash_0, hash_90, hash_180, hash_270 "
+                  f"FROM {d_tbl} WHERE allowed = 0 ORDER BY part_b ASC")
 
         # Add the non-allowed entries
         self.debug_execute(stmt_r)
