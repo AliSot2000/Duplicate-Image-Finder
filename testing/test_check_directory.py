@@ -8,7 +8,7 @@ def test_method(part_a: List[str], part_b: List[str], recurse: bool):
     """
     This function is used to test the FastDifPy class. It and execute the given test.
     """
-    cfg = Config(part_a=part_a, part_b=part_b, recurse=recurse)
+    cfg = Config(part_a=part_a, part_b=part_b, recurse=recurse, retain_progress=False)
     return FastDifPy(config=cfg, test_mode=True)
 
 
