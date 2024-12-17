@@ -96,6 +96,7 @@ class Config(BaseModel):
                                                 "size = (compression_target * compression_target)")
 
     part_a: List[str] | str = Field(...,
+                                    min_length=1,
                                     description="Directory or List of Directories to be added to partition a")
     part_b: List[str] | str = Field([],
                                               description="Directory or List of Directories to be added to partition b")
