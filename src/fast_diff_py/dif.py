@@ -1,6 +1,7 @@
 import fast_diff_py.config as cfg
 from fast_diff_py.fast_dif import FastDifPy
 import argparse
+import os
 
 
 def dif(dir_a: str, dir_b: str, purge: bool = False,  **kwargs):
