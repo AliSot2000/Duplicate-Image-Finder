@@ -504,9 +504,11 @@ class FastDifPy(GracefulWorker):
                 return True
 
 
-    def perform_index(self):
+    def perform_index(self, ignore_thumbs: bool = True):
         """
         Perform the indexing of the directories provided
+
+        :param ignore_thumbs: Ignore thumbnail directory (any dir with name '.temp_thumb')
         """
         # Check if the directories are subdirectories of each other
         if self.check_directories():
