@@ -412,7 +412,7 @@ class SQLiteDB(BaseSQliteDB):
         else:
             raise ValueError("Tertiem Non Datur")
 
-        self.debug_execute(stmt, (part_b, batch_size, start))
+        self.debug_execute(stmt, (part_b_i, batch_size, start))
         rows = self.sq_cur.fetchall()
         keys = []
         paths = []
