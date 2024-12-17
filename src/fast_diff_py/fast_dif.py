@@ -1228,6 +1228,11 @@ class FastDifPy(GracefulWorker):
         """
         Check if the configured parameters are actually compatible
         """
+        # Check presence of compressed images
+        if not self.config.first_loop.compress:
+            raise ValueError("SecondLoop relies on pre compressed images from first loop")
+
+        # Ensure the config
         if not isinstance(cfg, SecondLoopRuntimeConfig):
             cfg = SecondLoopRuntimeConfig.model_validate(cfg.model_dump())
 
@@ -1239,13 +1244,35 @@ class FastDifPy(GracefulWorker):
             return False
 
         if cfg.make_diff_plots:
-            if cfg.plot_output_dir is None or cfg.plot_threshold is None:
-                self.logger.error("Need plot output directory and diff threshold to make diff plots")
+            if cfg.plot_output_dir is None:
+                self.logger.error("Need plot output directory to make diff plots")
                 return False
+            if cfg.plot_threshold is None:
+                self.logger.info("No Plot Threshold set. Defaulting to diff_threshold")
+                cfg.plot_threshold = cfg.diff_threshold
 
+        # Check we're not running with 0 processes
         if cfg.cpu_proc + cfg.gpu_proc < 1:
             self.logger.error("Need at least one process to run the second loop")
             return False
+
+        # One direction is constrained beyond the other
+        if cfg.batch_size is None:
+            if self.db.get_partition_entry_count(False) < cfg.cpu_proc + cfg.gpu_proc:
+                # Very small case, we don't need full speed.
+                if self.db.get_partition_entry_count(True) < cfg.cpu_proc + cfg.gpu_proc:
+                    cfg.parallel = False
+
+                cfg.batch_size = min(self.db.get_partition_entry_count(part_b=True, only_allowed=True) // 4,
+                                 self.config.batch_size_max_sl)
+            else:
+                if len(self.config.part_b) > 0:
+                    cfg.batch_size = min(self.db.get_partition_entry_count(part_b=True, only_allowed=True),
+                                     self.db.get_partition_entry_count(part_b=False, only_allowed=True),
+                                     self.config.batch_size_max_sl)
+                else:
+                    cfg.batch_size = min(self.db.get_partition_entry_count(part_b=False, only_allowed=True),
+                                     self.config.batch_size_max_sl)
 
         if self.config.first_loop.compress is False:
             self.logger.error("Cannot run the second loop without compression")
@@ -1256,72 +1283,9 @@ class FastDifPy(GracefulWorker):
             if not os.path.exists(cfg.plot_output_dir):
                 os.makedirs(cfg.plot_output_dir)
 
+        self.config.second_loop = cfg
+
         return True
-
-    def second_loop_arg(self,
-                        cpu_proc: int = None,
-                        gpu_proc: int = None,
-                        batch_size: int = None,
-                        skip_matching_hash: bool = None,
-                        match_aspect_by: float = None,
-                        make_diff_plots: bool = None,
-                        plot_output_dir: str = None,
-                        diff_threshold: float = None,
-                        plot_threshold: float = None,
-                        parallel: bool = None,
-                        ) -> SecondLoopRuntimeConfig:
-        set_plot_threshold = False
-
-        if not self.config.first_loop.compress:
-            raise ValueError("SecondLoop relies on pre compressed images from first loop")
-
-        if make_diff_plots is not None:
-            if plot_output_dir is None:
-                raise ValueError("Need plot output directory and diff threshold to make diff plots")
-            if plot_threshold is None:
-                self.logger.info("Plot Threshold not provided, defaulting to diff_threshold")
-                set_plot_threshold = True
-
-        if cpu_proc is None:
-            cpu_proc = os.cpu_count()
-        if gpu_proc is None:
-            gpu_proc = 0
-
-        # One direction is constrained beyond the other
-        if batch_size is None:
-            if self.db.get_partition_entry_count(False) < cpu_proc + gpu_proc:
-                # Very small case, we don't need full speed.
-                if self.db.get_partition_entry_count(True) < cpu_proc + gpu_proc:
-                    parallel = False
-
-                batch_size = min(self.db.get_partition_entry_count(part_b=True, only_allowed=True) // 4,
-                                 self.config.batch_size_max_sl)
-            else:
-                if len(self.config.part_b) > 0:
-                    batch_size = min(self.db.get_partition_entry_count(part_b=True, only_allowed=True),
-                                     self.db.get_partition_entry_count(part_b=False, only_allowed=True),
-                                     self.config.batch_size_max_sl)
-                else:
-                    batch_size = min(self.db.get_partition_entry_count(part_b=False, only_allowed=True),
-                                     self.config.batch_size_max_sl)
-
-        args = {"cpu_proc": cpu_proc,
-                "gpu_proc": gpu_proc,
-                "skip_matching_hash": skip_matching_hash,
-                "match_aspect_by": match_aspect_by,
-                "make_diff_plots": make_diff_plots,
-                "plot_output_dir": plot_output_dir,
-                "diff_threshold": diff_threshold,
-                "batch_size": batch_size,
-                "plot_threshold": plot_threshold,
-                "parallel": parallel}
-
-        non_empty = {k: v for k, v in args.items() if v is not None}
-        r = SecondLoopRuntimeConfig.model_validate(non_empty)
-        if set_plot_threshold:
-            r.plot_threshold = r.diff_threshold
-
-        return r
 
     def internal_second_loop(self):
         """
