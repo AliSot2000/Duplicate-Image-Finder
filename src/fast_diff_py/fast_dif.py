@@ -926,17 +926,22 @@ class FastDifPy(GracefulWorker):
                 dfp = allowed * self.config.compression_target * self.config.compression_target * 3
                 self.logger.info(f"Disk Footprint of Directory: {sizeof_fmt(dfp)}")
 
-        dir_a_count = self.db.get_partition_entry_count(False)
-        dir_b_count = self.db.get_partition_entry_count(True)
+        dir_a_count = self.db.get_partition_entry_count(part_b=False, only_allowed=False)
+        dir_a_allowed = self.db.get_partition_entry_count(part_b=False, only_allowed=True)
+        dir_b_count = self.db.get_partition_entry_count(part_b=True, only_allowed=False)
+        dir_b_allowed = self.db.get_partition_entry_count(part_b=True, only_allowed=True)
 
         if do_print:
-            self.logger.info(f"Entries in {self.config.root_dir_a}: {dir_a_count}")
+            self.logger.info(f"Entries in Partition A: {dir_a_count}")
+            self.logger.info(f"Allowed Entries in Partition A: {dir_a_allowed}")
 
         if dir_b_count > 0 and do_print:
-            self.logger.info(f"Entries in {self.config.root_dir_b}: {dir_b_count}")
+            self.logger.info(f"Entries in Partition B: {dir_b_count}")
+            self.logger.info(f"Allowed Entries in Partition B: {dir_b_allowed}")
             self.logger.info(f"Total Entries: {dir_a_count + dir_b_count}")
+            self.logger.info(f"Total Allowed Entries: {dir_a_allowed + dir_b_allowed}")
 
-        total = (dir_a_count + dir_b_count) * self.config.compression_target * self.config.compression_target * 3
+        total = (dir_a_allowed + dir_b_allowed) * self.config.compression_target * self.config.compression_target * 3
         if do_print:
             self.logger.info(f"Total Storage Usage: {sizeof_fmt(total)}")
 
