@@ -451,7 +451,13 @@ class FastDifPy(GracefulWorker):
         """
         Finish indexing operation - checkin partition sizes and switching partitions if necessary, and writing to disk.
         """
-        self.db.repopulate_directory_table()
+        if self.db.repopulate_directory_table():
+            cpa = self.config.part_a if isinstance(self.config.part_a, list) else [self.config.part_a]
+            cpb = self.config.part_b if isinstance(self.config.part_b, list) else [self.config.part_b]
+
+            # Also need to invert the config for the subsequent tasks.
+            self.config.part_a = cpb
+            self.config.part_b = cpa
 
         # When run is set, we're done indexing
         if self.run:
