@@ -390,23 +390,24 @@ class SQLiteDB(BaseSQliteDB):
         part_b_i = 1 if part_b else 0
         if do_hash and aspect and path:
             stmt = ("SELECT key, path, hash_0, hash_90, hash_180, hash_270, px, py "
-                    "FROM directory WHERE part_b = ? LIMIT ? OFFSET ?")
+                    "FROM directory WHERE part_b = ? AND allowed = 1 LIMIT ? OFFSET ?")
         elif do_hash and aspect and not path:
             stmt = ("SELECT key, hash_0, hash_90, hash_180, hash_270, px, py FROM directory "
-                    "WHERE part_b = ? LIMIT ? OFFSET ?")
+                    "WHERE part_b = ? AND allowed = 1 LIMIT ? OFFSET ?")
         elif do_hash and not aspect and path:
             stmt = ("SELECT key, path, hash_0, hash_90, hash_180, hash_270 FROM directory "
-                    "WHERE part_b = ? LIMIT ? OFFSET ?")
+                    "WHERE part_b = ? AND allowed = 1 LIMIT ? OFFSET ?")
         elif do_hash and not aspect and not path:
-            stmt = "SELECT key, hash_0, hash_90, hash_180, hash_270 FROM directory WHERE part_b = ? LIMIT ? OFFSET ?"
+            stmt = ("SELECT key, hash_0, hash_90, hash_180, hash_270 FROM directory "
+                    "WHERE part_b = ? AND allowed = 1 LIMIT ? OFFSET ?")
         elif not do_hash and aspect and path:
-            stmt = "SELECT key, path, px, py FROM directory WHERE part_b = ? LIMIT ? OFFSET ?"
+            stmt = "SELECT key, path, px, py FROM directory WHERE part_b = ? AND allowed = 1 LIMIT ? OFFSET ?"
         elif not do_hash and aspect and not path:
-            stmt = "SELECT key, px, py FROM directory WHERE part_b = ? LIMIT ? OFFSET ?"
+            stmt = "SELECT key, px, py FROM directory WHERE part_b = ? AND allowed = 1 LIMIT ? OFFSET ?"
         elif not do_hash and not aspect and path:
-            stmt = "SELECT key, path FROM directory WHERE part_b = ? LIMIT ? OFFSET ?"
+            stmt = "SELECT key, path FROM directory WHERE part_b = ? AND allowed = 1 LIMIT ? OFFSET ?"
         elif not do_hash and not aspect and not path:
-            stmt = "SELECT key FROM directory WHERE part_b = ? LIMIT ? OFFSET ?"
+            stmt = "SELECT key FROM directory WHERE part_b = ? AND allowed = 1 LIMIT ? OFFSET ?"
             # return [], [], []
         else:
             raise ValueError("Tertiem Non Datur")
