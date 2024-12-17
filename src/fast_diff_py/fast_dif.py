@@ -482,17 +482,24 @@ class FastDifPy(GracefulWorker):
         idx_a = [i for i in range(len(a))]
         idx_b = [i for i in range(len(b))]
 
-        # only check within dir a
-        if len(b) == 0:
+        # checking within dir_a
+        if len(a) > 1:
             for ix_a, ix_b in itertools.product(idx_a, idx_a):
 
                 # Only check upper triangular matrix of combinations of directories
                 if ix_a < ix_b and self.check_dir_pair(a[ix_a], a[ix_b]):
                     return True
 
-            return False
+        if len(b) > 0:
+            if len(b) > 1:
+                # checking within dir_b
+                for ix_a, ix_b in itertools.product(idx_b, idx_b):
 
-        else:
+                    # Only check upper triangular matrix of combinations of directories
+                    if ix_a < ix_b and self.check_dir_pair(b[ix_a], b[ix_b]):
+                        return True
+
+            # Checking between dir_b and dir_a
             for ix_a, ix_b in itertools.product(idx_a, idx_b):
                 if self.check_dir_pair(a[ix_a], b[ix_b]):
                     return True
