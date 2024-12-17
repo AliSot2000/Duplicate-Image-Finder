@@ -296,7 +296,7 @@ class SQLiteDB(BaseSQliteDB):
         self.debug_execute(stmt, (index, 1 if allowed else 0))
         return self.sq_cur.fetchone()[0]
 
-    def repopulate_directory_table(self):
+    def repopulate_directory_table(self) -> bool:
         """
         Populate the directory table in a specific order to make sure we don't have holes when we're building the
         caches etc.
@@ -311,6 +311,8 @@ class SQLiteDB(BaseSQliteDB):
         Then the old table is dropped and the new table is renamed
 
         And lastly the indexes are recreated
+
+        :return: Whether the partition assignment was inverted
         """
         self.create_directory_table_and_index(temp=True)
         tmp_tbl = self.__get_directory_table_names(True)
@@ -319,6 +321,8 @@ class SQLiteDB(BaseSQliteDB):
         # Determine the order in which we get the keys for the allowed entries
         dac = self.get_partition_entry_count(part_b=False, only_allowed=True)
         dbc = self.get_partition_entry_count(part_b=True, only_allowed=True)
+
+        invert_partition = False
 
         # Make sure the smaller allowed partition is first
         if dac < dbc:
@@ -351,6 +355,7 @@ class SQLiteDB(BaseSQliteDB):
 
             self.debug_execute(stmt_b_a)
             self.debug_execute(stmt_a_b)
+            invert_partition = True
 
         # Writing the remaining not allowed entries
         stmt_r = (f"INSERT INTO {tmp_tbl} "
@@ -373,6 +378,8 @@ class SQLiteDB(BaseSQliteDB):
         self.debug_execute(f"ALTER TABLE {tmp_tbl} RENAME TO {d_tbl}")
         self.drop_directory_index()
         self.create_directory_indexes()
+
+        return invert_partition
 
     def get_rows_directory(self, start: int, batch_size: int, part_b: bool = False,
                            do_hash: bool = False, aspect: bool = False, path: bool = False) \
