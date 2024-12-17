@@ -568,6 +568,7 @@ class FastDifPy(GracefulWorker):
             p = os.path.abspath(all_parts[i])
             self.logger.info(f"Indexing Directory: {p}")
             part_a = i < len(pa)
+
             self.__recursive_index(p, part_a=part_a, dir_index=i, ignore_thumbnail=ignore_thumbs)
 
     def __recursive_index(self, path: str,
