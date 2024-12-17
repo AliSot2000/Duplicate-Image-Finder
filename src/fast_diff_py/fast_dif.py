@@ -264,7 +264,7 @@ class FastDifPy(GracefulWorker):
     # ==================================================================================================================
 
     def __init__(self, dir_a: str = None, dir_b: str = None, config: Config = None,
-                 default_cfg_path: str = None, purge: bool = False, **kwargs):
+                 default_cfg_path: str = None, purge: bool = False, test_mode: bool = False, **kwargs):
         """
         Initialize the FastDifPy object.
 
@@ -280,6 +280,7 @@ class FastDifPy(GracefulWorker):
         :param config: The config override in case we want to use a specific config
         :param default_cfg_path: The path to the config if it's supposed to be loaded from a file
         :param purge: Whether to purge the existing progress and start anew (has only effect for first and third source)
+        :param test_mode: expects a config to be passed, sets up loging and sets the config. Everything else is ignored.
 
         :kwargs: Additional arguments to be passed to the Config object. Check out the config objects for more details.
         """
@@ -290,6 +291,13 @@ class FastDifPy(GracefulWorker):
         qh = logging.handlers.QueueHandler(self.logging_queue)
         self.logger.addHandler(qh)
         self.start_logging()
+
+        # Exit if we're in test mode
+        if test_mode:
+            if config is None:
+                raise ValueError("Test Mode requires a config to be passed")
+            self.config = config
+            return
 
         # First Source of Truth - config
         if config is not None:
