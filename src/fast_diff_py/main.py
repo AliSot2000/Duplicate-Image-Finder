@@ -95,6 +95,7 @@ def dif(dir_a: str, dir_b: str, purge: bool = False, **kwargs):
         fdo.second_loop()
 
     if not fdo.run:
+        print("Second Loop Exited")
         fdo.commit()
         fdo.cleanup()
         return
