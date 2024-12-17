@@ -354,9 +354,9 @@ class SQLiteDB(BaseSQliteDB):
         # Writing the remaining not allowed entries
         stmt_r = (f"INSERT INTO {tmp_tbl} "
                   f"(path, filename, error, success, px, py, allowed, file_size, created, dir_index, part_b, "
-                  f"hash_0, hash_90, hash_180, hash_270) "
+                  f"allowed, hash_0, hash_90, hash_180, hash_270) "
                     f"SELECT path, filename, error, success, px, py, allowed, file_size, created, dir_index, part_b, "
-                  f"hash_0, hash_90, hash_180, hash_270 "
+                  f"allowed, hash_0, hash_90, hash_180, hash_270 "
                   f"FROM {d_tbl} WHERE allowed = 0 ORDER BY part_b ASC")
 
         # Add the non-allowed entries
