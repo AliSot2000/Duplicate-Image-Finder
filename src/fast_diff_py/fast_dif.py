@@ -283,6 +283,8 @@ class FastDifPy(GracefulWorker):
         :param test_mode: expects a config to be passed, sets up loging and sets the config. Everything else is ignored.
 
         :kwargs: Additional arguments to be passed to the Config object. Check out the config objects for more details.
+
+        # TODO docs about kwargs
         """
         super().__init__(0)
         self.logger = logging.getLogger("FastDiffPy_Main")
@@ -1199,6 +1201,8 @@ class FastDifPy(GracefulWorker):
     def second_loop(self, **kwargs):
         """
         Run the second loop
+
+        # TODO docs on kwargs
         """
         self.logger.info("Beginning Second Loop")
 
