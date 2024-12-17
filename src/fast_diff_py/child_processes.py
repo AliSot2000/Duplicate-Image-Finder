@@ -538,11 +538,13 @@ class SecondLoopWorker(ChildProcess):
                         if self.determine_hash_match(arg.x_hashes, arg.y_hashes[i - start]):
                             diffs.append((arg.x, i, 2, 0.0))
 
-                            self.make_plot(diff=0,
-                                           x_path=arg.x_path,
-                                           y_path=arg.y_path[i - start],
-                                           x=arg.x,
-                                           y=i)
+                            # Make a plot if necessary
+                            if self.make_plots:
+                                self.make_plot(diff=0,
+                                               x_path=arg.x_path,
+                                               y_path=arg.y_path[i - start],
+                                               x=arg.x,
+                                               y=i)
 
                             continue
 
