@@ -79,6 +79,41 @@ class FastDifPy(GracefulWorker):
         with open(path, "w") as file:
             file.write(cfg)
 
+    def cleanup(self):
+        """
+        Clean up the FastDifPy object, stopping the logging queue,
+        """
+        if self.config.delete_db:
+            self.logger.info(f"Closing DB and deleting DB at {self.config.db_path}")
+            self.db.close()
+            os.remove(self.config.db_path)
+
+        if self.config.delete_thumb:
+            self.logger.info(f"Deleting Thumbnail Directory at {self.config.thumb_dir}")
+            shutil.rmtree(self.config.thumb_dir)
+
+        if not self.config.retain_progress:
+            if os.path.exists(self.config.config_path):
+                self.logger.info("Removing Task File")
+                os.remove(self.config.config_path)
+
+        if self.ql is not None:
+            self.ql.stop()
+
+    def start_logging(self):
+        """
+        Start the logging process. This is done by starting the QueueListener
+        """
+        handler = logging.StreamHandler()
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        handler.setFormatter(formatter)
+        self.ql = QueueListener(self.logging_queue, handler, respect_handler_level=True)
+        self.ql.start()
+
+    # ==================================================================================================================
+    # Database Wrappers
+    # ==================================================================================================================
+
     def get_diff_pairs(self, delta: float = None, matching_hash: bool = False) -> List[Tuple[str, str, float]]:
         """
         Get the diff pairs from the database. Wrapper for db.get_duplicate_pairs.
@@ -133,37 +168,6 @@ class FastDifPy(GracefulWorker):
         :param threshold: The threshold for the difference
         """
         self.db.drop_diff(threshold)
-
-    def cleanup(self):
-        """
-        Clean up the FastDifPy object, stopping the logging queue,
-        """
-        if self.config.delete_db:
-            self.logger.info(f"Closing DB and deleting DB at {self.config.db_path}")
-            self.db.close()
-            os.remove(self.config.db_path)
-
-        if self.config.delete_thumb:
-            self.logger.info(f"Deleting Thumbnail Directory at {self.config.thumb_dir}")
-            shutil.rmtree(self.config.thumb_dir)
-
-        if not self.config.retain_progress:
-            if os.path.exists(self.config.config_path):
-                self.logger.info("Removing Task File")
-                os.remove(self.config.config_path)
-
-        if self.ql is not None:
-            self.ql.stop()
-
-    def start_logging(self):
-        """
-        Start the logging process. This is done by starting the QueueListener
-        """
-        handler = logging.StreamHandler()
-        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-        handler.setFormatter(formatter)
-        self.ql = QueueListener(self.logging_queue, handler, respect_handler_level=True)
-        self.ql.start()
 
     def populate_partition(self, paths: List[str], part_a: bool = True, check_ext: bool = False):
         """
