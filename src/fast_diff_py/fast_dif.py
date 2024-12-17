@@ -1198,23 +1198,21 @@ class FastDifPy(GracefulWorker):
         val = self._dequeue_counter + offset >= self._enqueue_counter
         return val
 
-    def second_loop(self, **kwargs):
+    def second_loop(self, config: Union[SecondLoopConfig, SecondLoopRuntimeConfig] = None):
         """
-        Run the second loop
+        Runs the full second loop.
 
-        # TODO docs on kwargs
+        :param config: The configuration for the second loop, in place as an override to save code.
         """
         self.logger.info("Beginning Second Loop")
 
+        # Stop condition if we're interrupted
         if not self.run:
             return
 
-        if not isinstance(self.config.second_loop, SecondLoopRuntimeConfig):
-            # Set the configuration
-            if "config" in kwargs:
-                self.config.second_loop = SecondLoopRuntimeConfig.model_validate(kwargs["config"])
-            else:
-                self.config.second_loop = self.second_loop_arg(**kwargs)
+        # Config override
+        if config is not None:
+            self.config.second_loop = config
 
         # Check the configuration
         if not self.check_second_loop_config(self.config.second_loop):
