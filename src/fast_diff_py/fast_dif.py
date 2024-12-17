@@ -1296,14 +1296,15 @@ class FastDifPy(GracefulWorker):
                 if self.db.get_partition_entry_count(True) < cpu_proc + gpu_proc:
                     parallel = False
 
-                batch_size = min(self.db.get_partition_entry_count(True) // 4, self.config.batch_size_max_sl)
+                batch_size = min(self.db.get_partition_entry_count(part_b=True, only_allowed=True) // 4,
+                                 self.config.batch_size_max_sl)
             else:
                 if len(self.config.part_b) > 0:
-                    batch_size = min(self.db.get_partition_entry_count(True),
-                                     self.db.get_partition_entry_count(False),
+                    batch_size = min(self.db.get_partition_entry_count(part_b=True, only_allowed=True),
+                                     self.db.get_partition_entry_count(part_b=False, only_allowed=True),
                                      self.config.batch_size_max_sl)
                 else:
-                    batch_size = min(self.db.get_partition_entry_count(False),
+                    batch_size = min(self.db.get_partition_entry_count(part_b=False, only_allowed=True),
                                      self.config.batch_size_max_sl)
 
         args = {"cpu_proc": cpu_proc,
