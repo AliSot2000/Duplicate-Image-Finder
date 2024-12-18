@@ -563,10 +563,9 @@ class FastDifPy(GracefulWorker):
                                   f"Parent Directory: {dir_a}, child: {dir_b}")
                 return True
 
-
-    def perform_index(self, ignore_thumbs: bool = True):
+    def _perform_index(self, ignore_thumbs: bool = True):
         """
-        Perform the indexing of the directories provided
+        Perform the indexing of the directories provided (please use full_index)
 
         :param ignore_thumbs: Ignore thumbnail directory (any dir with name '.temp_thumb')
         """
