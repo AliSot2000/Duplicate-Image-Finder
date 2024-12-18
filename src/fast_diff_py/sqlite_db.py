@@ -734,9 +734,11 @@ class SQLiteDB(BaseSQliteDB):
 
         # Get the key
         self.debug_execute(stmt, (delta, index))
-        tgt_key = self.sq_cur.fetchone()[0]
-        if tgt_key is None:
+        res = self.sq_cur.fetchone()
+        if res is None:
             raise IndexError("Index out of bound.")
+
+        tgt_key = res[0]
 
         self.debug_execute("SELECT path FROM directory WHERE key = ?", (tgt_key,))
         tgt_path = self.sq_cur.fetchone()[0]
