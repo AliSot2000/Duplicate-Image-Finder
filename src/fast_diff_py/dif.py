@@ -281,10 +281,11 @@ if __name__ == "__main__":
                         type=lambda x: str_to_bool(x),
                         help='Delete lower quality images among matches.',
                         required=False, choices=[True, False], default=False)
+    # INFO: Changed default to False and using it to set logging level to debug.
     parser.add_argument('-p', '--show_progress',
                         type=lambda x: str_to_bool(x),
-                        help='Show the real-time progress of difPy.',
-                        required=False, choices=[True, False], default=True)
+                        help='Show the real-time progress of difPy. Sets the logging level to debug for fast_diff_py ',
+                        required=False, choices=[True, False], default=False)
     parser.add_argument('-sd', '--silent_del',
                         type=lambda x: str_to_bool(x),
                         help='Suppress the user confirmation when deleting images.',
