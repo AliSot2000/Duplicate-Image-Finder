@@ -1,4 +1,5 @@
 import argparse
+import logging
 import os
 import warnings
 from typing import List, Tuple, Optional, Union, Dict
@@ -49,6 +50,7 @@ def dif(_part_a: List[str],
     :param lazy: Lazy comparison (compute hashes, skip if hash matches or images don't have same size)
     :param chunk: batching size for second loop. Used as an override.
     :param processes: Number of processes to use. Used as an override.
+    :param debug: log at debug level
 
     :return: FastDifPy object
     """
@@ -56,6 +58,10 @@ def dif(_part_a: List[str],
                     part_b=_part_b,
                     purge=True,
                     cli_args=cli_args)
+
+    if debug:
+        fdo.config.log_level = logging.DEBUG
+        fdo.config.log_level_children = logging.DEBUG
 
     # Setting recurse
     fdo.config.recurse = recursive
