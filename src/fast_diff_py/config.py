@@ -2,7 +2,7 @@ import datetime
 import logging
 import os
 from enum import Enum
-from typing import Optional, List, Union, Literal, Annotated
+from typing import Optional, List, Union, Literal, Annotated, Dict
 
 from annotated_types import Ge
 from pydantic import BaseModel, Field
@@ -161,7 +161,7 @@ class Config(BaseModel):
                             description="The current state of the progress")
     retain_progress: bool = Field(True,
                                   description="Whether to retain the progress from previous runs in config file")
-    cli_args: Optional[str] = Field(None,
+    cli_args: Optional[Dict] = Field(None,
                                     description="The CLI arguments to use for the run")
 
     first_loop: Union[FirstLoopConfig, FirstLoopRuntimeConfig] = Field(default_factory= lambda: FirstLoopConfig(),
