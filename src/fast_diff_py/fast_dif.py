@@ -1075,7 +1075,7 @@ class FastDifPy(GracefulWorker):
             self.config.state = Progress.FIRST_LOOP_DONE
 
             # Reset the config
-            self.config.first_loop = FirstLoopRuntimeConfig.model_validate(self.config.first_loop.model_dump())
+            self.config.first_loop = FirstLoopConfig.model_validate(self.config.first_loop.model_dump())
             self.commit()
             self.logger.info("Done with First Loop")
             return
