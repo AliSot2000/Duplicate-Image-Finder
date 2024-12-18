@@ -63,7 +63,7 @@ class ChildProcess(GracefulWorker):
                 self.fetch_arg += (datetime.datetime.now(datetime.UTC) - s).total_seconds()
                 count = 0
             except queue.Empty:
-                self.logger.warning("Starving...")
+                self.logger.debug("Starving...")
                 count += self.block_timeout
                 continue
 
