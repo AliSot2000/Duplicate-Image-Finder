@@ -14,7 +14,7 @@ def dif(dir_a: str, dir_b: str, purge: bool = False, **kwargs):
 
     :return: FastDifPy object
     """
-    fdo = FastDifPy(dir_a=dir_a, dir_b=dir_b, purge=purge, **kwargs)
+    fdo = FastDifPy(part_a=dir_a, part_b=dir_b, purge=purge, **kwargs)
 
     # Keep progress, we're not done
     fdo.config.retain_progress = True
