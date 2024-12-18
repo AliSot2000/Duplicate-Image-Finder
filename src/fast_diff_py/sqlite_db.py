@@ -469,6 +469,16 @@ class SQLiteDB(BaseSQliteDB):
 
         return paths, hashes, aspects, keys
 
+    def set_deleted(self, key: int, deleted: bool = True):
+        """
+        Set the deleted state of a file
+
+        :param key: The key of the file
+        :param deleted: Whether the file is deleted or not
+        """
+        stmt = "UPDATE directory SET deleted = ? WHERE key = ?"
+        self.debug_execute(stmt, (1 if deleted else 0, key))
+
     # ==================================================================================================================
     # Hash Table
     # ==================================================================================================================
