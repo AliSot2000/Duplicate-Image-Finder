@@ -1495,7 +1495,7 @@ class FastDifPy(GracefulWorker):
 
         ci = self.config.second_loop.cache_index
         self.ram_cache[ci] = pickle.dumps(bc)
-        print("Added cache")
+        self.logger.debug("Added cache")
 
     def prune_cache_batch(self):
         """
