@@ -1346,7 +1346,6 @@ class FastDifPy(GracefulWorker):
             self.blocks = build_start_blocks_a(self.dir_a_count, self.config.second_loop.batch_size)
             self.logger.info(f"Created Blocks for A , number of blocks: {len(self.blocks)}")
 
-
         # Reset the progress if we're coming from a in progress loop.
         if self.config.state == Progress.SECOND_LOOP_IN_PROGRESS:
             self.config.second_loop.cache_index = self.config.second_loop.finished_cache_index + 1
