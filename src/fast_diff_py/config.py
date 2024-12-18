@@ -114,6 +114,9 @@ class Config(BaseModel):
                                                     description="Lookup from directory given in partition a and "
                                                                 "partition b to the index in the directory table")
 
+    partition_swapped: bool = Field(False,
+                                     description="If the partition names were swapped during table optimization")
+
     dir_index_elapsed: int = Field(0,
                                    description="The number of seconds the indexing has taken")
 
