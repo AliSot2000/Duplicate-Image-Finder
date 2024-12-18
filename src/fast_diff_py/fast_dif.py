@@ -1067,6 +1067,10 @@ class FastDifPy(GracefulWorker):
         self.cmd_queue = None
         self.result_queue = None
 
+        # incrementing the time taken statistic
+        self.config.first_loop.elapsed_seconds += (
+                datetime.datetime.now(datetime.UTC) - self.config.first_loop.start_dt).total_seconds()
+
         if self.run:
             self.config.state = Progress.FIRST_LOOP_DONE
 
