@@ -6,6 +6,13 @@ from typing import List, Tuple, Optional, Union
 import fast_diff_py.config as cfg
 from fast_diff_py.fast_dif import FastDifPy
 
+"""
+This file contains a drop in replacement for the dif.py file from https://github.com/elisemercury/Duplicate-Image-Finder
+
+Currently the code is made to imitate v4.1.3.
+"""
+
+
 
 def dif(dir_a: str, dir_b: str, purge: bool = False,  **kwargs):
     """
