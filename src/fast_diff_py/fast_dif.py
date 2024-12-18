@@ -343,8 +343,12 @@ class FastDifPy(GracefulWorker):
             self.reconnect_to_existing()
 
         # Third Source of Truth - .task.json in the directory
-        elif dir_a is not None:
-            config_path = os.path.join(dir_a, ".task.json")
+        elif part_a is not None:
+            if len(part_a) == 0:
+                raise ValueError("dir_a cannot be empty when default_cfg_path and config is not provided")
+
+            tgt_a = part_a if isinstance(part_a, str) else part_a[0]
+            config_path = os.path.join(part_a, ".task.json")
 
             if os.path.exists(config_path) and not purge:
                 self.logger.info("Using Existing Config File in dir_a")
