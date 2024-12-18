@@ -246,8 +246,8 @@ class SQLiteDB(BaseSQliteDB):
                 success.append(res)
 
         # Update the errors
-        update_err = [(to_b64(res.error), 0, res.key) for res in err]
-        update_err_stmt = "UPDATE directory SET error = ?, success = ? WHERE key = ?"
+        update_err = [(to_b64(res.error), res.key) for res in err]
+        update_err_stmt = "UPDATE directory SET error = ?, success = 0 WHERE key = ?"
         self.debug_execute_many(update_err_stmt, update_err)
 
         # Update the successes
