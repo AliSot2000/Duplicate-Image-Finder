@@ -12,7 +12,15 @@ This file contains a drop in replacement for the dif.py file from https://github
 Currently the code is made to imitate v4.1.3.
 """
 
+def recover(dir_a: str) -> Optional[FastDifPy]:
+    """
+    Recover progress from a given directory.
 
+    Run the computation and return the finished object
+    """
+    fdo = FastDifPy(part_a=dir_a)
+
+    return compute(fdo)
 
 def dif(dir_a: str, dir_b: str, purge: bool = False,  **kwargs):
     """
