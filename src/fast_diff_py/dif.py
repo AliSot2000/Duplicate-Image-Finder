@@ -34,7 +34,8 @@ def dif(_part_a: List[str],
         rotate: bool,
         lazy: bool,
         chunk: int = None,
-        processes: int = None
+        processes: int = None,
+        debug: bool = False,
         ) -> Optional[FastDifPy]:
     """
     Set up a new object of FastDifPy and run the computation and return the finished object
