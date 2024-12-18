@@ -1,7 +1,10 @@
-import fast_diff_py.config as cfg
-from fast_diff_py.fast_dif import FastDifPy
 import argparse
 import os
+import warnings
+from typing import List, Tuple, Optional, Union
+
+import fast_diff_py.config as cfg
+from fast_diff_py.fast_dif import FastDifPy
 
 
 def dif(dir_a: str, dir_b: str, purge: bool = False,  **kwargs):
