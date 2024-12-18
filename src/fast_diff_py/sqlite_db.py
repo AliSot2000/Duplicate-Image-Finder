@@ -661,9 +661,9 @@ class SQLiteDB(BaseSQliteDB):
             # Exit Loop condition
             if row is None:
                 if group_a:
-                    yield head, {r[1]: r[2] for r in acc}
+                    yield head, [(r[1], r[2]) for r in acc]
                 else:
-                    yield head, {r[0]: r[2] for r in acc}
+                    yield head, [(r[0], r[2]) for r in acc]
                 break
 
             # Check the new head
@@ -672,9 +672,9 @@ class SQLiteDB(BaseSQliteDB):
                 acc.append(row)
             else:
                 if group_a:
-                    yield head, {r[1]: r[2] for r in acc}
+                    yield head, [(r[1], r[2]) for r in acc]
                 else:
-                    yield head, {r[0]: r[2] for r in acc}
+                    yield head, [(r[0], r[2]) for r in acc]
                 head = int_head
                 acc = [row]
 
