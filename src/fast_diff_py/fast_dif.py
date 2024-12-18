@@ -205,6 +205,7 @@ class FastDifPy(GracefulWorker):
 
         :return: The number of files added
         """
+        start = datetime.datetime.now(datetime.UTC)
         count = 0
 
         fpaths = []
@@ -249,6 +250,9 @@ class FastDifPy(GracefulWorker):
         if len(fpaths) > 0:
             self.db.bulk_insert_file_external(fpaths, allowed, fsize, create, part_a)
             count += len(fpaths)
+
+        # Setting the number of seconds indexing the dirs took.
+        self.config.dir_index_elapsed += (datetime.datetime.now(datetime.UTC) - start).total_seconds()
 
         return count
 
