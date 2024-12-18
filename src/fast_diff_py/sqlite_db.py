@@ -619,8 +619,8 @@ class SQLiteDB(BaseSQliteDB):
         for row in self.sq_cur.fetchall():
             yield row
 
-    def get_all_cluster(self, delta: float, group_a: bool = True, include_hash_match: bool = False) \
-            -> Tuple[str, Dict[str, float]]:
+    def get_all_cluster(self, delta: float, group_a: bool = True, include_hash_match: bool = True) \
+            -> Iterator[Tuple[str, List[Tuple[str, float]]]]:
         """
         Get clusters of images that have a difference below the threshold.
 
