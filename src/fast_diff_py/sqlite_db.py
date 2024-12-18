@@ -533,7 +533,7 @@ class SQLiteDB(BaseSQliteDB):
 
         :raises IndexError: If the index is out of bounds and the hash couldn't be found.
 
-        => Check the number of clusters with get_hash_cluster_count
+        => Check the number of clusters with `get_hash_cluster_count`
         """
         self.debug_execute("SELECT hash FROM hash_table WHERE count > 1 LIMIT 1 OFFSET ?", (i,))
         tgt_hash = self.sq_cur.fetchone()
