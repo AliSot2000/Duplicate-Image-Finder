@@ -22,17 +22,69 @@ def recover(dir_a: str) -> Optional[FastDifPy]:
 
     return compute(fdo)
 
-def dif(dir_a: str, dir_b: str, purge: bool = False,  **kwargs):
-    """
-    kwargs are all attributes of the Config class, except for root_dir_a and root_dir_b
 
-    :param dir_a: The first directory to compare
-    :param dir_b: The second directory to compare
-    :param purge: Delete any existing progress should it exist
+def dif(_part_a: List[str],
+        _part_b: List[str],
+        recursive: bool,
+        limit_ext: bool,
+        px_size: int,
+        similarity: float,
+        rotate: bool,
+        lazy: bool,
+        chunk: int = None,
+        processes: int = None
+        ) -> Optional[FastDifPy]:
+    """
+    Set up a new object of FastDifPy and run the computation and return the finished object
+
+    :param _part_a: The first partition of directories to compare
+    :param _part_b: The second partition of directories to compare
+    :param recursive: Recursively search within the partitions provided
+    :param limit_ext: Limit the size of the files to compare
+    :param px_size: The size to which to scale all images
+    :param similarity: The similarity metric to use
+    :param rotate: Rotate the image during comparisons
+    :param lazy: Lazy comparison (compute hashes, skip if hash matches or images don't have same size)
+    :param chunk: batching size for second loop. Used as an override.
+    :param processes: Number of processes to use. Used as an override.
 
     :return: FastDifPy object
     """
-    fdo = FastDifPy(dir_a=dir_a, dir_b=dir_b, purge=purge, **kwargs)
+    fdo = FastDifPy(part_a=_part_a,
+                    part_b=_part_b,
+                    purge=True)
+
+    # Setting recurse
+    fdo.config.recurse = recursive
+
+    # Setting the target size
+    fdo.config.compression_target = px_size
+
+    # Setting similarity
+    fdo.config.second_loop.diff_threshold = similarity
+
+    # Setting rotation
+    fdo.config.rotate = rotate
+
+    # Setting the process count if it is provided
+    if processes is not None:
+        fdo.config.first_loop.cpu_proc = processes
+        fdo.config.second_loop.cpu_proc = processes
+
+    # Setting the chunk size for the second loop
+    if chunk is not None:
+        fdo.config.second_loop.batch_size = chunk
+
+    # Setting all acceleration options.
+    if lazy:
+        fdo.config.first_loop.compute_hash = True
+        fdo.config.first_loop.shift_amount = 0
+        fdo.config.second_loop.match_aspect_by = 0.0
+        fdo.config.second_loop.skip_matching_hash = True
+
+    # Finally running the computation on the object.
+    return compute(fdo, limit_ext=limit_ext)
+
 
     # Keep progress, we're not done
     fdo.config.retain_progress = True
