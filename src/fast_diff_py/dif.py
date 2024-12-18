@@ -25,10 +25,11 @@ def recover(dir_a: str) -> Optional[FastDifPy]:
 
 def dif(_part_a: List[str],
         _part_b: List[str],
+        cli_args: Dict,
         recursive: bool,
         limit_ext: bool,
         px_size: int,
-        similarity: float,
+        _similarity: float,
         rotate: bool,
         lazy: bool,
         chunk: int = None,
@@ -37,12 +38,13 @@ def dif(_part_a: List[str],
     """
     Set up a new object of FastDifPy and run the computation and return the finished object
 
+    :param cli_args: Dict of Cli Arguments needed for process recovery.
     :param _part_a: The first partition of directories to compare
     :param _part_b: The second partition of directories to compare
     :param recursive: Recursively search within the partitions provided
     :param limit_ext: Limit the size of the files to compare
     :param px_size: The size to which to scale all images
-    :param similarity: The similarity metric to use
+    :param _similarity: The similarity metric to use
     :param rotate: Rotate the image during comparisons
     :param lazy: Lazy comparison (compute hashes, skip if hash matches or images don't have same size)
     :param chunk: batching size for second loop. Used as an override.
@@ -52,7 +54,8 @@ def dif(_part_a: List[str],
     """
     fdo = FastDifPy(part_a=_part_a,
                     part_b=_part_b,
-                    purge=True)
+                    purge=True,
+                    cli_args=cli_args)
 
     # Setting recurse
     fdo.config.recurse = recursive
@@ -61,7 +64,7 @@ def dif(_part_a: List[str],
     fdo.config.compression_target = px_size
 
     # Setting similarity
-    fdo.config.second_loop.diff_threshold = similarity
+    fdo.config.second_loop.diff_threshold = _similarity
 
     # Setting rotation
     fdo.config.rotate = rotate
