@@ -501,7 +501,7 @@ class FastDifPy(GracefulWorker):
 
     def check_directories(self) -> bool:
         """
-        Check directories aren't subdirectories of each other
+        Check directories aren't subdirectories of each other in both partitions
         """
         a = self.config.part_a if isinstance(self.config.part_a, list)  else [self.config.part_a]
         b = self.config.part_b if isinstance(self.config.part_b, list)  else [self.config.part_b]
