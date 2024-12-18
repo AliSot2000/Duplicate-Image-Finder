@@ -641,9 +641,9 @@ class SQLiteDB(BaseSQliteDB):
             stmt += " WHERE dif < ? AND d.success = 1 "
 
         if group_a:
-            stmt += "ORDER BY d.key_a, d.key_b"
+            stmt += "ORDER BY d.key_a, b.file_size DESC, b.created ASC"
         else:
-            stmt += "ORDER BY d.key_b, d.key_a"
+            stmt += "ORDER BY d.key_b, a.file_size DESC, a.created ASC"
 
         self.debug_execute(stmt, (delta,))
 
