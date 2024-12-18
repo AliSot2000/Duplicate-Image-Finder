@@ -296,14 +296,41 @@ if __name__ == "__main__":
                         required=False, choices=[True, False], default=None)
     args = parser.parse_args()
 
-    o = dif(dir_a="/home/alisot2000/Desktop/workbench_tiny/dir_a", dir_b="/home/alisot2000/Desktop/workbench_tiny/dir_b", purge=False)
-    for p in o.get_diff_pairs():
-        print(p)
+    # ==================================================================================================================
+    # Validating args beyond the defaults
+    # ==================================================================================================================
 
-    for c in o.get_diff_clusters(dir_a=True):
-        print(c)
+    # Need to raise warning. deprecated not implemented in python3.12
+    if args.logs is not None:
+        warnings.warn('Parameter "logs" was deprecated with difPy v4.1. '
+                      'Using it might lead to an exception in future versions. Consider updating your script.',
+            FutureWarning, stacklevel=2)
 
-    for c in o.get_diff_clusters(dir_a=False):
-        print(c)
+    # Validate the pixel size
+    if not 10 < args.px_size < 5000:
+        raise ValueError("Invalid value for Pixel Size [10, 5000] ")
+
+    if not isinstance(args.px_size, int):
+        raise TypeError(f"Invalid Type of Pixel Size {type(args.px_size).__name__}")
+
+    # validate move, delete and silent_delete, one without the other is useless.
+    if args.silent_del is False and args.delete:
+        warnings.warn("Parameter 'silent_del' has no effect without 'delete'")
+
+    # INFO: Handling inconsistency from dif.py by raising Error.
+    if args.delete and args.move_to is not None:
+        raise ValueError("Parameter 'move_to' conflicts with 'delete'. Specify either or. ")
+
+    # Get the start_dir
+    a_dir = args.directory[-1] if args.output_directory is None else args.output_directory
+
+    # Get the partitions from the inputs.
+    part_a, part_b = parse_dirs(args.directory, args.in_folder)
+
+    # Convert the similarity to usable format.
+    similarity = parse_similarity(args.similarity)
 
     o.cleanup()
+    # Subsequently using the dict in order to be able to recover the args from the config
+    cli_args = args.__dict__
+
