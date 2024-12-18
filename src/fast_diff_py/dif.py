@@ -140,50 +140,78 @@ def compute(fdo: FastDifPy, limit_ext: bool = False) -> Optional[FastDifPy]:
 
     return fdo
 
-    # Keep progress, we're not done
-    fdo.config.retain_progress = True
-    fdo.config.delete_db = False
-    fdo.config.delete_thumb = False
+# ======================================================================================================================
+# Util functions needed to convert from difpy to fast_diff_py
+# ======================================================================================================================
 
-    # Run the index
-    if fdo.config.state == cfg.Progress.INIT:
-        if fdo.db.dir_table_exists():
-            fdo.db.drop_directory_table()
 
-        fdo.full_index()
+def str_to_bool(arg: str) -> bool:
+    """
+    Convert a string from the commandline arguments to bool.
+    The conversion is case-insensitive.
 
-    # Exit in sigint
-    if not fdo.run:
-        fdo.commit()
-        fdo.cleanup()
-        return
+    Values converted to True are: y, yes, on, 1, true, t
+    """
+    val = arg.lower()
+    if val in ("y", "yes", "on", "1", "true", "t"):
+        return True
 
-    # Run the first loop
-    if fdo.config.state in (cfg.Progress.INDEXED_DIRS, cfg.Progress.FIRST_LOOP_IN_PROGRESS):
-        fdo.first_loop()
+    return False
 
-    # Exit on sigint
-    if not fdo.run:
-        print("First Loop Exited")
-        fdo.commit()
-        fdo.cleanup()
-        return
 
-    # Run the second loop
-    if fdo.config.state in (cfg.Progress.SECOND_LOOP_IN_PROGRESS, cfg.Progress.FIRST_LOOP_DONE):
-        fdo.second_loop()
+def parse_dirs(dirs: List[str], union: bool) -> Tuple[List[str], List[str]]:
+    """
+    Parse the commandline input into something that can be used by fast_diff_py.
 
-    if not fdo.run:
-        fdo.commit()
-        fdo.cleanup()
-        return
+    :param dirs: The list of directories to parse. Can be empty.
+    :param union: If true, return a union of dirs.
 
-    # We're done, clean up
-    fdo.config.retain_progress = False
-    fdo.config.delete_db = True
-    fdo.config.delete_thumb = True
+    :returns: partition_a and partition_b for fast_diff_py
+    """
 
-    return fdo
+    if len(dirs) == 0:
+        # Nothing was provided, so we're taking cwd and search only in the dir
+        return [os.path.basename(__file__)], []
+
+    # If we're unioning, return everything to be put inside the partition a
+    # (if only part a is present, search in union is performed)
+    # Also, if we have exactly one dir, also perform search within that dir
+    if union or len(dirs) == 1:
+        return dirs, []
+
+    # Partition a is the last directory provided, all other directories are unioned and then compared against the last.
+    # This was the deduced semantic from analyzing dif.py
+    return [dirs[-1]], dirs[:-1]
+
+
+def parse_similarity(sim: Union[str, int]) -> float:
+    """
+    Convert commandline argument for similarity to a float.
+
+    Allows for duplicates and similar as arguments to be converted to int
+    Otherwise it returns the value caste to float
+
+    Since fast_diff_py is using a different mse function than dif.py it must be multiplied by 3
+    """
+    if sim not in ['duplicates', 'similar']:
+        try:
+            sim = float(sim)
+            if sim < 0:
+              raise Exception('Invalid value for "similarity" parameter: must be >= 0.')
+            else:
+                return sim * 3
+        except:
+            raise Exception('Invalid value for "similarity" parameter: must be "duplicates", "similar" '
+                            'or of type INT or FLOAT.')
+    else:
+        if sim == 'duplicates':
+            # search for duplicate images
+            sim = 0 * 3
+        elif sim == 'similar':
+            # search for similar images
+            sim = 5 * 3
+        return sim
+
 
 if __name__ == "__main__":
     # Parameters for when launching difPy via CLI
