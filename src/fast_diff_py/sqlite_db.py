@@ -678,6 +678,31 @@ class SQLiteDB(BaseSQliteDB):
                 head = int_head
                 acc = [row]
 
+    def get_cluster_count(self, delta: float, part_a: bool = True, include_hash_match: bool = True) -> int:
+        """
+        Get the number of clusters that are below the threshold
+
+        :param delta: The threshold for the difference
+        :param part_a: Whether to get the count for partition a or partition b (part_b might be part_a if
+        it was left empty)
+        :param include_hash_match: Whether to include diffs of 0 that were a result of having matching hashes
+
+        :return: The number of clusters
+        """
+        if part_a and include_hash_match:
+            stmt = "SELECT COUNT(DISTINCT(key_a)) FROM dif_table WHERE dif < ? AND success IN (1, 2)"
+        elif part_a and not include_hash_match:
+            stmt = "SELECT COUNT(DISTINCT(key_a)) FROM dif_table WHERE dif < ? AND success = 1"
+        elif not part_a and include_hash_match:
+            stmt = "SELECT COUNT(DISTINCT(key_b)) FROM dif_table WHERE dif < ? AND success IN (1, 2)"
+        elif not part_a and not include_hash_match:
+            stmt = "SELECT COUNT(DISTINCT(key_b)) FROM dif_table WHERE dif < ? AND success = 1"
+        else:
+            raise ValueError("Tertiem Non Datur")
+
+        self.debug_execute(stmt, (delta,))
+        return self.sq_cur.fetchone()[0]
+
     def drop_diff(self, threshold: float):
         """
         Drop all diffs above a certain threshold
