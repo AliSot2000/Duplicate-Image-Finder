@@ -1364,7 +1364,7 @@ class FastDifPy(GracefulWorker):
         self.config.state = Progress.SECOND_LOOP_IN_PROGRESS
 
         # Run the second loop
-        self.generic_mp_loop(first_iteration=False, benchmark=False)
+        self.generic_mp_loop(first_iteration=False, benchmark=self.benchmark)
 
         self.ram_cache = None
 
