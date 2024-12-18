@@ -1462,6 +1462,10 @@ class FastDifPy(GracefulWorker):
             self.prune_cache_batch()
             self.commit()
 
+        # Updating the time taken
+        self.config.second_loop.elapsed_seconds += (
+            (datetime.datetime.now(datetime.UTC) - self.config.second_loop.start_dt).total_seconds())
+
         if self.run:
             self.config.state = Progress.SECOND_LOOP_DONE
             self.config.second_loop = SecondLoopConfig.model_validate(self.config.second_loop.model_dump())
