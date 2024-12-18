@@ -1124,7 +1124,11 @@ class FastDifPy(GracefulWorker):
         # Update the state
         self.config.state = Progress.FIRST_LOOP_IN_PROGRESS
 
-        self.generic_mp_loop(first_iteration=True, benchmark=False)
+        self.generic_mp_loop(first_iteration=True, benchmark=self.benchmark)
+
+        # incrementing the time taken statistic
+        self.config.first_loop.elapsed_seconds += (
+                datetime.datetime.now(datetime.UTC) - self.config.first_loop.start_dt).total_seconds()
 
         # Set the state if self.run is still true
         if self.run:
