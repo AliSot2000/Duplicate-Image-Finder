@@ -1387,7 +1387,10 @@ class FastDifPy(GracefulWorker):
         # Set the MSE function
         if self.cpu_diff is None:
             import fast_diff_py.img_processing as imgp
-            self.cpu_diff = imgp.mse
+            self.cpu_diff = lambda ia, ib, dr: imgp.compute_image_diff(image_a=ia,
+                                                                       image_b=ib,
+                                                                       use_gpu=False,
+                                                                       do_rot=dr)
 
         self.config.state = Progress.SECOND_LOOP_IN_PROGRESS
 
