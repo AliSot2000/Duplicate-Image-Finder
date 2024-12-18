@@ -1,3 +1,4 @@
+import datetime
 import logging
 import os
 from enum import Enum
@@ -33,7 +34,9 @@ class FirstLoopConfig(BaseModel):
                               description="The amount to shift the image before computing the hash")
     parallel: bool = Field(True,
                             description="Whether to run the first loop in parallel")
-
+    elapsed_seconds: int = Field(0,
+                                 description="The number of seconds the first loop has taken. "
+                                             "Set on exit of first loop")
 
 class FirstLoopRuntimeConfig(FirstLoopConfig):
     """
@@ -43,6 +46,8 @@ class FirstLoopRuntimeConfig(FirstLoopConfig):
                                         description="The batch size for the first loop")
     cpu_proc: int = Field(default_factory=lambda: os.cpu_count(),
                             description="The number of CPU processes to use for the first loop")
+    start_dt: datetime.datetime = Field(default_factory=lambda: datetime.datetime.now(datetime.UTC),
+                                        description="Datetime at which the first loop started")
 
 class SecondLoopConfig(BaseModel):
     # Because of batching this doesn't make much sense.
@@ -82,13 +87,17 @@ class SecondLoopConfig(BaseModel):
     preload_count: int = Field(4,
                                description="Number of caches to prepare in advance. Tune this variable to ensure "
                                            "you don't run into a memory overflow")
-
+    elapsed_seconds: int = Field(0,
+                                 description="The number of seconds the second loop has taken. "
+                                             "Set on exit of second loop")
 
 class SecondLoopRuntimeConfig(SecondLoopConfig):
     cache_index: int = Field(0,
                                 description="The index of the cache")
     finished_cache_index: Optional[int] = Field(None,
                                                 description="Index of the cache field we're done with")
+    start_dt: datetime.datetime = Field(default_factory=lambda: datetime.datetime.now(datetime.UTC),
+                                        description="Datetime at which the second loop started")
 
 class Config(BaseModel):
     compression_target: int = Field(64,
@@ -104,6 +113,9 @@ class Config(BaseModel):
     dir_index_lookup: Optional[List[str]] = Field(None,
                                                     description="Lookup from directory given in partition a and "
                                                                 "partition b to the index in the directory table")
+
+    dir_index_elapsed: int = Field(0,
+                                   description="The number of seconds the indexing has taken")
 
     recurse: bool = Field(True, 
                           description="Whether to recurse into directories that are in root_dir_a and root_dir_B")
