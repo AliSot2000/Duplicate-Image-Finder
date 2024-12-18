@@ -194,7 +194,7 @@ class FastDifPy(GracefulWorker):
 
     def populate_partition(self, paths: List[str], part_a: bool = True, check_ext: bool = False):
         """
-        Populate the directory table. If the integrated file discovery methods with root_dir_a and root_dir_b are not
+        Populate the directory table. If the integrated file discovery methods with part_a and part_b are not
         sufficient, the two partitions can be populated manually.
 
         The function checks if the file exists in the file system. Correct extension can be verified as well if needed.
