@@ -1099,6 +1099,9 @@ class FastDifPy(GracefulWorker):
         # Build runtime config if necessary
         if not isinstance(self.config.first_loop, FirstLoopRuntimeConfig):
             self.config.first_loop = self.build_first_loop_runtime_config(self.config.first_loop)
+        else:
+            # Factory not used -> set start_dt manually
+            self.config.first_loop.start_dt = datetime.datetime.now(datetime.timezone.utc)
 
         # No computation required. Skip it.
         if not (self.config.first_loop.compress or self.config.first_loop.compute_hash):
