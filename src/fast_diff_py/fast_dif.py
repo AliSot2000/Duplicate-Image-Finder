@@ -1538,7 +1538,7 @@ class FastDifPy(GracefulWorker):
         bp = {i + l_x: False for i in range(s_x)}
         self.block_progress_dict[self.config.second_loop.cache_index] = bp
 
-        self.logger.info(f"Created Cache with key: {self.config.second_loop.cache_index}")
+        self.logger.info(f"Created Cache with key: {self.config.second_loop.cache_index} out of {len(self.blocks)}")
 
         ci = self.config.second_loop.cache_index
         self.ram_cache[ci] = pickle.dumps(bc)
@@ -1556,7 +1556,7 @@ class FastDifPy(GracefulWorker):
 
         # Check if all keys in the block progress dict are True
         if all(self.block_progress_dict[lowest_key].values()):
-            self.logger.info(f"Pruning cache key: {lowest_key}")
+            self.logger.info(f"Pruning cache key: {lowest_key} of {len(self.blocks)}")
             self.ram_cache.pop(lowest_key)
             self.block_progress_dict.pop(lowest_key)
             self.config.second_loop.finished_cache_index = lowest_key
