@@ -1,7 +1,7 @@
 import argparse
 import os
 import warnings
-from typing import List, Tuple, Optional, Union
+from typing import List, Tuple, Optional, Union, Dict
 
 import fast_diff_py.config as cfg
 from fast_diff_py.fast_dif import FastDifPy
