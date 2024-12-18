@@ -1272,6 +1272,9 @@ class FastDifPy(GracefulWorker):
         # Ensure the config
         if not isinstance(cfg, SecondLoopRuntimeConfig):
             cfg = SecondLoopRuntimeConfig.model_validate(cfg.model_dump())
+        else:
+            # Set the start_dt manually since we're not using the factory
+            self.config.second_loop.start_dt = datetime.datetime.now(datetime.UTC)
 
         if not self.config.do_second_loop:
             return False
