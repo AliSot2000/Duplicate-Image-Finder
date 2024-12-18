@@ -26,6 +26,7 @@ class FastDifPy(GracefulWorker):
     config: Config = None
     logger: logging.Logger
 
+    # Process related
     handles: Union[List[mp.Process], None] = None
     exit_counter: int = 0
 
@@ -40,7 +41,7 @@ class FastDifPy(GracefulWorker):
     _dequeue_counter: int = 0
     _last_dequeue_counter: int = 0
 
-    # Attrs related to running the loop
+    # Attrs related to running the second loop
     manager: mp.Manager = mp.Manager()
     ram_cache: Optional[Dict[int, bytes]] = None
 
@@ -54,6 +55,7 @@ class FastDifPy(GracefulWorker):
     dir_a_count: Optional[int] = None
     dir_b_count: Optional[int] = None
 
+    # Callables needed for the first and second loop
     hash_fn: Optional[Callable[[str], str] | Callable[[np.ndarray[np.uint8]], str]] = None
     cpu_diff: Optional[Callable[[np.ndarray[np.uint8], np.ndarray[np.uint8], bool], float]] = None
     gpu_diff: Optional[Callable[[np.ndarray[np.uint8], np.ndarray[np.uint8], bool], float]] = None
