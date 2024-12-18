@@ -624,8 +624,10 @@ class SQLiteDB(BaseSQliteDB):
         """
         Get clusters of images that have a difference below the threshold.
 
+        Within each cluster, the images are sorted by file_size desc, created asc
+
         :param delta: The threshold for the difference
-        :param group_a: Either group by directory a or directory b.
+        :param group_a: Either group by partition a or partition b.
         :param include_hash_match: Whether to include diffs of 0 that were a result of having matching hashes
         """
         stmt = ("SELECT a.path, b.path, d.dif "
