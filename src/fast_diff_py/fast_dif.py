@@ -60,6 +60,9 @@ class FastDifPy(GracefulWorker):
     cpu_diff: Optional[Callable[[np.ndarray[np.uint8], np.ndarray[np.uint8], bool], float]] = None
     gpu_diff: Optional[Callable[[np.ndarray[np.uint8], np.ndarray[np.uint8], bool], float]] = None
 
+    # Use benchmarking in multiprocessing loops to make sure the enqueueing isn't taking too much time.
+    benchmark: bool = False
+
     # ==================================================================================================================
     # Util
     # ==================================================================================================================
