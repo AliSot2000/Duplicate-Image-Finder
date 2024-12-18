@@ -475,19 +475,29 @@ class FastDifPy(GracefulWorker):
 
         self.commit()
 
-    def full_index(self):
+    def full_index(self, ignore_thumbs: bool = True):
         """
-        Full index performs all actions associated with indexing the files
+        Full index performs all actions associated with indexing the files in the two partitions.
+
+        - Create the table for the index.
+        - Ensure the directories aren't duplicates or subdirectories of each other
+        - Index all provided directories
+        - Reconfigure the directory table to ensure we don't have holes and the all to all comparison works efficnetly
+        - Update the state of the config.
+
+        :param ignore_thumbs: Ignore thumbnail directory (any dir with name '.temp_thumb')
         """
+        start = datetime.datetime.now(datetime.UTC)
         self.index_preamble()
 
         # Index the directories
-        self.perform_index()
+        self._perform_index(ignore_thumbs)
 
         if not self.run:
             return
 
         self.index_epilogue()
+        self.config.dir_index_elapsed += (datetime.datetime.now(datetime.UTC) - start).total_seconds()
 
     def check_directories(self) -> bool:
         """
