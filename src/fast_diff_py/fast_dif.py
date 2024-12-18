@@ -272,7 +272,7 @@ class FastDifPy(GracefulWorker):
     # INIT
     # ==================================================================================================================
 
-    def __init__(self, dir_a: str = None, dir_b: str = None, config: Config = None,
+    def __init__(self, part_a: str | List[str] = None, part_b: str | List[str] = None, config: Config = None,
                  default_cfg_path: str = None, purge: bool = False, test_mode: bool = False, **kwargs):
         """
         Initialize the FastDifPy object.
@@ -283,9 +283,9 @@ class FastDifPy(GracefulWorker):
         - Third source of truth is the .task.json file in the 'a root' directory. If it is present, the object is
         initialized with the config.
 
-        :param dir_a: The first directory to compare (if no config and default_cfg_path is provided,
+        :param part_a: The first directory to compare (if no config and default_cfg_path is provided,
             task is searched there)
-        :param dir_b: The second directory to compare
+        :param part_b: The second directory to compare
         :param config: The config override in case we want to use a specific config
         :param default_cfg_path: The path to the config if it's supposed to be loaded from a file
         :param purge: Whether to purge the existing progress and start anew (has only effect for first and third source)
