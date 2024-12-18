@@ -7,7 +7,7 @@ import shutil
 import time
 import pickle
 from logging.handlers import QueueListener
-from typing import List, Union, Callable, Dict, Optional, Tuple
+from typing import List, Union, Callable, Dict, Optional, Tuple, Iterator
 
 import numpy as np
 import fast_diff_py.img_processing as imgp
@@ -137,7 +137,7 @@ class FastDifPy(GracefulWorker):
     # Database Wrappers
     # ==================================================================================================================
 
-    def get_diff_pairs(self, delta: float = None, matching_hash: bool = False) -> List[Tuple[str, str, float]]:
+    def get_diff_pairs(self, delta: float = None, matching_hash: bool = False) -> Iterator[Tuple[str, str, float]]:
         """
         Get the diff pairs from the database. Wrapper for db.get_duplicate_pairs.
 
@@ -158,7 +158,7 @@ class FastDifPy(GracefulWorker):
             yield p
 
     def get_diff_clusters(self, delta: float = None, dir_a: bool = True, matching_hash: bool = False) \
-            -> Tuple[str, Dict[str, float]]:
+            -> Iterator[Tuple[str, Dict[str, float]]]:
         """
         Get a Cluster of Duplicates. Wrapper for db.get_cluster.
 
