@@ -86,23 +86,37 @@ def dif(_part_a: List[str],
     return compute(fdo, limit_ext=limit_ext)
 
 
+def compute(fdo: FastDifPy, limit_ext: bool = False) -> Optional[FastDifPy]:
+    """
+    Perform the main computation (index, compress and compare)
+
+    :returns: the object after the computation is done.
+    """
     # Keep progress, we're not done
     fdo.config.retain_progress = True
     fdo.config.delete_db = False
     fdo.config.delete_thumb = False
 
+    # We're already done, return immediately
+    if fdo.config.state == cfg.Progress.SECOND_LOOP_DONE:
+        return fdo
+
     # Run the index
     if fdo.config.state == cfg.Progress.INIT:
-        if fdo.db.dir_table_exists():
-            fdo.db.drop_directory_table()
+        fdo.purge_preexisting_directory_table()
 
         fdo.full_index()
+
+    # Not limit_ext. Changing in DB all files to be allowed.
+    # INFO: Allowing myself to have one piece of spaghetti code.
+    if not limit_ext:
+        fdo.db.debug_execute("UPDATE directory SET allowed = 1 WHERE allowed = 0")
 
     # Exit in sigint
     if not fdo.run:
         fdo.commit()
         fdo.cleanup()
-        return
+        return None
 
     # Run the first loop
     if fdo.config.state in (cfg.Progress.INDEXED_DIRS, cfg.Progress.FIRST_LOOP_IN_PROGRESS):
@@ -113,7 +127,7 @@ def dif(_part_a: List[str],
         print("First Loop Exited")
         fdo.commit()
         fdo.cleanup()
-        return
+        return None
 
     # Run the second loop
     if fdo.config.state in (cfg.Progress.SECOND_LOOP_IN_PROGRESS, cfg.Progress.FIRST_LOOP_DONE):
@@ -122,12 +136,7 @@ def dif(_part_a: List[str],
     if not fdo.run:
         fdo.commit()
         fdo.cleanup()
-        return
-
-    # We're done, clean up
-    fdo.config.retain_progress = False
-    fdo.config.delete_db = True
-    fdo.config.delete_thumb = True
+        return None
 
     return fdo
 
