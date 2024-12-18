@@ -471,6 +471,7 @@ class FastDifPy(GracefulWorker):
             # Also need to invert the config for the subsequent tasks.
             self.config.part_a = cpb
             self.config.part_b = cpa
+            self.config.partition_swapped = True
 
         # When run is set, we're done indexing
         if self.run:
