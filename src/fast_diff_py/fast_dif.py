@@ -740,7 +740,7 @@ class FastDifPy(GracefulWorker):
                                                                            do_rot=dr)
 
             if self.config.second_loop.gpu_proc > 0 and self.gpu_diff is None:
-                self.cpu_diff = lambda ia, ib, dr: imgp.compute_image_diff(image_a=ia,
+                self.gpu_diff = lambda ia, ib, dr: imgp.compute_image_diff(image_a=ia,
                                                                            image_b=ib,
                                                                            use_gpu=True,
                                                                            do_rot=dr)
