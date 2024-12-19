@@ -479,6 +479,25 @@ class SQLiteDB(BaseSQliteDB):
         stmt = "UPDATE directory SET deleted = ? WHERE key = ?"
         self.debug_execute(stmt, (1 if deleted else 0, key))
 
+    def get_directory_errors(self) -> Iterator[Tuple[str, str]]:
+        """
+        Get the filepaths and errors from the directory table
+
+        Return the errors with iterator.
+        """
+        self.debug_execute("SELECT path, error FROM directory WHERE success = 0")
+
+        for res in self.sq_cur.fetchall():
+            yield res[0], from_b64(res[1])
+
+    def get_directory_disallowed(self) -> Iterator[str]:
+        """
+        Get the filepaths from the directory table which weren't allowed
+        """
+        self.debug_execute("SELECT path FROM directory WHERE allowed = 0")
+        for res in self.sq_cur.fetchall():
+            yield res[0]
+
     # ==================================================================================================================
     # Hash Table
     # ==================================================================================================================
