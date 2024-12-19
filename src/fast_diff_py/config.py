@@ -34,7 +34,7 @@ class FirstLoopConfig(BaseModel):
                               description="The amount to shift the image before computing the hash")
     parallel: bool = Field(True,
                             description="Whether to run the first loop in parallel")
-    elapsed_seconds: int = Field(0,
+    elapsed_seconds: float = Field(0,
                                  description="The number of seconds the first loop has taken. "
                                              "Set on exit of first loop")
 
@@ -87,7 +87,7 @@ class SecondLoopConfig(BaseModel):
     preload_count: int = Field(4,
                                description="Number of caches to prepare in advance. Tune this variable to ensure "
                                            "you don't run into a memory overflow")
-    elapsed_seconds: int = Field(0,
+    elapsed_seconds: float = Field(0,
                                  description="The number of seconds the second loop has taken. "
                                              "Set on exit of second loop")
 
@@ -117,7 +117,7 @@ class Config(BaseModel):
     partition_swapped: bool = Field(False,
                                      description="If the partition names were swapped during table optimization")
 
-    dir_index_elapsed: int = Field(0,
+    dir_index_elapsed: float = Field(0,
                                    description="The number of seconds the indexing has taken")
 
     recurse: bool = Field(True, 
