@@ -112,7 +112,7 @@ class SQLiteDB(BaseSQliteDB):
                 "key_a INTEGER NOT NULL, "
                 "key_b INTEGER NOT NULL, "
                 "dif REAL CHECK (dif_table.dif >= -1) DEFAULT -1, "
-                "success INT CHECK (dif_table.success IN (-1, 0, 1, 2, 3)) DEFAULT -1, " # 2, matching hash # 3, matching aspect
+                "success INT CHECK (dif_table.success IN (0, 1, 2, 3)) DEFAULT -1, " # 2, matching hash # 3, matching aspect
                 "error TEXT, "
                 "UNIQUE (key_a, key_b)) ")
 
