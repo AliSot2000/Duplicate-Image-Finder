@@ -109,7 +109,7 @@ def dif(_part_a: List[str],
     if lazy:
         fdo.config.first_loop.compute_hash = True
         fdo.config.first_loop.shift_amount = 0
-        fdo.config.second_loop.match_aspect_by = 0.0
+        fdo.config.second_loop.match_aspect_by = 0
         fdo.config.second_loop.skip_matching_hash = True
 
     # Finally running the computation on the object.
