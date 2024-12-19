@@ -208,8 +208,8 @@ def construct_stats(fdo: fast_diff_py.FastDifPy) -> Dict:
         else:
             file_errors.append(f"Error Processing Tuple {pa}, {pb}: {error}")
 
-    res = {
-        "directory": c.part_b + c.part_a if c.partition_swapped else c.part_a + c.part_a,
+    return {
+        "directory": c.part_b + c.part_a if c.partition_swapped else c.part_a + c.part_b,
         "process": {
             "build": {
                 "duration": {
@@ -251,7 +251,6 @@ def construct_stats(fdo: fast_diff_py.FastDifPy) -> Dict:
             "logs": file_errors
         }
     }
-    return res
 
 
 def move_duplicates(filepaths: List[str], target: str) -> int:
