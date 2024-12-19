@@ -109,8 +109,15 @@ def dif(dir_a: str, dir_b: str, purge: bool = False, **kwargs):
 
 
 if __name__ == "__main__":
-    o = dif(dir_a="/home/alisot2000/Desktop/workbench_tiny/dir_a",
-            dir_b="/home/alisot2000/Desktop/workbench_tiny/dir_b", purge=False)
+    # dir_a = "/home/alisot2000/Desktop/SAMEPLE_MIRA/dir_a"
+    # dir_b = "/home/alisot2000/Desktop/SAMEPLE_MIRA/dir_c"
+
+    dir_a = "/home/alisot2000/Desktop/test-dirs/dir_a"
+    dir_b = "/home/alisot2000/Desktop/test-dirs/dir_b"
+
+    # dir_a = "/home/alisot2000/Desktop/workbench_tiny/dir_a"
+    # dir_b = "/home/alisot2000/Desktop/workbench_tiny/dir_b"
+    o = dif(dir_a=dir_a, dir_b=dir_b, purge=True)
     for p in o.get_diff_pairs():
         print(p)
 
@@ -119,5 +126,9 @@ if __name__ == "__main__":
 
     for c in o.get_diff_clusters(dir_a=False):
         print(c)
+
+    o.config.retain_progress = False
+    o.config.delete_db = False
+    o.config.delete_thumb = True
 
     o.cleanup()
