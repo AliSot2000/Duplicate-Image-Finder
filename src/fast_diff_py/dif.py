@@ -222,7 +222,7 @@ def construct_stats(fdo: fast_diff_py.FastDifPy) -> Dict:
                     "in_folder": len(c.part_b) == 0, # INFO: If we have in_folder, there will be no part be, so no swap
                     "limit_extensions": c.cli_args["limit_extensions"],
                     "px_size": c.compression_target,
-                    "processes": c.cli_args["processes"]
+                    "processes": c.cli_args["processes"] if c.cli_args["processes"] is not None else os.cpu_count()
                 }
             },
             "search": {
@@ -235,7 +235,7 @@ def construct_stats(fdo: fast_diff_py.FastDifPy) -> Dict:
                     "similarity_mse": c.second_loop.diff_threshold,
                     "rotate": c.rotate,
                     "lazy": c.cli_args["lazy"],
-                    "processes": c.cli_args["processes"],
+                    "processes": c.cli_args["processes"] if c.cli_args["processes"] is not None else os.cpu_count(),
                     "chunksize": c.cli_args["chunksize"]
                 },
                 "files_searched": file_count,
