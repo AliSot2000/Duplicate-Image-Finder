@@ -23,7 +23,7 @@ from fast_diff_py.utils import sizeof_fmt, BlockProgress, build_start_blocks_a, 
 
 
 class FastDifPy(GracefulWorker):
-    db: SQLiteDB = None
+    db: Type[SQLiteDB] = None
     config: Config = None
     logger: logging.Logger
 
@@ -60,6 +60,8 @@ class FastDifPy(GracefulWorker):
     hash_fn: Optional[Callable[[str], str] | Callable[[np.ndarray[np.uint8]], str]] = None
     cpu_diff: Optional[Callable[[np.ndarray[np.uint8], np.ndarray[np.uint8], bool], float]] = None
     gpu_diff: Optional[Callable[[np.ndarray[np.uint8], np.ndarray[np.uint8], bool], float]] = None
+    gpu_worker_class: Optional[Type[SecondLoopWorker]] = None  # TODO implement
+    db_inst: Optional[Type[SQLiteDB]] = SQLiteDB
 
     # Constants to be reused
     # Use benchmarking in multiprocessing loops to make sure the enqueueing isn't taking too much time.
