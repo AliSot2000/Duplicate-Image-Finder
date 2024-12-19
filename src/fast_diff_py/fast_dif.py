@@ -3,13 +3,14 @@ import itertools
 import logging
 import multiprocessing as mp
 import os.path
+import pickle
 import shutil
 import time
-import pickle
 from logging.handlers import QueueListener
-from typing import List, Union, Callable, Dict, Optional, Tuple, Iterator
+from typing import List, Union, Callable, Dict, Optional, Tuple, Iterator, Type
 
 import numpy as np
+
 import fast_diff_py.img_processing as imgp
 from fast_diff_py.base_process import GracefulWorker
 from fast_diff_py.cache import ImageCache, BatchCache
