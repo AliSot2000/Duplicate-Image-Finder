@@ -477,7 +477,6 @@ if __name__ == "__main__":
     # Convert the similarity to usable format.
     similarity = parse_similarity(args.similarity)
 
-    o.cleanup()
     # Subsequently using the dict in order to be able to recover the args from the config
     cli_args = args.__dict__
 
