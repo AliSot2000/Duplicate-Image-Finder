@@ -642,11 +642,19 @@ class FastDifPy(GracefulWorker):
 
             # ignore a path if given
             if full_path in self.config.ignore_paths:
-                continue
+                allowed = 0
+                stats = os.stat(full_path)
+                size = stats.st_size
+                create = stats.st_ctime
+                files.append((file_name, allowed, size, create))
 
             # ignoring based only on name
             if file_name in self.config.ignore_names:
-                continue
+                allowed = 0
+                stats = os.stat(full_path)
+                size = stats.st_size
+                create = stats.st_ctime
+                files.append((file_name, allowed, size, create))
 
             # Thumbnail directory is called .temp_thumbnails
             if file_name == self.default_thumb_dir and ignore_thumbnail:
