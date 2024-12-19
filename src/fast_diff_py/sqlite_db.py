@@ -834,3 +834,27 @@ class SQLiteDB(BaseSQliteDB):
         Drop all diffs above a certain threshold
         """
         self.debug_execute("DELETE FROM dif_table WHERE dif > ?", (threshold,))
+
+    def get_dif_errors(self) -> Iterator[Tuple[str, Union[str, None], str]]:
+        """
+        Get all errors from the dif_table
+        If an error was encountered loading image a, path b is None.
+
+        :returns: Iterator which contains path a, path b and error.
+        """
+        # Get errors from dif table where issue was with image a
+        self.debug_execute("SELECT da.path, dif.error "
+                           "FROM dif_table AS dif "
+                           "JOIN directory AS da ON da.key = dif.key_a WHERE dif.key_b = -1")
+
+        for path, error in self.sq_cur.fetchall():
+            yield path, None, from_b64(error)
+
+        # Get errors where issue was with image b
+        self.debug_execute("SELECT da.path, db.path, dif.error "
+                           "FROM dif_table AS dif "
+                           "JOIN directory AS da ON da.key = dif.key_a "
+                           "JOIN directory AS db ON db.key = dif.key_b WHERE dif.success = 0")
+
+        for path_a, path_b, error in self.sq_cur.fetchall():
+            yield path_a, path_b, from_b64(error)
