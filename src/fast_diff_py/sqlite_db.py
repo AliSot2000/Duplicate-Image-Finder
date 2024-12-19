@@ -541,6 +541,17 @@ class SQLiteDB(BaseSQliteDB):
         self.debug_execute("SELECT COUNT(*) FROM hash_table WHERE count > 1")
         return self.sq_cur.fetchone()[0]
 
+    def get_all_hash_clusters(self, include_deleted: bool = True) -> Iterator[Tuple[str, List[str]]]:
+        """
+        Get all clusters from the hash table
+
+        :param include_deleted: Whether to include deleted images in the clusters
+
+        :return: A list of tuples the first string is the hash, the List of strings is the list of files with that hash.
+        """
+        for i in range(self.get_hash_cluster_count()):
+            yield self.get_ith_hash_cluster(i=i, include_deleted=include_deleted)
+
     def get_ith_hash_cluster(self, i: int, include_deleted: bool = True) -> Tuple[str, List[str]]:
         """
         Get the ith cluster of hashes
