@@ -121,7 +121,8 @@ Otherwise only that directory is searched.
 - `retain_progress` - Store the Config to in the `config_path`. If set to `False`, `cleanup` will remove the config if 
 it was written previously.
 - `delete_db` - Delete the DB if the `cleanup` method of the `FastDiffPy` is called
-- `delete_thumb` - Delete the thumbnail directory if the `cleanup` method of the `FastDiffPy` is called. 
+- `delete_thumb` - Delete the thumbnail directory if the `cleanup` method of the `FastDiffPy` is called.
+
 **Config Tunables and State Attributes**: These attributes are needed to recover the progress or can be used to tune 
 the performance of `FastDiffPy` 
 - `compression_target` - Size to which all the images get compressed down.
