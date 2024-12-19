@@ -406,7 +406,7 @@ if __name__ == "__main__":
                         required=False, choices=[True, False], default=True)
     parser.add_argument('-proc', '--processes',
                         type=int,
-                        help=' Number of worker processes for multiprocessing.',
+                        help='Number of worker processes for multiprocessing.',
                         required=False, default=None)
     parser.add_argument('-ch', '--chunksize',
                         type=int,
