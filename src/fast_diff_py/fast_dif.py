@@ -60,8 +60,12 @@ class FastDifPy(GracefulWorker):
     cpu_diff: Optional[Callable[[np.ndarray[np.uint8], np.ndarray[np.uint8], bool], float]] = None
     gpu_diff: Optional[Callable[[np.ndarray[np.uint8], np.ndarray[np.uint8], bool], float]] = None
 
+    # Constants to be reused
     # Use benchmarking in multiprocessing loops to make sure the enqueueing isn't taking too much time.
     benchmark: bool = False
+    default_config_file = ".task.json"
+    default_db_file = ".fast_diff.db"
+    default_thumb_dir = ".temp_thumb"
 
     # ==================================================================================================================
     # Util
@@ -348,7 +352,7 @@ class FastDifPy(GracefulWorker):
                 raise ValueError("dir_a cannot be empty when default_cfg_path and config is not provided")
 
             tgt_a = part_a if isinstance(part_a, str) else part_a[0]
-            config_path = os.path.join(part_a, ".task.json")
+            config_path = os.path.join(tgt_a, self.default_config_file)
 
             if os.path.exists(config_path) and not purge:
                 self.logger.info("Using Existing Config File in dir_a")
@@ -383,15 +387,15 @@ class FastDifPy(GracefulWorker):
         rp = self.config.part_a if isinstance(self.config.part_a, str) else self.config.part_a[0]
 
         if self.config.db_path is None:
-            self.config.db_path = os.path.join(rp, ".fast_diff.db")
+            self.config.db_path = os.path.join(rp, self.default_db_file)
             self.logger.info(f"DB Path not provided. Using {self.config.db_path}")
 
         if self.config.thumb_dir is None:
-            self.config.thumb_dir = os.path.join(rp, ".temp_thumb")
+            self.config.thumb_dir = os.path.join(rp, self.default_thumb_dir)
             self.logger.info(f"Thumbnail Directory not provided. Using {self.config.thumb_dir}")
 
         if self.config.config_path is None:
-            self.config.config_path = os.path.join(rp, ".task.json")
+            self.config.config_path = os.path.join(rp, self.default_config_file)
             self.logger.info(f"Config Path not provided. Using {self.config.config_path}")
 
     def clean_and_init(self):
@@ -645,7 +649,7 @@ class FastDifPy(GracefulWorker):
                 continue
 
             # Thumbnail directory is called .temp_thumbnails
-            if file_name.startswith(".temp_thumb") and ignore_thumbnail:
+            if file_name == self.default_thumb_dir and ignore_thumbnail:
                 continue
 
             # for directories, continue the recursion
