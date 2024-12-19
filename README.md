@@ -283,7 +283,7 @@ CREATE TABLE dif_table (
     UNIQUE (key_a, key_b)) 
 ```
 
-##### Similar Projects:
+##### Links:
 - [Duplicate-Image-Finder](https://github.com/elisemercury/Duplicate-Image-Finder) (the project this is based on)
 - [imagededup](https://github.com/idealo/imagededup)
 - [Benchmark Dataset](https://data.vision.ee.ethz.ch/cvl/rrothe/imdb-wiki/?ref=hackernoon.com)
