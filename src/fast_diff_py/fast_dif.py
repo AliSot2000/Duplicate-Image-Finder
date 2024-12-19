@@ -7,7 +7,7 @@ import pickle
 import shutil
 import time
 from logging.handlers import QueueListener
-from typing import List, Union, Callable, Dict, Optional, Tuple, Iterator, Type
+from typing import List, Union, Callable, Dict, Optional, Tuple, Iterator, Type, Iterable
 
 import numpy as np
 
@@ -196,7 +196,7 @@ class FastDifPy(GracefulWorker):
         """
         self.db.drop_diff(threshold)
 
-    def populate_partition(self, paths: List[str], part_a: bool = True, check_ext: bool = False):
+    def populate_partition(self, paths: Iterable[str], part_a: bool = True, check_ext: bool = False):
         """
         Populate the directory table. If the integrated file discovery methods with part_a and part_b are not
         sufficient, the two partitions can be populated manually.
