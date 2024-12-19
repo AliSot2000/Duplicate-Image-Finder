@@ -407,7 +407,7 @@ class FastDifPy(GracefulWorker):
             self.logger.info("Removing preexisting DB")
             os.remove(self.config.db_path)
 
-        self.db = SQLiteDB(self.config.db_path, debug=__debug__)
+        self.db = self.db_inst(self.config.db_path, debug=__debug__)
 
         # Config Path
         if os.path.exists(self.config.config_path):
@@ -448,7 +448,7 @@ class FastDifPy(GracefulWorker):
         if not os.path.exists(self.config.db_path):
             raise FileNotFoundError(f"DB Path {self.config.db_path} does not exist")
         else:
-            self.db = SQLiteDB(self.config.db_path, debug=__debug__)
+            self.db = self.db_inst(self.config.db_path, debug=__debug__)
 
         if not os.path.exists(self.config.thumb_dir):
             raise FileNotFoundError(f"Thumbnail Directory {self.config.thumb_dir} does not exist")
