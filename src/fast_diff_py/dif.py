@@ -461,7 +461,7 @@ if __name__ == "__main__":
         raise TypeError(f"Invalid Type of Pixel Size {type(args.px_size).__name__}")
 
     # validate move, delete and silent_delete, one without the other is useless.
-    if args.silent_del is False and args.delete:
+    if args.silent_del and not args.delete:
         warnings.warn("Parameter 'silent_del' has no effect without 'delete'")
 
     # INFO: Handling inconsistency from dif.py by raising Error.
