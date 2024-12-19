@@ -1460,15 +1460,7 @@ class FastDifPy(GracefulWorker):
                 success.extend(res.success)
                 error.extend(res.errors)
 
-            success = list(filter(lambda x: x[3] < self.config.second_loop.diff_threshold, success))
-
-            if not self.config.second_loop.keep_non_matching_aspects:
-                success = list(filter(lambda x: x[2] != 3, success))
-
-            self.db.bulk_insert_diff_success(success)
-            self.db.bulk_insert_diff_error(error)
-
-            self.prune_cache_batch()
+            self.dequeue_second_loop_batch(success=success, error=error)
             self.commit()
 
         # Updating the time taken
@@ -1628,34 +1620,47 @@ class FastDifPy(GracefulWorker):
 
         return True
 
-    def dequeue_second_loop_batch(self, drain: bool = False):
+    def dequeue_second_loop_batch(self, drain: bool = False,
+                                  success: List[Tuple[int, int, int, float]] = None,
+                                  error: List[Tuple[int, int, str]] = None):
         """
         Dequeue the results of second loop.
 
+        INFO: drain has no effect if success and error are provided.
+
         :param drain: Whether to drain the queue (disregard the diff between the enqueue and dequeue counters)
+        :param success: Successes if not retrieved from queue
+        :param error: Errors if not retrieved from queue
 
+        :raises: ValueError if not both or none of success and error are provided
         """
-        success: List[Tuple[int, int, int, float]] = []
-        error: List[Tuple[int, int, str]] = []
+        # Ensure both is set but not either or
+        if success is None and error is not None or success is not None and error is None:
+            raise ValueError("Either no error and no success is provided or both.")
 
-        offset = self.config.second_loop.batch_size * self.config.second_loop.preload_count
+        # Emptying queue for successes and errors
+        if success is None and error is None:
+            success: List[Tuple[int, int, int, float]] = []
+            error: List[Tuple[int, int, str]] = []
 
-        while (not self.result_queue.empty()
-               and (self._dequeue_counter + offset < self._enqueue_counter
-                    or drain)):
-            res: Union[SecondLoopResults, None] = self.result_queue.get()
+            offset = self.config.second_loop.batch_size * self.config.second_loop.preload_count
 
-            # Handle the cases, when result is None -> indicating a process is exiting
-            if res is None:
-                self.exit_counter += 1
-                continue
+            while (not self.result_queue.empty()
+                   and (self._dequeue_counter + offset < self._enqueue_counter
+                        or drain)):
+                res: Union[SecondLoopResults, None] = self.result_queue.get()
 
-            # Update the progress dict
-            self.block_progress_dict[res.cache_key][res.x] = True
+                # Handle the cases, when result is None -> indicating a process is exiting
+                if res is None:
+                    self.exit_counter += 1
+                    continue
 
-            self._dequeue_counter += 1
-            success.extend(res.success)
-            error.extend(res.errors)
+                # Update the progress dict
+                self.block_progress_dict[res.cache_key][res.x] = True
+
+                self._dequeue_counter += 1
+                success.extend(res.success)
+                error.extend(res.errors)
 
         success = list(filter(lambda x: x[3] <= self.config.second_loop.diff_threshold, success))
 
