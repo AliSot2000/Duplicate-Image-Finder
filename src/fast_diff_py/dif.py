@@ -480,3 +480,132 @@ if __name__ == "__main__":
     # Subsequently using the dict in order to be able to recover the args from the config
     cli_args = args.__dict__
 
+    print(args)
+
+    # ==================================================================================================================
+    # Progress recovery and fast_diff_py object generation
+    # ==================================================================================================================
+    if os.path.exists(os.path.join(a_dir, ".task.json")) \
+        and input("A config from a previous iteration is present. Do you want to discard the progress? (y/n)\n") \
+            .lower() == 'y':
+            output = dif(
+                _part_a=part_a,
+                _part_b=part_b,
+                _similarity=similarity,
+                px_size=args.px_size,
+                limit_ext=args.limit_extensions,
+                processes=args.processes,
+                chunk=args.chunksize,
+                recursive=args.recursive,
+                lazy=args.lazy,
+                rotate=args.rotate,
+                cli_args=cli_args,
+                debug=args.show_progress
+            )
+
+    elif os.path.exists(os.path.join(a_dir, ".fast_diff.db")) \
+        and input("A database from a previous iteration is present. Do you want overwrite that database? (y/n)\n") \
+            .lower() == 'y':
+        output = dif(
+            _part_a=part_a,
+            _part_b=part_b,
+            _similarity=similarity,
+            px_size=args.px_size,
+            limit_ext=args.limit_extensions,
+            processes=args.processes,
+            chunk=args.chunksize,
+            recursive=args.recursive,
+            lazy=args.lazy,
+            rotate=args.rotate,
+            cli_args=cli_args,
+            debug=args.show_progress
+        )
+    elif not os.path.exists(os.path.join(a_dir, ".task.json")) \
+        and not os.path.exists(os.path.join(a_dir, ".fast_diff.db")):
+        output = dif(
+            _part_a=part_a,
+            _part_b=part_b,
+            _similarity=similarity,
+            px_size=args.px_size,
+            limit_ext=args.limit_extensions,
+            processes=args.processes,
+            chunk=args.chunksize,
+            recursive=args.recursive,
+            lazy=args.lazy,
+            rotate=args.rotate,
+            cli_args=cli_args,
+            debug=args.show_progress
+        )
+    else:
+        print("INFO: Recovering")
+        output = recover(dir_a=a_dir)
+        cli_args = output.config.cli_args
+        similarity = output.config.second_loop.diff_threshold
+
+    # Process interrupted
+    if output is None:
+        print("Process was interrupted before fast_diff_py could finish. Progress is saved. Exiting now")
+        exit(0)
+
+    # Get the clusters again.
+    if output.config.partition_swapped:
+        clusters = output.get_diff_clusters(matching_hash=True, dir_a=False)
+    else:
+        clusters = output.get_diff_clusters(matching_hash=True, dir_a=True)
+
+    # Prepare the dict and list for lower_quality.txt and results.json
+    results = {}
+    lower_quality = []
+
+    # Get the clusters from the
+    for head, duplicates in clusters:
+        results[head] = duplicates
+
+        # Building the lower quality
+        for elm in duplicates:
+            lower_quality.append(elm[0])
+
+    if cli_args["move_to"] is not None:
+        res = move_duplicates(lower_quality, cli_args["move_to"])
+        print(f"Moved {res} files")
+
+    if cli_args["delete"]:
+        res = delete_files(lower_quality, cli_args["silent_del"])
+        print(f"Delete {res} files")
+
+    # check if 'output_directory' parameter exists
+    if cli_args["output_directory"] is not None:
+        out_dir = cli_args["output_directory"]
+        if not os.path.exists(out_dir):
+            print(f"INFO: Creating output directory {out_dir}")
+            os.makedirs(out_dir)
+    else:
+        out_dir = os.getcwd()
+
+    # create filenames for the output files
+    timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+    result_file = f'difPy_{timestamp}_results.json'
+    lq_file = f'difPy_{timestamp}_lower_quality.txt'
+    stats_file = f'difPy_{timestamp}_stats.json'
+
+    # INFO: using indentation to make files more readable.
+    # Writing results
+    with open(os.path.join(out_dir, result_file), 'w') as file:
+        json.dump(results, file, indent=4)
+
+    # Writing the lower quality files.
+    with open(os.path.join(out_dir, lq_file), 'w') as file:
+        json.dump(list(set(lower_quality)), file, indent=4)
+
+    # And writing the stats.
+    with open(os.path.join(out_dir, stats_file), 'w') as file:
+        json.dump(construct_stats(output), file, indent=4)
+
+    print(f'''\n{result_file}\n{lq_file}\n{stats_file}\n\nsaved in '{out_dir}'.''')
+
+    # perform cleanup of fast-diff-py
+    output.config.delete_db = True
+    output.config.retain_progress = False
+    output.config.delete_thumb = True
+    output.commit()
+    output.cleanup()
