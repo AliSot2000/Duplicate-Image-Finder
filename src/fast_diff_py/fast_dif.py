@@ -1439,6 +1439,7 @@ class FastDifPy(GracefulWorker):
                 break
 
             # Process the batch
+            # INFO: Errors are handled within the process_batch_thumb function
             results = [slw.process_batch_thumb(a) for a in args]
 
             # Update count
