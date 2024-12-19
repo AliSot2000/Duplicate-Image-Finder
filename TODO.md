@@ -11,9 +11,9 @@
 - [X] DB Add column for file size
 
 # QT Frontend
-- [ ] Get i-th cluster
-- [ ] Mark image as deleted in db
-- [ ] Fill with paths
+- [X] Get i-th cluster
+- [X] Mark image as deleted in db
+- [X] Fill with paths
 
 # Ideas:
 - No shared cache, copy into the args
