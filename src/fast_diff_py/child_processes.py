@@ -564,7 +564,7 @@ class SecondLoopWorker(ChildProcess):
                     diff = self.delta_fn(img_a, img_b, self.do_rot)
 
                     # Make a plot if necessary
-                    if self.make_plots and diff < self.plot_threshold:
+                    if self.make_plots and diff <= self.plot_threshold:
                         self.make_plot(diff=diff,
                                        x_path=arg.x_path,
                                        y_path=arg.y_path[i - start],

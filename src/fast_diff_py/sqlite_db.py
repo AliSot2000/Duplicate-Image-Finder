@@ -636,9 +636,9 @@ class SQLiteDB(BaseSQliteDB):
                 "JOIN directory AS b ON b.key = d.key_b ")
 
         if include_hash_match:
-            stmt += " WHERE dif < ? AND d.success IN (1, 2) "
+            stmt += " WHERE dif <= ? AND d.success IN (1, 2) "
         else:
-            stmt += " WHERE dif < ? AND d.success = 1 "
+            stmt += " WHERE dif <= ? AND d.success = 1 "
 
         if group_a:
             stmt += "ORDER BY d.key_a, b.file_size DESC, b.created ASC"
@@ -690,13 +690,13 @@ class SQLiteDB(BaseSQliteDB):
         :return: The number of clusters
         """
         if part_a and include_hash_match:
-            stmt = "SELECT COUNT(DISTINCT(key_a)) FROM dif_table WHERE dif < ? AND success IN (1, 2)"
+            stmt = "SELECT COUNT(DISTINCT(key_a)) FROM dif_table WHERE dif <= ? AND success IN (1, 2)"
         elif part_a and not include_hash_match:
-            stmt = "SELECT COUNT(DISTINCT(key_a)) FROM dif_table WHERE dif < ? AND success = 1"
+            stmt = "SELECT COUNT(DISTINCT(key_a)) FROM dif_table WHERE dif <= ? AND success = 1"
         elif not part_a and include_hash_match:
-            stmt = "SELECT COUNT(DISTINCT(key_b)) FROM dif_table WHERE dif < ? AND success IN (1, 2)"
+            stmt = "SELECT COUNT(DISTINCT(key_b)) FROM dif_table WHERE dif <= ? AND success IN (1, 2)"
         elif not part_a and not include_hash_match:
-            stmt = "SELECT COUNT(DISTINCT(key_b)) FROM dif_table WHERE dif < ? AND success = 1"
+            stmt = "SELECT COUNT(DISTINCT(key_b)) FROM dif_table WHERE dif <= ? AND success = 1"
         else:
             raise ValueError("Tertiem Non Datur")
 
@@ -722,13 +722,13 @@ class SQLiteDB(BaseSQliteDB):
         :raises IndexError: If the index is out of bounds and the hash couldn't be found.
         """
         if part_a and include_hash_match:
-            stmt = "SELECT DISTINCT(key_a) FROM dif_table WHERE dif < ? AND success IN (1, 2) LIMIT 1 OFFSET ?"
+            stmt = "SELECT DISTINCT(key_a) FROM dif_table WHERE dif <= ? AND success IN (1, 2) LIMIT 1 OFFSET ?"
         elif part_a and not include_hash_match:
-            stmt = "SELECT DISTINCT(key_a) FROM dif_table WHERE dif < ? AND success = 1 LIMIT 1 OFFSET ?"
+            stmt = "SELECT DISTINCT(key_a) FROM dif_table WHERE dif <= ? AND success = 1 LIMIT 1 OFFSET ?"
         elif not part_a and include_hash_match:
-            stmt = "SELECT DISTINCT(key_b) FROM dif_table WHERE dif < ? AND success IN (1, 2) LIMIT 1 OFFSET ?"
+            stmt = "SELECT DISTINCT(key_b) FROM dif_table WHERE dif <= ? AND success IN (1, 2) LIMIT 1 OFFSET ?"
         elif not part_a and not include_hash_match:
-            stmt = "SELECT DISTINCT(key_b) FROM dif_table WHERE dif < ? AND success = 1 LIMIT 1 OFFSET ?"
+            stmt = "SELECT DISTINCT(key_b) FROM dif_table WHERE dif <= ? AND success = 1 LIMIT 1 OFFSET ?"
         else:
             raise ValueError("Tertiem Non Datur")
 
@@ -746,42 +746,42 @@ class SQLiteDB(BaseSQliteDB):
         if part_a and include_hash_match and include_deleted:
             stmt = ("SELECT dir.path, dif.dif "
                     "FROM dif_table AS dif JOIN directory AS dir ON dir.key = dif.key_b "
-                    "WHERE dif.key_a = ? AND dif.dif < ? AND dif.success IN (1, 2) "
+                    "WHERE dif.key_a = ? AND dif.dif <= ? AND dif.success IN (1, 2) "
                     "ORDER BY dir.file_Size DESC, dir.created ASC")
         elif part_a and include_hash_match and not include_deleted:
             stmt = ("SELECT dir.path, dif.dif "
                     "FROM dif_table AS dif JOIN directory AS dir ON dir.key = dif.key_b "
-                    "WHERE dif.key_a = ? AND dif.dif < ? AND dif.success IN (1, 2) AND dir.deleted = 0"
+                    "WHERE dif.key_a = ? AND dif.dif <= ? AND dif.success IN (1, 2) AND dir.deleted = 0"
                     "ORDER BY dir.file_Size DESC, dir.created ASC")
         elif part_a and not include_hash_match and include_deleted:
             stmt = ("SELECT dir.path, dif.dif "
                     "FROM dif_table AS dif JOIN directory AS dir ON dir.key = dif.key_b "
-                    "WHERE dif.key_a = ? AND dif.dif < ? AND dif.success = 1 "
+                    "WHERE dif.key_a = ? AND dif.dif <= ? AND dif.success = 1 "
                     "ORDER BY dir.file_Size DESC, dir.created ASC")
         elif part_a and not include_hash_match and not include_deleted:
             stmt = ("SELECT dir.path, dif.dif "
                     "FROM dif_table AS dif JOIN directory AS dir ON dir.key = dif.key_b "
-                    "WHERE dif.key_a = ? AND dif.dif < ? AND dif.success = 1 AND dir.deleted = 0"
+                    "WHERE dif.key_a = ? AND dif.dif <= ? AND dif.success = 1 AND dir.deleted = 0"
                     "ORDER BY dir.file_Size DESC, dir.created ASC")
         elif not part_a and include_hash_match and include_deleted:
             stmt = ("SELECT dir.path, dif.dif "
                     "FROM dif_table AS dif JOIN directory AS dir ON dir.key = dif.key_a "
-                    "WHERE dif.key_b = ? AND dif.dif < ? AND dif.success IN (1, 2) "
+                    "WHERE dif.key_b = ? AND dif.dif <= ? AND dif.success IN (1, 2) "
                     "ORDER BY dir.file_Size DESC, dir.created ASC")
         elif not part_a and include_hash_match and not include_deleted:
             stmt = ("SELECT dir.path, dif.dif "
                     "FROM dif_table AS dif JOIN directory AS dir ON dir.key = dif.key_a "
-                    "WHERE dif.key_b = ? AND dif.dif < ? AND dif.success IN (1, 2) AND dir.deleted = 0"
+                    "WHERE dif.key_b = ? AND dif.dif <= ? AND dif.success IN (1, 2) AND dir.deleted = 0"
                     "ORDER BY dir.file_Size DESC, dir.created ASC")
         elif not part_a and not include_hash_match and include_deleted:
             stmt = ("SELECT dir.path, dif.dif "
                     "FROM dif_table AS dif JOIN directory AS dir ON dir.key = dif.key_a "
-                    "WHERE dif.key_b = ? AND dif.dif < ? AND dif.success = 1 "
+                    "WHERE dif.key_b = ? AND dif.dif <= ? AND dif.success = 1 "
                     "ORDER BY dir.file_Size DESC, dir.created ASC")
         elif not part_a and not include_hash_match and not include_deleted:
             stmt = ("SELECT dir.path, dif.dif "
                     "FROM dif_table AS dif JOIN directory AS dir ON dir.key = dif.key_a "
-                    "WHERE dif.key_b = ? AND dif.dif < ? AND dif.success = 1 AND dir.deleted = 0"
+                    "WHERE dif.key_b = ? AND dif.dif <= ? AND dif.success = 1 AND dir.deleted = 0"
                     "ORDER BY dir.file_Size DESC, dir.created ASC")
         else:
             raise ValueError("Tertiem Non Datur")

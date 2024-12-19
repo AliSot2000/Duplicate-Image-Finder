@@ -1653,7 +1653,7 @@ class FastDifPy(GracefulWorker):
             success.extend(res.success)
             error.extend(res.errors)
 
-        success = list(filter(lambda x: x[3] < self.config.second_loop.diff_threshold, success))
+        success = list(filter(lambda x: x[3] <= self.config.second_loop.diff_threshold, success))
 
         if not self.config.second_loop.keep_non_matching_aspects:
             success = list(filter(lambda x: x[2] != 3, success))
