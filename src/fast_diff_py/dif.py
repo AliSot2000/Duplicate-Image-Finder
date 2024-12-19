@@ -479,8 +479,6 @@ if __name__ == "__main__":
     # Subsequently using the dict in order to be able to recover the args from the config
     cli_args = args.__dict__
 
-    print(args)
-
     # ==================================================================================================================
     # Progress recovery and fast_diff_py object generation
     # ==================================================================================================================
