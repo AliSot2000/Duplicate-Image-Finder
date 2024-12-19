@@ -40,6 +40,7 @@ def dif(_part_a: List[str],
         chunk: int = None,
         processes: int = None,
         debug: bool = False,
+        tgt_dir: str = None
         ) -> Optional[FastDifPy]:
     """
     Set up a new object of FastDifPy and run the computation and return the finished object
@@ -56,13 +57,25 @@ def dif(_part_a: List[str],
     :param chunk: batching size for second loop. Used as an override.
     :param processes: Number of processes to use. Used as an override.
     :param debug: log at debug level
+    :param tgt_dir: Override for the config, db and thumb paths.
 
     :return: FastDifPy object
     """
-    fdo = FastDifPy(part_a=_part_a,
-                    part_b=_part_b,
-                    purge=True,
-                    cli_args=cli_args)
+    if tgt_dir is not None:
+        fdo = FastDifPy(part_a=_part_a,
+                        part_b=_part_b,
+                        purge=True,
+                        cli_args=cli_args,
+                        thumb_dir=os.path.join(tgt_dir, FastDifPy.default_thumb_dir),
+                        db_path=os.path.join(tgt_dir, FastDifPy.default_db_file),
+                        config_path=os.path.join(tgt_dir, FastDifPy.default_config_file))
+    else:
+        fdo = FastDifPy(part_a=_part_a,
+                        part_b=_part_b,
+                        purge=True,
+                        cli_args=cli_args)
+
+
 
     if debug:
         fdo.config.log_level = logging.DEBUG
