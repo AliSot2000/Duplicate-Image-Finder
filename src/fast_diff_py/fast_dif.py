@@ -162,7 +162,7 @@ class FastDifPy(GracefulWorker):
             yield p
 
     def get_diff_clusters(self, delta: float = None, dir_a: bool = True, matching_hash: bool = False) \
-            -> Iterator[Tuple[str, Dict[str, float]]]:
+            -> Iterator[Tuple[str, List[Tuple[str, float]]]]:
         """
         Get a Cluster of Duplicates. Wrapper for db.get_cluster.
 
