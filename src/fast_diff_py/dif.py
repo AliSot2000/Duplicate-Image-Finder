@@ -176,6 +176,125 @@ def compute(fdo: FastDifPy, limit_ext: bool = False) -> Optional[FastDifPy]:
 # ======================================================================================================================
 
 
+def construct_stats(fdo: fast_diff_py.FastDifPy) -> Dict:
+    """
+    Construct the stats.json dictionary from the given FastDifPy object
+
+    :param fdo: FastDifPy object for which to construct the stats.
+    """
+    c = fdo.config
+    db = fdo.db
+    file_count = (db.get_partition_entry_count(part_b=True, only_allowed=True)
+                  + db.get_partition_entry_count(part_b=True, only_allowed=True))
+
+    files_total = (db.get_partition_entry_count(part_b=True, only_allowed=False)
+                  + db.get_partition_entry_count(part_b=True, only_allowed=False))
+
+    dups = db.get_cluster_count(delta=0,
+                                      include_hash_match=True,
+                                      part_a=not c.partition_swapped)
+    dup_and_sim = db.get_cluster_count(delta=c.second_loop.diff_threshold,
+                                       include_hash_match=True,
+                                       part_a=not c.partition_swapped)
+    similar = dup_and_sim - dups
+
+    file_errors = [f"{res[0]}: {res[1]}" for res in db.get_directory_errors()]
+    file_errors.extend([f"{res}: Not Allowed" for res in db.get_directory_disallowed()])
+    error_count = len(file_errors)
+
+    for pa, pb, error in db.get_dif_errors():
+        if pb is None:
+            file_errors.append(f"Error Loading Thumbnail of {pa}: {error}")
+        else:
+            file_errors.append(f"Error Processing Tuple {pa}, {pb}: {error}")
+
+    res = {
+        "directory": c.part_b + c.part_a if c.partition_swapped else c.part_a + c.part_a,
+        "process": {
+            "build": {
+                "duration": {
+                    "start": None,
+                    "end": None,
+                    "seconds_elapsed": c.dir_index_elapsed + c.first_loop.elapsed_seconds
+                },
+                "parameters": {
+                    "recursive": c.recurse,
+                    "in_folder": len(c.part_b) == 0, # INFO: If we have in_folder, there will be no part be, so no swap
+                    "limit_extensions": c.cli_args["limit_extensions"],
+                    "px_size": c.compression_target,
+                    "processes": c.cli_args["processes"]
+                }
+            },
+            "search": {
+                "duration": {
+                    "start": None,
+                    "end": None,
+                    "seconds_elapsed": c.second_loop.elapsed_seconds
+                },
+                "parameters": {
+                    "similarity_mse": c.second_loop.diff_threshold,
+                    "rotate": c.rotate,
+                    "lazy": c.cli_args["lazy"],
+                    "processes": c.cli_args["processes"],
+                    "chunksize": c.cli_args["chunksize"]
+                },
+                "files_searched": file_count,
+                "matches_found":{
+                    "duplicates": dups,
+                    "similar": similar,
+                }
+            }
+        },
+        "total_files": files_total,
+        "invalid_files": {
+            "count": error_count,
+            "logs": file_errors
+        }
+    }
+    return res
+
+
+def move_duplicates(filepaths: List[str], target: str) -> int:
+    """
+    Moves the duplicates into a specified folder.
+
+    :param filepaths: List of duplicate folders to move
+    :param target: Target folder (will be created if not exists)
+
+    :return: Number of moved files
+    """
+    tgt = os.path.abspath(target)
+    if not os.path.exists(tgt):
+        os.makedirs(tgt)
+
+    count = 0
+
+    # Moving the files
+    for f in filepaths:
+        if os.path.exists(os.path.abspath(f)):
+            os.rename(os.path.abspath(f), os.path.join(tgt, os.path.basename(f)))
+            count += 1
+
+    return count
+
+def delete_files(filepaths: List[str], silent: bool) -> int:
+    """
+    Delete all files which were deemed duplicates
+
+    :parma duplicates: List of duplicate files to delete
+    :param silent: Silent mode
+    """
+    count = 0
+    if silent or input("Are you sure you want to delete all lower quality matched images? \n"
+                       "This cannot be undone! (y/n)").lower() == "y":
+        # Removing all files
+        for f in filepaths:
+            if os.path.exists(os.path.abspath(f)):
+                os.remove(f)
+                count += 1
+
+    return count
+
 def str_to_bool(arg: str) -> bool:
     """
     Convert a string from the commandline arguments to bool.
