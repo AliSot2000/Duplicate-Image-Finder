@@ -1160,6 +1160,10 @@ class FastDifPy(GracefulWorker):
             self.logger.info("No computation required. Skipping first loop")
             return
 
+        # Disable parallel computation with only one process
+        if self.config.first_loop.cpu_proc == 1:
+            self.config.first_loop.parallel = False
+
         # Create hash table if necessary
         if self.config.first_loop.compute_hash:
             self.db.create_hash_table_and_index()
