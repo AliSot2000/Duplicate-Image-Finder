@@ -1215,6 +1215,9 @@ class FastDifPy(GracefulWorker):
         """
         Store the results of the first loop in the database
         """
+        if len(results) == 0:
+            return
+
         # Check the hashes, if they should be computed
         if self.config.first_loop.compute_hash:
             # Extract all hashes from the results
