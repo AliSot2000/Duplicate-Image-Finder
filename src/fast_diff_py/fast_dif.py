@@ -1228,8 +1228,9 @@ class FastDifPy(GracefulWorker):
                 hashes.append(res.hash_180)
                 hashes.append(res.hash_270)
 
-            # Put the hashes into the db
-            self.db.bulk_insert_hashes(list(filter(lambda x: x is not None, hashes)))
+            # Put the hashes into the db and remove any None hashes
+            hashes = list(filter(lambda x: x is not None, hashes))
+            self.db.bulk_insert_hashes(hashes)
             lookup = self.db.get_bulk_hash_lookup(set(hashes))
 
             # Update the hashes from string to int (based on the hash key in the db
