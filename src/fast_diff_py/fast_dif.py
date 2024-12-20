@@ -769,7 +769,14 @@ class FastDifPy(GracefulWorker):
                                                                            image_b=ib,
                                                                            use_gpu=True,
                                                                            do_rot=dr)
-            for i in range(self.config.second_loop.cpu_proc + self.config.second_loop.gpu_proc):
+
+            if self.gpu_worker_class is None:
+                lim = self.config.second_loop.cpu_proc + self.config.second_loop.gpu_proc
+            else:
+                lim = self.config.second_loop.gpu_proc
+
+            # Instantiate regular workers
+            for i in range(lim):
                 workers.append(SecondLoopWorker(
                     identifier=i,
                     cmd_queue=self.cmd_queue,
@@ -787,6 +794,26 @@ class FastDifPy(GracefulWorker):
                     plot_threshold=self.config.second_loop.plot_threshold,
                     make_plots=self.config.second_loop.make_diff_plots,
                     do_rot=self.config.rotate))
+
+            if self.gpu_worker_class is not None:
+                for i in range(lim, self.config.second_loop.gpu_proc):
+                    workers.append(self.gpu_worker_class(
+                        identifier=i,
+                        cmd_queue=self.cmd_queue,
+                        res_queue=self.result_queue,
+                        log_queue=self.logging_queue,
+                        hash_short_circuit=self.config.second_loop.skip_matching_hash,
+                        match_aspect_by=self.config.second_loop.match_aspect_by,
+                        compare_fn=self.gpu_diff,
+                        target_size=(self.config.compression_target, self.config.compression_target),
+                        log_level=self.config.log_level_children,
+                        timeout=self.config.child_proc_timeout,
+                        has_dir_b=len(self.config.part_b) > 0,
+                        plot_dir=self.config.second_loop.plot_output_dir,
+                        ram_cache=self.ram_cache,
+                        plot_threshold=self.config.second_loop.plot_threshold,
+                        make_plots=self.config.second_loop.make_diff_plots,
+                        do_rot=self.config.rotate))
 
             self.handles = [mp.Process(target=w.main) for w in workers]
 
