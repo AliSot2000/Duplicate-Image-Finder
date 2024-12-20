@@ -23,7 +23,7 @@ from fast_diff_py.utils import sizeof_fmt, BlockProgress, build_start_blocks_a, 
 
 
 class FastDifPy(GracefulWorker):
-    db: Type[SQLiteDB] = None
+    db: SQLiteDB = None
     config: Config = None
     logger: logging.Logger
 
