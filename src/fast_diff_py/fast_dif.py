@@ -57,7 +57,7 @@ class FastDifPy(GracefulWorker):
     hash_fn: Optional[Callable[[str], str] | Callable[[np.ndarray[np.uint8]], str]] = None
     cpu_diff: Optional[Callable[[np.ndarray[np.uint8], np.ndarray[np.uint8], bool], float]] = None
     gpu_diff: Optional[Callable[[np.ndarray[np.uint8], np.ndarray[np.uint8], bool], float]] = None
-    gpu_worker_class: Optional[Type[SecondLoopWorker]] = None  # TODO implement
+    gpu_worker_class: Optional[Type[SecondLoopWorker]] = None
     db_inst: Type[SQLiteDB]
 
     # Constants to be reused
