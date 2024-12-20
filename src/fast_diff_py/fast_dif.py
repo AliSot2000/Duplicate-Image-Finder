@@ -58,7 +58,7 @@ class FastDifPy(GracefulWorker):
     cpu_diff: Optional[Callable[[np.ndarray[np.uint8], np.ndarray[np.uint8], bool], float]] = None
     gpu_diff: Optional[Callable[[np.ndarray[np.uint8], np.ndarray[np.uint8], bool], float]] = None
     gpu_worker_class: Optional[Type[SecondLoopWorker]] = None  # TODO implement
-    db_inst: Optional[Type[SQLiteDB]] = SQLiteDB
+    db_inst: Type[SQLiteDB]
 
     # Constants to be reused
     # Use benchmarking in multiprocessing loops to make sure the enqueueing isn't taking too much time.
