@@ -56,86 +56,103 @@ def partition(source: str,
     if op not in ["MOVE", "COPY", "LINK"]:
         raise ValueError(f"Operation {op} not supported")
 
-    def partition_internal(src: str,
-                           cur: str,
-                           dir_a: str,
-                           dir_b: str,
-                           pd: float,
-                           pb: float,
-                           limit: int,
-                           op: str,
-                           ca: int, cb: int, cd: int) -> Tuple[int, int, int]:
+    def partition_internal(_src: str,
+                           _cur: str,
+                           _dir_a: str,
+                           _dir_b: str,
+                           _pd: float,
+                           _pb: float,
+                           _op: str,
+                           _ca: int, _cb: int, _cd: int, _limit: int = None) -> Tuple[int, int, int]:
+        """
+        Internal partition function
 
-        a, b, d = ca, cb, cd
-        abs_src = os.path.abspath(src)
-        abs_a = os.path.abspath(dir_a)
-        abs_b = os.path.abspath(dir_b)
-        cp = os.path.join(abs_src, cur)
-        ca = os.path.join(abs_a, cur)
-        cb = os.path.join(abs_b, cur)
+        :param _src: The source directory
+        :param _cur: The current directory prefix within the source directory
+        :param _dir_a: Partition Directory A
+        :param _dir_b: Partition Directory B
+        :param _pd: Probability of duplication during the partition. Duplicating iff random.random() < _pd
+        :param _pb: Probability of moving to Partition B. Move to Partition if random.random() < _pb
+        :param _limit: Number of files to process (scanning)
+        :param _op: Operation to perform (MOVE, COPY, LINK)
+        :param _ca: Current number of files in partition a
+        :param _cb: Current number of files in partition b.
+        :param _cd: Current number of files in both partitions.
+
+        :return: Number of files in dir a, number of files in dir b, number of duplicates
+        """
+
+        a, b, d = _ca, _cb, _cd
+        abs_src = os.path.abspath(_src)
+        abs_a = os.path.abspath(_dir_a)
+        abs_b = os.path.abspath(_dir_b)
+        cp = os.path.join(abs_src, _cur)
+        _ca = os.path.join(abs_a, _cur)
+        _cb = os.path.join(abs_b, _cur)
 
         for f in os.listdir(cp):
-            if limit is not None and (a > limit or b > limit):
+            if _limit is not None and (a > _limit or b > _limit):
                 return a, b, d
 
             # If it's a directory, we need to recurse
             if os.path.isdir(os.path.join(cp, f)):
-                a, b, c = partition_internal(src, os.path.join(cur, f), dir_a, dir_b, pd, pb, limit, op, a, b, d)
+                a, b, c = partition_internal(_src, os.path.join(_cur, f),
+                                             _dir_a, _dir_b, _pd, _pb, _op, a, b, d, _limit)
 
             # If it's a file, we need to copy it
             elif os.path.isfile(os.path.join(cp, f)):
                 # Duplicate the file
-                if random.random() < pd:
+                if random.random() < _pd:
                     # Create directory in dir_a
-                    if not os.path.exists(ca):
-                        os.makedirs(ca)
+                    if not os.path.exists(_ca):
+                        os.makedirs(_ca)
 
                     # Create directory in dir_b
-                    if not os.path.exists(cb):
-                        os.makedirs(cb)
+                    if not os.path.exists(_cb):
+                        os.makedirs(_cb)
 
-                    if op == "LINK":
-                        os.symlink(os.path.join(cp, f), os.path.join(ca, f))
-                        os.symlink(os.path.join(cp, f), os.path.join(cb, f))
-                    elif op == "MOVE":
-                        shutil.move(os.path.join(cp, f), os.path.join(ca, f))
-                        shutil.copy(os.path.join(ca, f), os.path.join(cb, f))
-                    elif op == "COPY":
-                        shutil.copy(os.path.join(cp, f), os.path.join(ca, f))
-                        shutil.copy(os.path.join(cp, f), os.path.join(cb, f))
+                    if _op == "LINK":
+                        os.symlink(os.path.join(cp, f), os.path.join(_ca, f))
+                        os.symlink(os.path.join(cp, f), os.path.join(_cb, f))
+                    elif _op == "MOVE":
+                        shutil.move(os.path.join(cp, f), os.path.join(_ca, f))
+                        shutil.copy(os.path.join(_ca, f), os.path.join(_cb, f))
+                    elif _op == "COPY":
+                        shutil.copy(os.path.join(cp, f), os.path.join(_ca, f))
+                        shutil.copy(os.path.join(cp, f), os.path.join(_cb, f))
                     a, b, d = a + 1, b + 1, d + 1
 
                 # Symlink to either or
                 else:
                     # Symlink to dir_b
-                    if random.random() < pb:
-                        if not os.path.exists(cb):
-                            os.makedirs(cb)
-                        if op == "LINK":
-                            os.symlink(os.path.join(cp, f), os.path.join(cb, f))
-                        elif op == "MOVE":
-                            shutil.move(os.path.join(cp, f), os.path.join(cb, f))
-                        elif op == "COPY":
-                            shutil.copy(os.path.join(cp, f), os.path.join(cb, f))
+                    if random.random() < _pb:
+                        if not os.path.exists(_cb):
+                            os.makedirs(_cb)
+                        if _op == "LINK":
+                            os.symlink(os.path.join(cp, f), os.path.join(_cb, f))
+                        elif _op == "MOVE":
+                            shutil.move(os.path.join(cp, f), os.path.join(_cb, f))
+                        elif _op == "COPY":
+                            shutil.copy(os.path.join(cp, f), os.path.join(_cb, f))
                         b += 1
 
                     # Symlink to dir_a
                     else:
-                        if not os.path.exists(ca):
-                            os.makedirs(ca)
-                        if op == "LINK":
-                            os.symlink(os.path.join(cp, f), os.path.join(ca, f))
-                        elif op == "MOVE":
-                            shutil.move(os.path.join(cp, f), os.path.join(ca, f))
-                        elif op == "COPY":
-                            shutil.copy(os.path.join(cp, f), os.path.join(ca, f))
+                        if not os.path.exists(_ca):
+                            os.makedirs(_ca)
+                        if _op == "LINK":
+                            os.symlink(os.path.join(cp, f), os.path.join(_ca, f))
+                        elif _op == "MOVE":
+                            shutil.move(os.path.join(cp, f), os.path.join(_ca, f))
+                        elif _op == "COPY":
+                            shutil.copy(os.path.join(cp, f), os.path.join(_ca, f))
                         a += 1
             else:
                 print(f"Skipping {f}")
 
         return a, b, d
 
-    return partition_internal(source, "", dir_a, dir_b, pd, pb, op=op, limit=limit, ca=0, cb=0, cd=0)
+    return partition_internal(source, "", dir_a, dir_b, pd, pb, _op=op, _limit=limit, _ca=0, _cb=0, _cd=0)
 
 
 def duplicate(src: str, dst: str, pc: float = 0.5, op: str = "COPY", limit: int = None) -> Tuple[int, int]:
