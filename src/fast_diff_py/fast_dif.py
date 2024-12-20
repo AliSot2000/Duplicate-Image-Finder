@@ -277,7 +277,8 @@ class FastDifPy(GracefulWorker):
     # ==================================================================================================================
 
     def __init__(self, part_a: str | List[str] = None, part_b: str | List[str] = None, config: Config = None,
-                 default_cfg_path: str = None, purge: bool = False, test_mode: bool = False, **kwargs):
+                 default_cfg_path: str = None, purge: bool = False, test_mode: bool = False,
+                 db_inst: Type[SQLiteDB] = None, **kwargs):
         """
         Initialize the FastDifPy object.
 
@@ -294,11 +295,15 @@ class FastDifPy(GracefulWorker):
         :param default_cfg_path: The path to the config if it's supposed to be loaded from a file
         :param purge: Whether to purge the existing progress and start anew (has only effect for first and third source)
         :param test_mode: expects a config to be passed, sets up loging and sets the config. Everything else is ignored.
+        :param db_inst: The Database to use. If not provided defaults to the sqlite db within this package.
 
         :kwargs: Additional arguments to be passed to the Config object. Check out the config objects for more details.
 
         # TODO docs about kwargs
         """
+        if db_inst is None:
+            self.db_inst = SQLiteDB
+
         super().__init__(0)
         self.logger = logging.getLogger("FastDiffPy_Main")
         self.logger.setLevel(logging.DEBUG)
