@@ -76,7 +76,12 @@ if __name__ == "__main__":
 
     # Set some stuff 
     args = parser.parse_args()
-    print(args)
+
+    if not 10 < args.size < 5000:
+        raise ValueError("Size must be between 1 and 5000")
+
+    if not args.attempts < 1:
+        raise ValueError("Attempts must be greater than 0")
 
     # Setting stats file
     dts = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
