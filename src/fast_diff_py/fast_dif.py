@@ -308,6 +308,9 @@ class FastDifPy(GracefulWorker):
         self.logger = logging.getLogger("FastDiffPy_Main")
         self.logger.setLevel(logging.DEBUG)
 
+        # Clear handlers to make sure we don't log multiple times
+        self.logger.handlers.clear()
+
         qh = logging.handlers.QueueHandler(self.logging_queue)
         self.logger.addHandler(qh)
         self.start_logging()
