@@ -618,7 +618,6 @@ class SecondLoopWorker(ChildProcess):
         q_handler = QueueHandler(q)
         self.logger.addHandler(q_handler)
 
-
     def get_stats(self):
         """
         Print Timing Statistics for Debugging
