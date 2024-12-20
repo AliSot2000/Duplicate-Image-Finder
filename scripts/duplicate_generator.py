@@ -155,15 +155,19 @@ def partition(source: str,
     return partition_internal(source, "", dir_a, dir_b, pd, pb, _op=op, _limit=limit, _ca=0, _cb=0, _cd=0)
 
 
-def duplicate(src: str, dst: str, pc: float = 0.5, op: str = "COPY", limit: int = None) -> Tuple[int, int]:
+def duplicate(src: str,
+              dst: str,
+              pc: float = 0.5,
+              op: str = "COPY",
+              limit: int = None) -> Tuple[int, int]:
     """
     Duplicate mode to generate duplicates.
 
     :param src: The first directory
     :param dst: The second directory
-    :param pc: The probability of copying. Copy iff random.random() < pc
+    :param pc: The probability of Duplicating. Duplicate iff random.random() < pc
     :param op: The operation to perform (COPY, LINK)
-    :param limit: The limit of files to process (number of duplicates
+    :param limit: The limit of files to process (max number of duplicates)
 
     :return: Number of files in dir a, number of files in dir b
     """
