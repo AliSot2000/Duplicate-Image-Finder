@@ -176,34 +176,55 @@ def duplicate(src: str,
     if op not in ["COPY", "LINK"]:
         raise ValueError(f"Operation {op} not supported")
 
-    def duplicate_internal(src: str, dst: str, cur: str, pc: float, op: str, limit: int, s: int, c: int):
-        abs_src = os.path.abspath(src)
-        abs_dst = os.path.abspath(dst)
-        cp = os.path.join(abs_src, cur)
-        cd = os.path.join(abs_dst, cur)
+    def duplicate_internal(_src: str,
+                           _dst: str,
+                           _cur: str,
+                           _pc: float,
+                           _op: str,
+                           _s: int,
+                           _d: int,
+                           _limit: int = None) -> Tuple[int, int]:
+        """
+        Internal function to generate duplicates.
+
+        :param _src: The directory to get the images from
+        :param _dst: The directory to copy all duplicates into
+        :param _cur: The current suffix of the src directory to be replicated in the dst directory
+        :param _pc: The probability of copying. Copy iff random.random() < pc
+        :param _op: The operation to perform (COPY, LINK)
+        :param _limit: The limit of files to process (max number of duplicates)
+        :param _s: Number of files scanned
+        :param _d: Number of files copied into dst
+
+        :return: Number of files scanned, number of files duplicated
+        """
+        abs_src = os.path.abspath(_src)
+        abs_dst = os.path.abspath(_dst)
+        cp = os.path.join(abs_src, _cur)
+        cd = os.path.join(abs_dst, _cur)
 
         for f in os.listdir(cp):
-            if limit is not None and c > limit:
-                return s, c
+            if _limit is not None and _d > _limit:
+                return _s, _d
 
             # If it's a directory, we need to recurse
             if os.path.isdir(os.path.join(cp, f)):
-                s, c = duplicate_internal(src, dst, os.path.join(cur, f), pc, op, limit, s, c)
+                _s, _d = duplicate_internal(_src, _dst, os.path.join(_cur, f), _pc, _op, _s, _d, _limit)
 
             # If it's a file, we need to copy it
             elif os.path.isfile(os.path.join(cp, f)):
-                s += 1
-                if random.random() < pc:
+                _s += 1
+                if random.random() < _pc:
                     # Create directory in dst
                     if not os.path.exists(cd):
                         os.makedirs(cd)
 
-                    if op == "LINK":
+                    if _op == "LINK":
                         os.symlink(os.path.join(cp, f), os.path.join(cd, f))
-                    elif op == "COPY":
+                    elif _op == "COPY":
                         shutil.copy(os.path.join(cp, f), os.path.join(cd, f))
 
-                    c += 1
+                    _d += 1
             # We've got something we don't know.
             else:
                 print(f"Skipping {f}")
