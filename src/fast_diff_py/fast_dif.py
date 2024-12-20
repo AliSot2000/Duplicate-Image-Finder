@@ -1586,7 +1586,7 @@ class FastDifPy(GracefulWorker):
         bp = {i + l_x: False for i in range(s_x)}
         self.block_progress_dict[self.config.second_loop.cache_index] = bp
 
-        self.logger.info(f"Created Cache with key: {self.config.second_loop.cache_index} out of {len(self.blocks)}")
+        self.logger.info(f"Created Cache with key: {self.config.second_loop.cache_index + 1} out of {len(self.blocks)}")
 
         ci = self.config.second_loop.cache_index
         self.ram_cache[ci] = pickle.dumps(bc)
