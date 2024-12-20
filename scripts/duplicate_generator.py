@@ -48,7 +48,7 @@ def partition(source: str,
     :param pd: The probability of duplication
     :param pb: The probability of moving to dir_b
     :param op: The operation to perform (MOVE, COPY, LINK)
-    :param limit: The limit of files to process
+    :param limit: The limit of files to process (scanning not duplicating)
 
     :return: Number of files in dir a, number of files in dir b, number of duplicates
     """
