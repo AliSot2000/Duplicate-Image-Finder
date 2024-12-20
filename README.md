@@ -107,7 +107,7 @@ The `config.py` contains extensive documentation in the description fields.
 - `part_a` - The first partition of directories. If no `part_b` is provided. The comparison is performed within the `part_a`
 - `part_b` - The second partition. If it is provided all files from `part_a` are compared to the files within `part_b`
 - `recursive` - All paths provided in the two partitions are searched recursively by default.
-Otherwise only that directory is searched.
+Otherwise, only that directory is searched.
 - `rotate` - Images are rotated for both the comparison and for hashing. Can be disabled with this option.
 - `ignore_names` - Names of files or directories to be ignored. 
 - `ignore_paths` - All filepaths that have a prefix defined in this list will be ignored
