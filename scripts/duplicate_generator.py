@@ -233,6 +233,64 @@ def duplicate(src: str,
 
 
 if __name__ == "__main__":
-    print(partition(source="/media/alisot2000/MacBeth/dedup_benchmarks/IMDB-Bench/",
-                    dir_a="/media/alisot2000/MacBeth/workbench_tiny/dir_a",
-                    dir_b="/media/alisot2000/MacBeth/workbench_tiny/dir_b", pd=0.01, pb=0.5, limit=5000, op="COPY"))
+    parser = argparse.ArgumentParser(description="Generate duplicate images")
+
+    # Required
+    parser.add_argument("mode", type=str, help="Directory to get images from",
+                        choices=["PARTITION", "DUPLICATE"])
+    parser.add_argument("-o", "--operation", type=str,
+                        help="Operation to perform. Can be COPY, LINK and only for partition MOVE",
+                        choices=["COPY", "LINK", "MOVE"],
+                        default="COPY",
+                        required=False)
+    parser.add_argument("-s", "--source", type=str,
+                        help="Directory to get images from",
+                        required=True)
+    parser.add_argument("-a", "--partition_a", type=str,
+                        help="First Partition in PARTITION mode and destination for duplicates in DUPLICATE mode",
+                        required=True)
+
+    # Optionals
+    parser.add_argument("-b", "--partition_b", type=str,
+                        help="Second Partition in PARTITION")
+    parser.add_argument("-d", "--duplication", type=float, default=0.001,
+                        help="Probability to generate a duplicate. Uses a random float between 0 and 1. "
+                             "A file is duplicated iff random.random() < pc")
+    parser.add_argument("-l", "--limit", type=int,
+                        help="Limit number of files to process, in PARTITION mode limits the number of files in either "
+                             "partition (so if size(part_a) > limit or size(part_b) > limit stop), in DUPLICATE mode"
+                             "it limits the number of duplicates generated!")
+    parser.add_argument("-p", "--probability_b", type=float, default=0.5,
+                        help="Probability of a file going into partition b in PARTITION mode. Goes into Partition B iff"
+                             "random.random() < p. Has no effect on DUPLICATE mode")
+    args = parser.parse_args()
+
+    print(args)
+
+    # Validate arguments
+    if not 0 < args.duplication < 1:
+        raise ValueError("Duplication value must be between 0 and 1")
+
+    if not 0 < args.probability_b < 1:
+        raise ValueError("Probability value must be between 0 and 1")
+
+    if args.mode == "DUPLICATE":
+        if args.operation == "MOVE":
+            raise ValueError("Duplicate mode not supported for MOVE")
+
+        if args.partition_b is not None:
+            warnings.warn("Duplicate mode doesn't use partition_b, argument will be ignored")
+
+    if args.mode == "PARTITION":
+        if args.partition_b is None:
+            raise ValueError("PARTITION mode needs partition_b")
+
+
+    if args.mode == "DUPLICATE":
+        res = duplicate(args.source, args.partition_a, args.duplication, args.operation, args.limit)
+        print(f"Scanned {res[0]} files and duplicated {res[1]} files.")
+
+    else:
+        res = partition(args.source, args.partition_a, args.partition_b,
+                        args.duplication, args.probability_b, args.operation, args.limit)
+        print(f"Files in Partition A: {res[0]}, Files in Partition B: {res[1]}, Files in both Partitions: {res[2]}")
