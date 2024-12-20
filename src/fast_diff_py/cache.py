@@ -11,7 +11,7 @@ import fast_diff_py.img_processing as imgp
 class ImageCache:
     offset: int  # The offset from the key in the db to the index in the array
     img_shape: Tuple[int, int, int]
-    data: np.ndarray[np.uint8]
+    data: Optional[np.ndarray[np.uint8]] = None
     size: int
     logger: Optional[logging.Logger] = None
 
@@ -22,7 +22,6 @@ class ImageCache:
         self.img_shape = img_shape
         self.offset = offset
         self.size = size
-        self.data = np.ndarray((size, *img_shape), dtype=np.uint8)
 
     def get_image(self, key: int) -> np.ndarray[np.uint8]:
         """
@@ -34,6 +33,9 @@ class ImageCache:
         """
         Fill the cache with images from the thumbnail directory
         """
+        if self.data is None:
+            self.data = np.ndarray((self.size, *self.img_shape), dtype=np.uint8)
+
         for i in range(self.size):
             try:
                 img, aspect = imgp.load_std_image(img_path=os.path.join(thumbnail_dir, f"{i+self.offset}.png"),
@@ -63,6 +65,9 @@ class ImageCache:
 
         :param paths: The paths to the original images
         """
+        if self.data is None:
+            self.data = np.ndarray((self.size, *self.img_shape), dtype=np.uint8)
+
         if len(paths) != self.size:
             raise ValueError("Paths and size of cache do not match")
 
