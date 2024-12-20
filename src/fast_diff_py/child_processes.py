@@ -105,6 +105,9 @@ class ChildProcess(GracefulWorker):
         self.logger = logging.getLogger(f"Child_{self.identifier:03}")
         self.logger.setLevel(level)
         self.log_queue = q
+
+        # Need to clear the handlers
+        self.logger.handlers.clear()
         q_handler = QueueHandler(q)
         self.logger.addHandler(q_handler)
 
@@ -221,6 +224,9 @@ class FirstLoopWorker(ChildProcess):
         self.logger = logging.getLogger(f"FirstLoopWorker_{self.identifier:03}")
         self.logger.setLevel(level)
         self.log_queue = q
+
+        # Need to clear the handlers
+        self.logger.handlers.clear()
         q_handler = QueueHandler(q)
         self.logger.addHandler(q_handler)
 
@@ -606,6 +612,9 @@ class SecondLoopWorker(ChildProcess):
         self.logger = logging.getLogger(f"SecondLoopWorker_{self.identifier:03}")
         self.logger.setLevel(level)
         self.log_queue = q
+
+        # Need to clear the handlers
+        self.logger.handlers.clear()
         q_handler = QueueHandler(q)
         self.logger.addHandler(q_handler)
 
