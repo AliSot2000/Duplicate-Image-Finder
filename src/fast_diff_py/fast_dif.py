@@ -1229,15 +1229,15 @@ class FastDifPy(GracefulWorker):
                 hashes.append(res.hash_270)
 
             # Put the hashes into the db
-            self.db.bulk_insert_hashes(hashes)
+            self.db.bulk_insert_hashes(list(filter(lambda x: x is not None, hashes)))
             lookup = self.db.get_bulk_hash_lookup(set(hashes))
 
             # Update the hashes from string to int (based on the hash key in the db
             for res in results:
-                res.hash_0 = lookup[res.hash_0]
-                res.hash_90 = lookup[res.hash_90]
-                res.hash_180 = lookup[res.hash_180]
-                res.hash_270 = lookup[res.hash_270]
+                res.hash_0 = lookup.get(res.hash_0)
+                res.hash_90 = lookup.get(res.hash_90)
+                res.hash_180 = lookup.get(res.hash_180)
+                res.hash_270 = lookup.get(res.hash_270)
 
         self.db.batch_of_first_loop_results(results, has_hash=self.config.first_loop.compute_hash)
 
