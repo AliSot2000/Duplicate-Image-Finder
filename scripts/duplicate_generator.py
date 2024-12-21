@@ -35,6 +35,7 @@ def remove_prefix(text, prefix):
 def partition(source: str,
               dir_a: str,
               dir_b: str,
+              verbose: bool,
               pd: float = 0.001,
               pb: float = 0.5,
               op: str = "MOVE",
@@ -45,6 +46,7 @@ def partition(source: str,
     :param source: The source directory
     :param dir_a: The first directory
     :param dir_b: The second directory
+    :param verbose: Verbose output
     :param pd: The probability of duplication
     :param pb: The probability of moving to dir_b
     :param op: The operation to perform (MOVE, COPY, LINK)
@@ -60,6 +62,7 @@ def partition(source: str,
                            _cur: str,
                            _dir_a: str,
                            _dir_b: str,
+                           _verb: bool,
                            _pd: float,
                            _pb: float,
                            _op: str,
@@ -71,6 +74,7 @@ def partition(source: str,
         :param _cur: The current directory prefix within the source directory
         :param _dir_a: Partition Directory A
         :param _dir_b: Partition Directory B
+        :param _verb: Verbose output
         :param _pd: Probability of duplication during the partition. Duplicating iff random.random() < _pd
         :param _pb: Probability of moving to Partition B. Move to Partition if random.random() < _pb
         :param _limit: Number of files to process (scanning)
@@ -96,8 +100,8 @@ def partition(source: str,
 
             # If it's a directory, we need to recurse
             if os.path.isdir(os.path.join(cp, f)):
-                a, b, c = partition_internal(_src, os.path.join(_cur, f),
-                                             _dir_a, _dir_b, _pd, _pb, _op, a, b, d, _limit)
+                a, b, d = partition_internal(_src, os.path.join(_cur, f),
+                                             _dir_a, _dir_b, _verb, _pd, _pb, _op, a, b, d, _limit)
 
             # If it's a file, we need to copy it
             elif os.path.isfile(os.path.join(cp, f)):
@@ -105,21 +109,35 @@ def partition(source: str,
                 if random.random() < _pd:
                     # Create directory in dir_a
                     if not os.path.exists(_ca):
+                        if _verb:
+                            print(f"Creating Directory {_ca}")
                         os.makedirs(_ca)
 
                     # Create directory in dir_b
                     if not os.path.exists(_cb):
+                        if _verb:
+                            print(f"Creating Directory {_cb}")
                         os.makedirs(_cb)
 
                     if _op == "LINK":
+                        if _verb:
+                            print(f"Duplicate LINK {os.path.join(cp, f)} "
+                              f"to {os.path.join(_ca, f)} and {os.path.join(_cb, f)}")
                         os.symlink(os.path.join(cp, f), os.path.join(_ca, f))
                         os.symlink(os.path.join(cp, f), os.path.join(_cb, f))
                     elif _op == "MOVE":
+                        if _verb:
+                            print(f"Duplicate MOVE {os.path.join(cp, f)} "
+                              f"to {os.path.join(_ca, f)} and {os.path.join(_cb, f)}")
                         shutil.move(os.path.join(cp, f), os.path.join(_ca, f))
                         shutil.copy(os.path.join(_ca, f), os.path.join(_cb, f))
                     elif _op == "COPY":
+                        if _verb:
+                            print(f"Duplicate COPY {os.path.join(cp, f)} "
+                              f"to {os.path.join(_ca, f)} and {os.path.join(_cb, f)}")
                         shutil.copy(os.path.join(cp, f), os.path.join(_ca, f))
                         shutil.copy(os.path.join(cp, f), os.path.join(_cb, f))
+
                     a, b, d = a + 1, b + 1, d + 1
 
                 # Symlink to either or
@@ -127,24 +145,42 @@ def partition(source: str,
                     # Symlink to dir_b
                     if random.random() < _pb:
                         if not os.path.exists(_cb):
+                            if _verb:
+                                print(f"Creating Directory {_cb}")
                             os.makedirs(_cb)
+
                         if _op == "LINK":
+                            if _verb:
+                                print(f"Partitioning LINK {os.path.join(cp, f)} to {os.path.join(_cb, f)}")
                             os.symlink(os.path.join(cp, f), os.path.join(_cb, f))
                         elif _op == "MOVE":
+                            if _verb:
+                                print(f"Partitioning MOVE {os.path.join(cp, f)} to {os.path.join(_cb, f)}")
                             shutil.move(os.path.join(cp, f), os.path.join(_cb, f))
                         elif _op == "COPY":
+                            if _verb:
+                                print(f"Partitioning COPY {os.path.join(cp, f)} to {os.path.join(_cb, f)}")
                             shutil.copy(os.path.join(cp, f), os.path.join(_cb, f))
                         b += 1
 
                     # Symlink to dir_a
                     else:
                         if not os.path.exists(_ca):
+                            if _verb:
+                                print(f"Creating Directory {_ca}")
                             os.makedirs(_ca)
+
                         if _op == "LINK":
+                            if _verb:
+                                print(f"Partitioning LINK {os.path.join(cp, f)} to {os.path.join(_ca, f)}")
                             os.symlink(os.path.join(cp, f), os.path.join(_ca, f))
                         elif _op == "MOVE":
+                            if _verb:
+                                print(f"Partitioning MOVE {os.path.join(cp, f)} to {os.path.join(_ca, f)}")
                             shutil.move(os.path.join(cp, f), os.path.join(_ca, f))
                         elif _op == "COPY":
+                            if _verb:
+                                print(f"Partitioning COPY {os.path.join(cp, f)} to {os.path.join(_ca, f)}")
                             shutil.copy(os.path.join(cp, f), os.path.join(_ca, f))
                         a += 1
             else:
@@ -152,11 +188,12 @@ def partition(source: str,
 
         return a, b, d
 
-    return partition_internal(source, "", dir_a, dir_b, pd, pb, _op=op, _limit=limit, _ca=0, _cb=0, _cd=0)
+    return partition_internal(source, "", dir_a, dir_b, verbose, pd, pb, _op=op, _limit=limit, _ca=0, _cb=0, _cd=0)
 
 
 def duplicate(src: str,
               dst: str,
+              verbose: bool,
               pc: float = 0.5,
               op: str = "COPY",
               limit: int = None) -> Tuple[int, int]:
@@ -165,6 +202,7 @@ def duplicate(src: str,
 
     :param src: The first directory
     :param dst: The second directory
+    :param verbose: Verbose output
     :param pc: The probability of Duplicating. Duplicate iff random.random() < pc
     :param op: The operation to perform (COPY, LINK)
     :param limit: The limit of files to process (max number of duplicates)
@@ -179,6 +217,7 @@ def duplicate(src: str,
     def duplicate_internal(_src: str,
                            _dst: str,
                            _cur: str,
+                           _verb: bool,
                            _pc: float,
                            _op: str,
                            _s: int,
@@ -190,6 +229,7 @@ def duplicate(src: str,
         :param _src: The directory to get the images from
         :param _dst: The directory to copy all duplicates into
         :param _cur: The current suffix of the src directory to be replicated in the dst directory
+        :param _verb: Verbose output
         :param _pc: The probability of copying. Copy iff random.random() < pc
         :param _op: The operation to perform (COPY, LINK)
         :param _limit: The limit of files to process (max number of duplicates)
@@ -209,7 +249,7 @@ def duplicate(src: str,
 
             # If it's a directory, we need to recurse
             if os.path.isdir(os.path.join(cp, f)):
-                _s, _d = duplicate_internal(_src, _dst, os.path.join(_cur, f), _pc, _op, _s, _d, _limit)
+                _s, _d = duplicate_internal(_src, _dst, os.path.join(_cur, f), _verb, _pc, _op, _s, _d, _limit)
 
             # If it's a file, we need to copy it
             elif os.path.isfile(os.path.join(cp, f)):
@@ -217,11 +257,17 @@ def duplicate(src: str,
                 if random.random() < _pc:
                     # Create directory in dst
                     if not os.path.exists(cd):
+                        if verbose:
+                            print(f"Creating Directory {cd}")
                         os.makedirs(cd)
 
                     if _op == "LINK":
+                        if verbose:
+                            print(f"LINKING {os.path.join(cp, f)} to {os.path.join(cd, f)}")
                         os.symlink(os.path.join(cp, f), os.path.join(cd, f))
                     elif _op == "COPY":
+                        if verbose:
+                            print(f"COPYING {os.path.join(cp, f)} to {os.path.join(cd, f)}")
                         shutil.copy(os.path.join(cp, f), os.path.join(cd, f))
 
                     _d += 1
@@ -229,7 +275,7 @@ def duplicate(src: str,
             else:
                 print(f"Skipping {f}")
 
-    return duplicate_internal(src, dst, "", pc, op, limit, 0, 0)
+    return duplicate_internal(src, dst, "", verbose, pc, op, limit, 0, 0)
 
 
 if __name__ == "__main__":
@@ -263,9 +309,9 @@ if __name__ == "__main__":
     parser.add_argument("-p", "--probability_b", type=float, default=0.5,
                         help="Probability of a file going into partition b in PARTITION mode. Goes into Partition B iff"
                              "random.random() < p. Has no effect on DUPLICATE mode")
+    parser.add_argument("-v", "--verbose", action="store_true",
+                        help="Print info about every action taken.")
     args = parser.parse_args()
-
-    print(args)
 
     # Validate arguments
     if not 0 < args.duplication < 1:
@@ -287,10 +333,10 @@ if __name__ == "__main__":
 
 
     if args.mode == "DUPLICATE":
-        res = duplicate(args.source, args.partition_a, args.duplication, args.operation, args.limit)
+        res = duplicate(args.source, args.partition_a, args.verbose, args.duplication, args.operation, args.limit)
         print(f"Scanned {res[0]} files and duplicated {res[1]} files.")
 
     else:
-        res = partition(args.source, args.partition_a, args.partition_b,
+        res = partition(args.source, args.partition_a, args.partition_b, args.verbose,
                         args.duplication, args.probability_b, args.operation, args.limit)
         print(f"Files in Partition A: {res[0]}, Files in Partition B: {res[1]}, Files in both Partitions: {res[2]}")
