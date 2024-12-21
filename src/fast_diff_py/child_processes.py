@@ -539,6 +539,10 @@ class SecondLoopWorker(ChildProcess):
                     img_b = self.get_image_from_cache(key=i, is_x=False)
                     self.fetch_y += (datetime.datetime.now(datetime.UTC) - s).total_seconds()
 
+                    # Using array equality to avoid expensive computation
+                    if np.array_equal(img_a, img_b):
+                        diffs.append((arg.x, i, 1, 0.0))
+
                     # Check hash
                     if self.match_hash:
                         if self.determine_hash_match(arg.x_hashes, arg.y_hashes[i - start]):
