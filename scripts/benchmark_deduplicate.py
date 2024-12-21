@@ -157,6 +157,7 @@ if __name__ == "__main__":
     fast_diff_preamble(directory=partitions, rotate=args.rotate, size=args.size, task_dir=td)
 
     subjects = ["difpy", "fast_diff_py"]
+    # subjects = ["fast_diff_py"]
     stats = {}
 
     for subject in subjects:
@@ -164,7 +165,6 @@ if __name__ == "__main__":
         for p in args.processes:
             stats[subject][p] = []
             for a in range(args.attempts):
-
                 print(f"Performing Benchmark with {subject}, attempt {a + 1} of {args.attempts}, processes {p}")
 
                 command = [python, external_benchmark, "-p", f"{p}", "-f", file, "-d", td, "-s", f"{args.delta}"]
@@ -197,10 +197,6 @@ if __name__ == "__main__":
                 return_code = proc.poll()
                 if return_code is not None:
                     print(f'RETURN CODE', return_code)
-
-                    output = proc.stdout.read()
-                    print(output)
-
 
                 end = datetime.datetime.now(datetime.UTC)
                 time = (end - start).total_seconds()
