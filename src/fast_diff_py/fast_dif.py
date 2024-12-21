@@ -5,6 +5,7 @@ import multiprocessing as mp
 import os.path
 import pickle
 import shutil
+import sys
 import time
 from logging.handlers import QueueListener
 from typing import List, Union, Callable, Dict, Optional, Tuple, Iterator, Type, Iterable
@@ -131,7 +132,7 @@ class FastDifPy(GracefulWorker):
         """
         Start the logging process. This is done by starting the QueueListener
         """
-        handler = logging.StreamHandler()
+        handler = logging.StreamHandler(stream=sys.stdout)
         formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
         handler.setFormatter(formatter)
         self.ql = QueueListener(self.logging_queue, handler, respect_handler_level=True)
