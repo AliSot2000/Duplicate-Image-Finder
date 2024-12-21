@@ -5,7 +5,9 @@ import json
 import argparse
 from typing import List
 import os
+import subprocess
 import pickle
+import shutil
 
 from fast_diff_py import FastDifPy
 
@@ -112,6 +114,10 @@ if __name__ == "__main__":
                         help="Delta between images to be achieved for them to be considered duplicated", default=200.0)
 
     args = parser.parse_args()
+
+    python = shutil.which("python3")
+    source_dir = os.path.abspath(os.path.join(__file__, "..", "..", "src"))
+    external_benchmark = os.path.abspath(os.path.join(os.path.dirname(__file__), "difpy_benchmark_external.py"))
 
     if args.temp is not None:
         os.makedirs(args.temp, exist_ok=True)
