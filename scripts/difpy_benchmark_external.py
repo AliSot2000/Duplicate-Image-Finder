@@ -23,6 +23,8 @@ def fast_diff_benchmark(dir: str, rotate: bool, lazy: bool, processes: int, simi
     fdo.config.state = fast_diff.config.Progress.FIRST_LOOP_DONE
     fdo.db.debug_execute("DROP TABLE IF EXISTS dif_table")
 
+    # Clearing the old second loop config
+    fdo.config.second_loop = fast_diff.SecondLoopConfig()
     fdo.config.rotate = rotate
     fdo.config.second_loop.cpu_proc = processes
     fdo.config.second_loop.diff_threshold = similarity
