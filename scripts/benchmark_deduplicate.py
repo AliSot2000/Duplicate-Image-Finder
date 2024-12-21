@@ -139,7 +139,6 @@ if __name__ == "__main__":
     else:
         target = args.target
 
-
     if args.partition_b is not None:
         partitions = [args.partition_b, args.partition_a]
     else:
