@@ -32,7 +32,7 @@ def difpy_preamble(directory: List[str], size: int, file: str):
 
     # Writing dif build object to file for recovery
     with open(file, "wb") as f:
-        pickle.dump(dif, file)
+        pickle.dump(dif, f)
 
 
 def fast_diff_preamble(directory: List[str], size: int, task_dir: str, rotate: bool):
