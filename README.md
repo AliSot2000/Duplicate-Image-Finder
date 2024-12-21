@@ -193,6 +193,19 @@ their size or aspect ratios.
 4 will only increase the time it takes to drain the queue if you want to interrupt the process midway.
 - `elapsed_seconds` - Once the second loop completes, it will contain the number of second the second loop took.
 
+### Logging
+FastDiffPy logs using the python logging library and uses QueueHandler and QueueListeners to join all logs into one.
+All Workers get their own logger named like `FirstLoopWorker_XXX` or `SecondLoopWorker_XXX` with `XXX` replacing its id.
+The main process has itself the logger `FastDiffPy_Main`. The Handlers both of the workers and the main process are 
+cleared with each instantiation of a worker process of a instantiation of the main object. All logs are written to 
+`stdout` using a `QueueListener` which resides in `FastDiffPy.ql` this listener is also instantiated a new with every
+call to the constructor of `FastDiffPy`. If you want to capture the logs, I suggest adding more handlers to the 
+`QueueListener` once the `FastDiffPy` object is instantiated. 
+
+In order to avoid errors, call the `FastDiffPy.cleanup()` method which stops the `QueueListener` process. 
+`FastDiffPy.test_cleanup` stops it as well. If you are doing something beyond the extent of the available functions, 
+call `FastDiffPy.qh.stop()` separately.
+
 ##### SecondLoopRuntimeConfig:
 Before the Second Loop is executed, the `second_loopo` config will be converted with defaults to a
 `SecondoLoopRuntimeConfig`. The `second_loop` function of the `FastDiffPy` object also provides an argument to overwrite 
