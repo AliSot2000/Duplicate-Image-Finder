@@ -228,9 +228,13 @@ The function takes two `np.ndarray` and a `bool`. If the bool is set to true rot
 computed. Otherwise, the two image tensors are to be compared as is.
 - `gpu_diff` - Function which computes the delta on a GPU. It should be obvious but if you provide the same function as 
 for `cpu_diff` and instantiate also processes for the gpu, you won't see any performance improvements. 
-- `gpu_worker_class` **NOT IMPLEMENTED**: If you provide a GPU worker, this will be favored over the `gpu_diff`. 
-Providing a GPU Worker allows for more optimizations and computations to be made on the GPU, leading to higher
-performance.
+- `gpu_worker_class`: This worker will be instantiated in favor of a `SecondLoopWorker` with a function that computes 
+only the delta on the gpu. The default `SecondLoopGPUWorker` also moves the entire cache to the GPU to minimize data
+movement. However, the compare_fn will still be set, so put the delta function you want to use in your gpu worker
+into the `gpu_diff` attribute of the `FastDiffPy` object. At the point of writing a preliminary benchmark has shown
+that the GPU both with a custom worker and only with the mse computed on the GPU is slower than the implementation using 
+numpy. The `compression_target` was `64` benchmarks with the old implementation from 2023 showed a speed improvement 
+with the GPU after a `compression_target` of `256. Benchmarks are to follow.
 
 You can also provide your own subclass of the `SQLiteDB`. For that you need to overwrite the `db_inst` class variable of 
 the FastDiffPy Object.
