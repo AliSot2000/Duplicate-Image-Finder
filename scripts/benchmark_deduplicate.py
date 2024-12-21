@@ -58,44 +58,6 @@ def fast_diff_preamble(directory: List[str], size: int, task_dir: str, rotate: b
     fdo.commit()
 
 
-def difpy_benchmark(file: str, rotate: bool, lazy: bool, processes: int, similarity: float) -> float:
-    """
-    Difpy benchmark. Perform the search step. once completed, return the number of seconds taken
-    """
-    with open(file, "rb") as f:
-        dif = pickle.load(f)
-
-    start = datetime.datetime.now(datetime.timezone.utc)
-    difpy.search(dif, similarity=similarity, rotate=rotate, lazy=lazy, processes=processes)
-    end = datetime.datetime.now(datetime.timezone.utc)
-    return (end - start).total_seconds()
-
-
-def fast_diff_benchmark(dir: str, rotate: bool, lazy: bool, processes: int, similarity: float) -> float:
-    """
-    Perform the benchmark with fast_diff_py
-    """
-    fdo = FastDifPy(default_cfg_path=os.path.join(dir, FastDifPy.default_config_file))
-    fdo.config.state = fast_diff.config.Progress.FIRST_LOOP_DONE
-    fdo.db.debug_execute("DROP TABLE IF EXISTS dif_table")
-
-    fdo.config.rotate = rotate
-    fdo.config.second_loop.cpu_proc = processes
-    fdo.config.second_loop.diff_threshold = similarity
-
-    if lazy:
-        fdo.config.second_loop.match_aspect_by = 0
-        fdo.config.second_loop.skip_matching_hash = True
-    else:
-        fdo.config.second_loop.match_aspect_by = None
-        fdo.config.second_loop.skip_matching_hash = False
-
-    start = datetime.datetime.now(datetime.timezone.UTC)
-    fdo.second_loop()
-    end = datetime.datetime.now(datetime.timezone.utc)
-    return (end - start).total_seconds()
-
-
 def difpy_epilogue(file: str):
     """
     Remove the dif object we wrote to disk
