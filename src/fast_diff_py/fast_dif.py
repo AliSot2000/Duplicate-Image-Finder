@@ -1368,8 +1368,8 @@ class FastDifPy(GracefulWorker):
                                  self.config.batch_size_max_sl)
             else:
                 if len(self.config.part_b) > 0:
-                    cfg.batch_size = min(self.db.get_partition_entry_count(part_b=True, only_allowed=True),
-                                     self.db.get_partition_entry_count(part_b=False, only_allowed=True),
+                    cfg.batch_size = min(self.db.get_partition_entry_count(part_b=True, only_allowed=True) // 4,
+                                     self.db.get_partition_entry_count(part_b=False, only_allowed=True) // 4,
                                      self.config.batch_size_max_sl)
                 else:
                     cfg.batch_size = min(self.db.get_partition_entry_count(part_b=False, only_allowed=True),
