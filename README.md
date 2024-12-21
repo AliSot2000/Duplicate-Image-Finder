@@ -215,6 +215,8 @@ determine which images to load)
 - `finished_cache_index` - Highest cache key which was removed from RAM because all paris within that cache were computed.
 - `start_dt` - Used to compute the `elapsed_seconds` once the second loop is done.
 
+**INFO**: The reported `cache_index` in `Created Cache with key: ...` as well as `Pruning cache key: ...` is offset by 
+one compared to the config
 
 ### User Extension:
 You as the user have the ability to provide your own functions to the FastDiffPy object.
