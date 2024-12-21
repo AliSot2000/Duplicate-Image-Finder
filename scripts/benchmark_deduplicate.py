@@ -125,7 +125,7 @@ if __name__ == "__main__":
     if not 10 < args.size < 5000:
         raise ValueError("Size must be between 1 and 5000")
 
-    if not args.attempts < 1:
+    if args.attempts < 1:
         raise ValueError("Attempts must be greater than 0")
 
     if args.delta < 0:
@@ -135,7 +135,7 @@ if __name__ == "__main__":
     dts = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
     if args.target is None:
         target = os.path.join(os.getcwd(),
-                              f"benchmark_compression_stats_{dts}.json")
+                              f"benchmark_deduplication_stats_{dts}.json")
     else:
         target = args.target
 
