@@ -1605,7 +1605,7 @@ class FastDifPy(GracefulWorker):
 
         # Check if all keys in the block progress dict are True
         if all(self.block_progress_dict[lowest_key].values()):
-            self.logger.info(f"Pruning cache key: {lowest_key} of {len(self.blocks)}")
+            self.logger.info(f"Pruning cache key: {lowest_key + 1} of {len(self.blocks)}")
             self.ram_cache.pop(lowest_key)
             self.block_progress_dict.pop(lowest_key)
             self.config.second_loop.finished_cache_index = lowest_key
