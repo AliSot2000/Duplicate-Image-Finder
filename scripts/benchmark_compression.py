@@ -80,7 +80,7 @@ if __name__ == "__main__":
     if not 10 < args.size < 5000:
         raise ValueError("Size must be between 1 and 5000")
 
-    if not args.attempts < 1:
+    if args.attempts < 1:
         raise ValueError("Attempts must be greater than 0")
 
     # Setting stats file
