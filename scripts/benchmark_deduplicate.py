@@ -163,23 +163,47 @@ if __name__ == "__main__":
         stats[subject] = {}
         for p in args.processes:
             stats[subject][p] = []
-            for a in args.attempts:
+            for a in range(args.attempts):
 
                 print(f"Performing Benchmark with {subject}, attempt {a + 1} of {args.attempts}, processes {p}")
-                if subject == "difpy":
-                    time = difpy_benchmark(file=file,
-                                           rotate=args.rotate,
-                                           lazy=args.lazy,
-                                           processes=p,
-                                           similarity=args.delta / 3)
-                elif subjects == ["fast_diff_py"]:
-                    time = fast_diff_benchmark(dir=td,
-                                               rotate=args.rotate,
-                                               lazy=args.lazy,
-                                               processes=p,
-                                               similarity=args.delta)
-                else:
-                    raise ValueError(f"Unknown subject: {subject}")
+
+                command = [python, external_benchmark, "-p", f"{p}", "-f", file, "-d", td, "-s", f"{args.delta}"]
+
+                # Add flags for lazy and rotate
+                if args.lazy:
+                    command.append("-l")
+
+                if not args.rotate:
+                    command.append("-r")
+
+                # Set the mode
+                command.append(subject.upper())
+
+                start = datetime.datetime.now(datetime.UTC)
+                proc = subprocess.Popen(
+                    command,
+                    env={"PYTHONPATH": source_dir},
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE, universal_newlines=True)
+
+                # Read the output
+                for line in iter(proc.stdout.readline, ""):
+                    print(f"{line.strip()}")
+
+                # Read the stderr
+                for line in iter(proc.stderr.readline, ""):
+                    print(f"{line.strip()}")
+
+                return_code = proc.poll()
+                if return_code is not None:
+                    print(f'RETURN CODE', return_code)
+
+                    output = proc.stdout.read()
+                    print(output)
+
+
+                end = datetime.datetime.now(datetime.UTC)
+                time = (end - start).total_seconds()
 
                 # Storing the time taken
                 stats[subject][p].append(time)
