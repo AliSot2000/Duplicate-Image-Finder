@@ -18,7 +18,7 @@ For difpy, we're performing the action of the "search" class. For FastDiffPy, we
 """
 
 # Defaults
-number_of_processes = [1, 2, 4, 8, 16]
+number_of_processes = [4, 8, 16]
 retries = 3
 target_size = 64
 
