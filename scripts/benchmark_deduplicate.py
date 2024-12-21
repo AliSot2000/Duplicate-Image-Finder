@@ -212,3 +212,5 @@ if __name__ == "__main__":
     # Cleaning up afterwards
     difpy_epilogue(file)
     fast_diff_epilogue(td)
+
+print("Done Deduplications Benchmark")
