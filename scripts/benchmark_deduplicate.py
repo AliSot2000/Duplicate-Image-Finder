@@ -117,7 +117,7 @@ if __name__ == "__main__":
 
     python = shutil.which("python3")
     source_dir = os.path.abspath(os.path.join(__file__, "..", "..", "src"))
-    external_benchmark = os.path.abspath(os.path.join(os.path.dirname(__file__), "difpy_benchmark_external.py"))
+    external_benchmark = os.path.abspath(os.path.join(os.path.dirname(__file__), "benchmark_external.py"))
 
     if args.temp is not None:
         os.makedirs(args.temp, exist_ok=True)
