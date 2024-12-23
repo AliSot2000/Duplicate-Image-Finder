@@ -1,6 +1,6 @@
 #!/bin/bash
 
-eche "Running scaling benchmark"
+echo "Running scaling benchmark"
 
 source /home/alisot2000/Documents/01_ReposNCode/Fast-Image-Deduplicator/lin_venv/bin/activate
 export PYTHONPATH="/home/alisot2000/Documents/01_ReposNCode/Fast-Image-Deduplicator/src"
