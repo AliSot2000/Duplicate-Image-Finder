@@ -52,6 +52,10 @@ if __name__ == "__main__":
     parser.add_argument("-e", "--diff_py", type=str, required=False,
                         help="Path to diff-py executable")
 
+    parser.add_argument("-m", "--method", type=str, required=False, default=["difpy", "fast_diff_py"],
+                        nargs="+", choices=["difpy", "fast_diff_py"], help="Override which application to test."
+                        )
+
     args = parser.parse_args()
 
     python = shutil.which("python3")
@@ -140,53 +144,57 @@ if __name__ == "__main__":
                 cmd_a.extend(["-Z", os.path.dirname(target)])
                 cmd_b.extend(["-Z", os.path.dirname(target)])
 
-                print(difpy_str)
-                start = datetime.datetime.now(datetime.UTC)
-                proc = subprocess.Popen(
-                    cmd_a,
-                    env={"PYTHONPATH": source_dir},
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE, universal_newlines=True)
+                # Only run difpy if requested
+                if "difpy" in args.method:
+                    print(difpy_str)
+                    start = datetime.datetime.now(datetime.UTC)
+                    proc = subprocess.Popen(
+                        cmd_a,
+                        env={"PYTHONPATH": source_dir},
+                        stdout=subprocess.PIPE,
+                        stderr=subprocess.PIPE, universal_newlines=True)
 
-                # Read the output
-                for line in iter(proc.stdout.readline, ""):
-                    print(f"{line.strip()}")
+                    # Read the output
+                    for line in iter(proc.stdout.readline, ""):
+                        print(f"{line.strip()}")
 
-                # Read the stderr
-                for line in iter(proc.stderr.readline, ""):
-                    print(f"{line.strip()}")
+                    # Read the stderr
+                    for line in iter(proc.stderr.readline, ""):
+                        print(f"{line.strip()}")
 
-                return_code = proc.poll()
-                if return_code is not None:
-                    print(f'RETURN CODE', return_code)
-                end = datetime.datetime.now(datetime.UTC)
+                    return_code = proc.poll()
+                    if return_code is not None:
+                        print(f'RETURN CODE', return_code)
+                    end = datetime.datetime.now(datetime.UTC)
 
-                stats["difpy"][args.partition_a[i]][process].append((end-start).total_seconds())
+                    stats["difpy"][args.partition_a[i]][process].append((end-start).total_seconds())
 
-                print(fast_diff_py_str)
-                start = datetime.datetime.now(datetime.UTC)
-                proc = subprocess.Popen(
-                    cmd_b,
-                    env={"PYTHONPATH": source_dir},
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE, universal_newlines=True
-                )
+                if "fast_diff_py" in args.method:
 
-                # Read the output
-                for line in iter(proc.stdout.readline, ""):
-                    print(f"{line.strip()}")
+                    print(fast_diff_py_str)
+                    start = datetime.datetime.now(datetime.UTC)
+                    proc = subprocess.Popen(
+                        cmd_b,
+                        env={"PYTHONPATH": source_dir},
+                        stdout=subprocess.PIPE,
+                        stderr=subprocess.PIPE, universal_newlines=True
+                    )
 
-                # Read the stderr
-                for line in iter(proc.stderr.readline, ""):
-                    print(f"{line.strip()}")
+                    # Read the output
+                    for line in iter(proc.stdout.readline, ""):
+                        print(f"{line.strip()}")
 
-                return_code = proc.poll()
-                if return_code is not None:
-                    print(f'RETURN CODE', return_code)
+                    # Read the stderr
+                    for line in iter(proc.stderr.readline, ""):
+                        print(f"{line.strip()}")
 
-                end = datetime.datetime.now(datetime.UTC)
+                    return_code = proc.poll()
+                    if return_code is not None:
+                        print(f'RETURN CODE', return_code)
 
-                stats["fast_diff_py"][args.partition_a[i]][process].append((end-start).total_seconds())
+                    end = datetime.datetime.now(datetime.UTC)
+
+                    stats["fast_diff_py"][args.partition_a[i]][process].append((end-start).total_seconds())
 
                 with open(target, "w") as tgt:
                     json.dump(stats, tgt)
