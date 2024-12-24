@@ -36,6 +36,8 @@ def difpy_preamble(directory: List[str], size: int, file: str):
     with open(file, "wb") as f:
         pickle.dump(dif, f)
 
+    del dif
+
 
 def fast_diff_preamble(directory: List[str], size: int, task_dir: str, rotate: bool):
     """
@@ -58,6 +60,11 @@ def fast_diff_preamble(directory: List[str], size: int, task_dir: str, rotate: b
     fdo.full_index()
     fdo.first_loop(fast_diff.FirstLoopConfig(compute_hash=True, shift_amount=0))
     fdo.commit()
+    fdo.config.delete_db = False
+    fdo.config.delete_thumb = False
+    fdo.config.retain_progress = True
+    fdo.cleanup()
+    del fdo
 
 
 def difpy_epilogue(file: str):
