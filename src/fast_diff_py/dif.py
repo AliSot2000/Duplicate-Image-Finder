@@ -8,7 +8,6 @@ from typing import List, Tuple, Optional, Union, Dict
 
 import fast_diff_py
 import fast_diff_py.config as cfg
-from fast_diff_py import FirstLoopRuntimeConfig
 from fast_diff_py.fast_dif import FastDifPy
 
 """
@@ -95,9 +94,6 @@ def dif(_part_a: List[str],
 
     # Setting the process count if it is provided
     if processes is not None:
-        old = fdo.config.first_loop.model_dump()
-        old["cpu_proc"] = processes
-        fdo.config.first_loop = FirstLoopRuntimeConfig.model_validate(old)
         fdo.config.first_loop.cpu_proc = processes
         fdo.config.second_loop.cpu_proc = processes
 
