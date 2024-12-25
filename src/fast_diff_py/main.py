@@ -2,7 +2,7 @@ import logging
 import os
 import shutil
 
-import fast_diff_py.config as cfgp
+import fast_diff_py.config as cfg
 from fast_diff_py.fast_dif import FastDifPy
 import argparse
 
@@ -31,7 +31,7 @@ def execute(_fdo: FastDifPy, output: str = None):
     _fdo.config.delete_thumb = False
 
     # Run the index
-    if _fdo.config.state == cfgp.Progress.INIT:
+    if _fdo.config.state == cfg.Progress.INIT:
         if _fdo.db.dir_table_exists():
             _fdo.db.drop_directory_table()
 
@@ -44,7 +44,7 @@ def execute(_fdo: FastDifPy, output: str = None):
         return
 
     # Run the first loop
-    if _fdo.config.state in (cfgp.Progress.INDEXED_DIRS, cfgp.Progress.FIRST_LOOP_IN_PROGRESS):
+    if _fdo.config.state in (cfg.Progress.INDEXED_DIRS, cfg.Progress.FIRST_LOOP_IN_PROGRESS):
         _fdo.first_loop()
 
     # Exit on sigint
@@ -55,7 +55,7 @@ def execute(_fdo: FastDifPy, output: str = None):
         return
 
     # Run the second loop
-    if _fdo.config.state in (cfgp.Progress.SECOND_LOOP_IN_PROGRESS, cfgp.Progress.FIRST_LOOP_DONE):
+    if _fdo.config.state in (cfg.Progress.SECOND_LOOP_IN_PROGRESS, cfg.Progress.FIRST_LOOP_DONE):
         _fdo.second_loop()
 
     if not _fdo.run:
