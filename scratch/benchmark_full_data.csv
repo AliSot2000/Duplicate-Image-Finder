@@ -1,0 +1,11 @@
+,algorithm,partition size,processes,iteration,time
+0,difpy,2k,16,0,98.647463
+1,difpy,4k,16,0,397.359112
+2,difpy,8k,16,0,1520.747047
+3,difpy,16k,16,0,6038.742855
+4,difpy,32k,16,0,
+5,fast_diff_py,2k,16,0,99.842716
+6,fast_diff_py,4k,16,0,378.81513
+7,fast_diff_py,8k,16,0,1474.764495
+8,fast_diff_py,16k,16,0,5903.805682
+9,fast_diff_py,32k,16,0,22828.439479
