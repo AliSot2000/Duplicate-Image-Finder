@@ -135,10 +135,10 @@ class FastDifPy(GracefulWorker):
         """
         Start the logging process. This is done by starting the QueueListener
         """
-        handler = logging.StreamHandler(stream=sys.stdout)
+        self.handler = logging.StreamHandler(stream=sys.stdout)
         formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-        handler.setFormatter(formatter)
-        self.ql = QueueListener(self.logging_queue, handler, respect_handler_level=True)
+        self.handler.setFormatter(formatter)
+        self.ql = QueueListener(self.logging_queue, self.handler, respect_handler_level=True)
         self.ql.start()
 
     # ==================================================================================================================
