@@ -87,9 +87,12 @@ def execute(_fdo: FastDifPy, output: str = None):
     _fdo.cleanup()
 
 
-if __name__ == "__main__":
+def main():
+    """
+    Everything necessary in the main function to be exposed in the package
+    """
     parser = argparse.ArgumentParser(description='''
-    Find Duplicates and output a DB for the User - https://github.com/AliSot2000/Fast-Image-Deduplicator.''')
+        Find Duplicates and output a DB for the User - https://github.com/AliSot2000/Fast-Image-Deduplicator.''')
 
     # General Arguments
     parser.add_argument("-R", "--recover", type=str, required=False,
@@ -98,7 +101,7 @@ if __name__ == "__main__":
                              "subsequently confirming the continuation of the progress.")
 
     parser.add_argument("-a", "--part_a", type=str, required=True, nargs="+",
-                             help="Provide a list of directories which form partition a")
+                        help="Provide a list of directories which form partition a")
     parser.add_argument("-b", "--part_b", type=str, required=False, nargs="*",
                         help="Provide a list of directories which form partition b. If empty, "
                              "deduplicate within partition a")
@@ -238,3 +241,7 @@ if __name__ == "__main__":
         fdo.config.second_loop.preload_count = args.cache_preload
 
     execute(fdo, output=args.output_dir)
+
+
+if __name__ == "__main__":
+    main()
