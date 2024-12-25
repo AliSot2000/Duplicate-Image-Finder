@@ -358,11 +358,14 @@ def parse_similarity(sim: Union[str, int]) -> float:
         return sim
 
 
-if __name__ == "__main__":
+def main():
+    """
+    Everything necessary in the main function to be exposed in the package
+    """
     # Parameters for when launching difPy via CLI
     parser = argparse.ArgumentParser(description='''
-    Find duplicate or similar images with fast_diff_py - https://github.com/AliSot2000/Fast-Image-Deduplicator
-    ''')
+        Find duplicate or similar images with fast_diff_py - https://github.com/AliSot2000/Fast-Image-Deduplicator
+        ''')
     parser.add_argument('-D', '--directory',
                         type=str,
                         nargs='+',
@@ -446,7 +449,7 @@ if __name__ == "__main__":
     if args.logs is not None:
         warnings.warn('Parameter "logs" was deprecated with difPy v4.1. '
                       'Using it might lead to an exception in future versions. Consider updating your script.',
-            FutureWarning, stacklevel=2)
+                      FutureWarning, stacklevel=2)
 
     # Validate the pixel size
     if not 10 < args.px_size < 5000:
@@ -479,25 +482,25 @@ if __name__ == "__main__":
     # Progress recovery and fast_diff_py object generation
     # ==================================================================================================================
     if os.path.exists(os.path.join(a_dir, ".task.json")) \
-        and input("A config from a previous iteration is present. Do you want to discard the progress? (y/n)\n") \
+            and input("A config from a previous iteration is present. Do you want to discard the progress? (y/n)\n") \
             .lower() == 'y':
-            output = dif(
-                _part_a=part_a,
-                _part_b=part_b,
-                _similarity=similarity,
-                px_size=args.px_size,
-                limit_ext=args.limit_extensions,
-                processes=args.processes,
-                chunk=args.chunksize,
-                recursive=args.recursive,
-                lazy=args.lazy,
-                rotate=args.rotate,
-                cli_args=cli_args,
-                debug=args.show_progress
-            )
+        output = dif(
+            _part_a=part_a,
+            _part_b=part_b,
+            _similarity=similarity,
+            px_size=args.px_size,
+            limit_ext=args.limit_extensions,
+            processes=args.processes,
+            chunk=args.chunksize,
+            recursive=args.recursive,
+            lazy=args.lazy,
+            rotate=args.rotate,
+            cli_args=cli_args,
+            debug=args.show_progress
+        )
 
     elif os.path.exists(os.path.join(a_dir, ".fast_diff.db")) \
-        and input("A database from a previous iteration is present. Do you want overwrite that database? (y/n)\n") \
+            and input("A database from a previous iteration is present. Do you want overwrite that database? (y/n)\n") \
             .lower() == 'y':
         output = dif(
             _part_a=part_a,
@@ -514,7 +517,7 @@ if __name__ == "__main__":
             debug=args.show_progress
         )
     elif not os.path.exists(os.path.join(a_dir, ".task.json")) \
-        and not os.path.exists(os.path.join(a_dir, ".fast_diff.db")):
+            and not os.path.exists(os.path.join(a_dir, ".fast_diff.db")):
         output = dif(
             _part_a=part_a,
             _part_b=part_b,
@@ -602,3 +605,7 @@ if __name__ == "__main__":
     output.config.delete_thumb = True
     output.commit()
     output.cleanup()
+
+
+if __name__ == "__main__":
+    main()
