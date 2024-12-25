@@ -16,6 +16,5 @@
 - [X] Fill with paths
 
 # Ideas:
-- No shared cache, copy into the args
-- Implement entire block including cache with gpu
-- 
+- [ ] Implement Blocking (Submit one Cache to the args and do mat blocking like spca)
+- [X] Implement GPU Worker -> Done, not faster
