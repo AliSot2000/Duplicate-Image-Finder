@@ -58,7 +58,7 @@ class FastDifPy(GracefulWorker):
     dir_b_count: Optional[int] = None
 
     # Callables needed for the first and second loop
-    hash_fn: Optional[Callable[[str], str] | Callable[[np.ndarray[np.uint8]], str]] = None
+    hash_fn: Optional[Union[Callable[[str], str], Callable[[np.ndarray[np.uint8]], str]]] = None
     cpu_diff: Optional[Callable[[np.ndarray[np.uint8], np.ndarray[np.uint8], bool], float]] = None
     gpu_diff: Optional[Callable[[np.ndarray[np.uint8], np.ndarray[np.uint8], bool], float]] = None
     gpu_worker_class: Optional[Type[SecondLoopWorker]] = None
@@ -280,9 +280,9 @@ class FastDifPy(GracefulWorker):
     # INIT
     # ==================================================================================================================
 
-    def __init__(self, part_a: str | List[str] = None, part_b: str | List[str] = None, config: Config = None,
-                 default_cfg_path: str = None, purge: bool = False, test_mode: bool = False,
-                 db_inst: Type[SQLiteDB] = None, **kwargs):
+    def __init__(self, part_a: Union[str, List[str]] = None, part_b: Union[str, List[str]] = None,
+                 config: Config = None, default_cfg_path: str = None, purge: bool = False, test_mode: bool = False,
+                 db_inst: Type[SQLiteDB] = None, workdir: str = None, **kwargs):
         """
         Initialize the FastDifPy object.
 
@@ -300,6 +300,7 @@ class FastDifPy(GracefulWorker):
         :param purge: Whether to purge the existing progress and start anew (has only effect for first and third source)
         :param test_mode: expects a config to be passed, sets up loging and sets the config. Everything else is ignored.
         :param db_inst: The Database to use. If not provided defaults to the sqlite db within this package.
+        :param workdir: The working directory override where to store config, db and thumbnails.
 
         :kwargs: Additional arguments to be passed to the Config object. Check out the config objects for more details.
 
@@ -333,7 +334,7 @@ class FastDifPy(GracefulWorker):
             self.logger.info("Using Provided Config")
 
             # Populate on empty
-            self.add_defaults_to_config()
+            self.add_defaults_to_config(path=workdir)
 
             if purge:
                 self.logger.info("Purging any preexisting progress and using provided config")
@@ -354,7 +355,7 @@ class FastDifPy(GracefulWorker):
 
             self.config.config_path = default_cfg_path
 
-            self.add_defaults_to_config()
+            self.add_defaults_to_config(path=workdir)
 
             self.reconnect_to_existing()
 
@@ -372,14 +373,14 @@ class FastDifPy(GracefulWorker):
                     self.config = Config.model_validate_json(file.read())
 
                 self.config.config_path = config_path
-                self.add_defaults_to_config()
+                self.add_defaults_to_config(path=workdir)
                 self.reconnect_to_existing()
 
             else:
                 if part_b is None:
                     part_b = []
                 self.config = Config(part_a=part_a, part_b=part_b, **kwargs)
-                self.add_defaults_to_config()
+                self.add_defaults_to_config(path=workdir)
                 self.clean_and_init()
 
         else:
@@ -389,14 +390,17 @@ class FastDifPy(GracefulWorker):
 
         self.register_interrupts()
 
-    def add_defaults_to_config(self):
+    def add_defaults_to_config(self, path: str = None):
         """
         Add default paths to config if they are not provided. Those being:
         - db_path
         - thumb_dir
         - config_path
         """
-        rp = self.config.part_a if isinstance(self.config.part_a, str) else self.config.part_a[0]
+        if path is None:
+            rp = self.config.part_a if isinstance(self.config.part_a, str) else self.config.part_a[0]
+        else:
+            rp = path
 
         if self.config.db_path is None:
             self.config.db_path = os.path.join(rp, self.default_db_file)
