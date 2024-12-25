@@ -118,11 +118,11 @@ if __name__ == "__main__":
                         help="Compute Hashes in First Loop")
     parser.add_argument("-S", "--shift_amount", required=False, type=int,
                         help="Shift amount by which bytes of the images should be shifted. Default from Config")
-    parser.add_argument("-f", "--no_compress", action="store_false",
+    parser.add_argument("-f", "--no_compress", action="store_true",
                         help="Disable the storing of the compressed images in the first loop.")
 
     # Arguments for second loop
-    parser.add_argument("-d", "--no_second_loop", action="store_false",
+    parser.add_argument("-d", "--no_second_loop", action="store_true",
                         help="Disable the execution of the second loop. (All to all image comparison)")
     parser.add_argument("-m", "--skip_matching_hash", action="store_true",
                         help="Images with matching hashes are deemed duplicates. Requires -H / --hash")
