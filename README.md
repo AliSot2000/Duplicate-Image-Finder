@@ -246,9 +246,9 @@ datasets.
 
 ### Benchmarking:
 For benchmarking, I used my Laptop with:
-- 16Gb RAM, 4Gb Swap
+- 16GB RAM, 4GB Swap
 - Ryzen 9 5900HS 
-- 1Tb SSD
+- 1TB SSD
 
 From the [IMDB Dataset](https://data.vision.ee.ethz.ch/cvl/rrothe/imdb-wiki/?ref=hackernoon.com), partitions were 
 generated using the [duplicate_generator.py](scripts/duplicate_generator.py) in partition mode. Datasets with sizes of 
