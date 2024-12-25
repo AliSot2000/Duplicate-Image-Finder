@@ -1,134 +1,239 @@
-import fast_diff_py.config as cfg
+import logging
+import os
+import shutil
+
+import fast_diff_py.config as cfgp
 from fast_diff_py.fast_dif import FastDifPy
+import argparse
 
 
-# TODO finish implementation of this code
-
-def dif(dir_a: str, dir_b: str, purge: bool = False, **kwargs):
+def recover(path: str, output: str = None):
     """
-    kwargs are all attributes of the Config class, except for root_dir_a and root_dir_b
+    Recover computation from a given config or a given directory.
 
-    :param dir_a: The first directory to compare
-    :param dir_b: The second directory to compare
-    :param purge: Delete any existing progress should it exist
-
-    :return: FastDifPy object
+    :param path: Path to config or directory.
+    :param output: Path to output directory or output file to move db to in the end.
     """
-    fdo = FastDifPy(part_a=dir_a, part_b=dir_b, purge=purge, **kwargs)
+    if os.path.isdir(path):
+        local_fdo = FastDifPy(part_a=path)
+    else:
+        local_fdo = FastDifPy(part_a=os.path.dirname(path))
 
+    execute(local_fdo, output)
+
+def execute(_fdo: FastDifPy, output: str = None):
+    """
+    Run FastDiffPy and finally copy the database to the output path
+    """
     # Keep progress, we're not done
-    fdo.config.retain_progress = True
-    fdo.config.delete_db = False
-    fdo.config.delete_thumb = False
+    _fdo.config.retain_progress = True
+    _fdo.config.delete_db = False
+    _fdo.config.delete_thumb = False
 
     # Run the index
-    if fdo.config.state == cfg.Progress.INIT:
-        if fdo.db.dir_table_exists():
-            fdo.db.drop_directory_table()
+    if _fdo.config.state == cfgp.Progress.INIT:
+        if _fdo.db.dir_table_exists():
+            _fdo.db.drop_directory_table()
 
-        fdo.full_index()
+        _fdo.full_index()
 
     # Exit in sigint
-    if not fdo.run:
-        fdo.commit()
-        fdo.cleanup()
+    if not _fdo.run:
+        _fdo.commit()
+        _fdo.cleanup()
         return
 
     # Run the first loop
-    if fdo.config.state in (cfg.Progress.INDEXED_DIRS, cfg.Progress.FIRST_LOOP_IN_PROGRESS):
-        fdo.first_loop()
+    if _fdo.config.state in (cfgp.Progress.INDEXED_DIRS, cfgp.Progress.FIRST_LOOP_IN_PROGRESS):
+        _fdo.first_loop()
 
     # Exit on sigint
-    if not fdo.run:
+    if not _fdo.run:
         print("First Loop Exited")
-        fdo.commit()
-        fdo.cleanup()
+        _fdo.commit()
+        _fdo.cleanup()
         return
 
     # Run the second loop
-    if fdo.config.state in (cfg.Progress.SECOND_LOOP_IN_PROGRESS, cfg.Progress.FIRST_LOOP_DONE):
-        fdo.second_loop()
+    if _fdo.config.state in (cfgp.Progress.SECOND_LOOP_IN_PROGRESS, cfgp.Progress.FIRST_LOOP_DONE):
+        _fdo.second_loop()
 
-    if not fdo.run:
-        fdo.commit()
-        fdo.cleanup()
+    if not _fdo.run:
+        _fdo.commit()
+        _fdo.cleanup()
         return
 
     # We're done, clean up
-    fdo.config.retain_progress = False
-    fdo.config.delete_db = True
-    fdo.config.delete_thumb = True
+    _fdo.commit()
 
-    return fdo
+    if output is not None:
+        if os.path.isdir(output):
+            tgt = os.path.join(output, "fast_diff_py.db")
+            print(f"Moving Finished Database to {tgt}")
+            shutil.copy(_fdo.config.db_path, tgt)
+        else:
+            print(f"Moving Finished Database to {output}")
+            shutil.copy(_fdo.config.db_path, output)
+    else:
+        print(f"Renaming Database in work dir to fast_diff_py.db")
+        name = "fast_diff_py.db"
+        shutil.copy(_fdo.config.db_path, os.path.join(os.path.dirname(_fdo.config.db_path), name))
 
-    # Keep progress, we're not done
-    fdo.config.retain_progress = True
-    fdo.config.delete_db = False
-    fdo.config.delete_thumb = False
+    _fdo.config.retain_progress = False
+    _fdo.config.delete_db = True
+    _fdo.config.delete_thumb = True
 
-    # Run the index
-    if fdo.config.state == cfg.Progress.INIT:
-        if fdo.db.dir_table_exists():
-            fdo.db.drop_directory_table()
-
-        fdo.full_index()
-
-    # Exit in sigint
-    if not fdo.run:
-        fdo.commit()
-        fdo.cleanup()
-        return
-
-    # Run the first loop
-    if fdo.config.state in (cfg.Progress.INDEXED_DIRS, cfg.Progress.FIRST_LOOP_IN_PROGRESS):
-        fdo.first_loop()
-
-    # Exit on sigint
-    if not fdo.run:
-        print("First Loop Exited")
-        fdo.commit()
-        fdo.cleanup()
-        return
-
-    # Run the second loop
-    if fdo.config.state in (cfg.Progress.SECOND_LOOP_IN_PROGRESS, cfg.Progress.FIRST_LOOP_DONE):
-        fdo.second_loop()
-
-    if not fdo.run:
-        print("Second Loop Exited")
-        fdo.commit()
-        fdo.cleanup()
-        return
-
-    # We're done, clean up
-    fdo.config.retain_progress = False
-    fdo.config.delete_db = True
-    fdo.config.delete_thumb = True
-
-    return fdo
+    _fdo.commit()
+    _fdo.cleanup()
 
 
 if __name__ == "__main__":
-    # dir_a = "/home/alisot2000/Desktop/SAMEPLE_MIRA/dir_a"
-    # dir_b = "/home/alisot2000/Desktop/SAMEPLE_MIRA/dir_c"
+    parser = argparse.ArgumentParser(description='''
+    Find Duplicates and output a DB for the User - https://github.com/AliSot2000/Fast-Image-Deduplicator.''')
 
-    dir_a = "/home/alisot2000/Desktop/test-dirs/dir_a"
-    dir_b = "/home/alisot2000/Desktop/test-dirs/dir_b"
+    # General Arguments
+    parser.add_argument("-R", "--recover", type=str, required=False,
+                        help="Provide either a directory or the path to a config file from which to recover. "
+                             "(Can be achieved implicitly by providing -a /path/to/dir, not providing -p and "
+                             "subsequently confirming the continuation of the progress.")
 
-    # dir_a = "/home/alisot2000/Desktop/workbench_tiny/dir_a"
-    # dir_b = "/home/alisot2000/Desktop/workbench_tiny/dir_b"
-    o = dif(dir_a=dir_a, dir_b=dir_b, purge=True)
-    for p in o.get_diff_pairs():
-        print(p)
+    parser.add_argument("-a", "--part_a", type=str, required=True, nargs="+",
+                             help="Provide a list of directories which form partition a")
+    parser.add_argument("-b", "--part_b", type=str, required=False, nargs="*",
+                        help="Provide a list of directories which form partition b. If empty, "
+                             "deduplicate within partition a")
+    parser.add_argument("-r", "--no_recursive", action="store_false",
+                        help="Disable recursive search in the directories provided in partition a and partition b")
+    parser.add_argument("-c", "--compression_target", type=int, required=False,
+                        help="Size target to which the images should be compressed. Default from Config")
+    parser.add_argument("-p", "--purge", action="store_true",
+                        help="Delete any existing progress should it exist in the first directory of partition a")
+    parser.add_argument("-C", "--cpu_proc", type=int, required=False,
+                        help="Number of CPU cores to use. Default number of CPU cores available.")
+    parser.add_argument("-v", "--verbose", action="store_true",
+                        help="Enable Logging at Debug Level")
 
-    for c in o.get_diff_clusters(dir_a=True):
-        print(c)
+    # Arguments for the first loop
+    parser.add_argument("-H", "--hash", action="store_true",
+                        help="Compute Hashes in First Loop")
+    parser.add_argument("-S", "--shift_amount", required=False, type=int,
+                        help="Shift amount by which bytes of the images should be shifted. Default from Config")
+    parser.add_argument("-f", "--no_compress", action="store_false",
+                        help="Disable the storing of the compressed images in the first loop.")
 
-    for c in o.get_diff_clusters(dir_a=False):
-        print(c)
+    # Arguments for second loop
+    parser.add_argument("-d", "--no_second_loop", action="store_false",
+                        help="Disable the execution of the second loop. (All to all image comparison)")
+    parser.add_argument("-m", "--skip_matching_hash", action="store_true",
+                        help="Images with matching hashes are deemed duplicates. Requires -H / --hash")
+    parser.add_argument("-M", "--match_aspect", type=float, required=False,
+                        help=f"Either match size of image (set to 0) or match aspect ratio of images within a degree")
+    parser.add_argument("-T", "--threshold", type=float, required=False,
+                        help="Threshold below which images are considered duplicates. Default 200.0")
+    parser.add_argument("-l", "--cache_preload", type=int, required=False,
+                        help="Number of Caches in RAM at any point in time.")
 
-    o.config.retain_progress = False
-    o.config.delete_db = False
-    o.config.delete_thumb = True
+    # Process arguments
+    parser.add_argument("-t", "--temp_dir", type=str, required=False,
+                        help="Temp directory where progress, db and thumbnails are stored.")
 
-    o.cleanup()
+    parser.add_argument("-o", "--output_dir", type=str, required=False,
+                        help="Output directory where db moved to once the process is done..")
+
+    args = parser.parse_args()
+
+    # Short circuit if we get a recover argument
+    if args.recover:
+        recover(args.recover)
+        exit(0)
+
+    # Verifying progress first
+    if args.temp_dir is not None:
+        cfgp = os.path.join(args.temp_dir, FastDifPy.default_config_file)
+        db = os.path.join(args.temp_dir, FastDifPy.default_db_file)
+    else:
+        cfgp = os.path.join(args.part_a[0], FastDifPy.default_config_file)
+        db = os.path.join(args.part_a[0], FastDifPy.default_db_file)
+
+    dbe = os.path.exists(db)
+    cfge = os.path.exists(cfgp)
+
+    if dbe or cfge:
+        print("Progress from a previous attempt exists")
+        if cfge:
+            print(f"A Config File was found at {cfgp}")
+        if dbe:
+            print(f"A Database was found at {db}")
+
+        if input("Do you want to override the existing progress? [y/n] ").lower() == "y":
+            args.purge = True
+        else:
+            recover(args.temp_dir if args.temp_dir is not None else args.part_a[0])
+            exit(0)
+
+    # Validating args
+    if args.skip_matching_hash and not args.hash:
+        raise ValueError("--skip_matching_hash requires --hash")
+
+    if args.cpu_proc is not None and args.cpu_proc < 1:
+        raise ValueError("Number of CPUs needs to be used must be >= 1")
+
+    if args.no_compress and not args.no_second_loop:
+        raise ValueError("second loop requires compressed images. add --no_second_loop or remove --no_compress")
+
+    # Make directory if not exists
+    if args.temp_dir is not None and not os.path.exists(args.temp_dir):
+        os.makedirs(args.temp_dir)
+
+    fdo = FastDifPy(part_a=args.part_a, part_b=args.part_b, purge=args.purge, workdir=args.temp_dir)
+
+    # Setting the arguments
+    if args.verbose:
+        fdo.handler.setLevel(logging.DEBUG)
+
+    # Setting the recursive
+    fdo.config.recurse = not args.no_recursive
+
+    # Setting the compression target
+    if args.compression_target is not None:
+        if args.compression_target < 16 or args.compression_target > 4096:
+            raise ValueError("Compression target must be between 16 and 4096")
+
+        fdo.config.compression_target = args.compression_target
+
+    # Setting cpu processes
+    if args.cpu_proc is not None:
+        fdo.config.first_loop.cpu_proc = args.cpu_proc
+        fdo.config.second_loop.cpu_proc = args.cpu_proc
+
+    # Setting the first loop config
+    fdo.config.first_loop.compute_hash = args.hash
+    fdo.config.first_loop.shift_amount = args.shift_amount
+    fdo.config.first_loop.compress = not args.no_compress
+
+    # Setting second loop arguments
+    if args.no_second_loop:
+        fdo.config.do_second_loop = False
+
+    # Set the hash
+    fdo.config.second_loop.skip_matching_hash = args.skip_matching_hash
+
+    # Setting aspect match aspect ratio
+    if args.match_aspect is not None:
+        fdo.config.second_loop.match_aspect_by = args.match_aspect
+
+    # Setting threshold
+    if args.threshold is not None:
+        if args.threshold < 0:
+            raise ValueError("Threshold must be >= 0")
+
+        fdo.config.second_loop.diff_threshold = args.threshold
+
+    # Set the preload count
+    if args.cache_preload is not None:
+        if args.cache_preload < 1:
+            raise ValueError("Caches preload must be > 1")
+
+        fdo.config.second_loop.preload_count = args.cache_preload
+
+    execute(fdo, output=args.output_dir)
