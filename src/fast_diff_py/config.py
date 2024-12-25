@@ -37,6 +37,8 @@ class FirstLoopConfig(BaseModel):
     elapsed_seconds: float = Field(0,
                                  description="The number of seconds the first loop has taken. "
                                              "Set on exit of first loop")
+    cpu_proc: int = Field(default_factory=lambda: os.cpu_count(),
+                            description="The number of CPU processes to use for the first loop")
 
 class FirstLoopRuntimeConfig(FirstLoopConfig):
     """
@@ -44,8 +46,6 @@ class FirstLoopRuntimeConfig(FirstLoopConfig):
     """
     batch_size: Optional[int] = Field(None,
                                         description="The batch size for the first loop")
-    cpu_proc: int = Field(default_factory=lambda: os.cpu_count(),
-                            description="The number of CPU processes to use for the first loop")
     start_dt: datetime.datetime = Field(default_factory=lambda: datetime.datetime.now(datetime.UTC),
                                         description="Datetime at which the first loop started")
 
