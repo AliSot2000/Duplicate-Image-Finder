@@ -26,7 +26,6 @@ from fast_diff_py.utils import sizeof_fmt, BlockProgress, build_start_blocks_a, 
 class FastDifPy(GracefulWorker):
     db: SQLiteDB = None
     config: Config = None
-    logger: logging.Logger
 
     # Process related
     handles: Union[List[mp.Process], None] = None
@@ -36,7 +35,11 @@ class FastDifPy(GracefulWorker):
     cmd_queue: Optional[mp.Queue] = None
     result_queue: Optional[mp.Queue] = None
     logging_queue: mp.Queue = mp.Queue()
+
+    # Logging
+    logger: logging.Logger
     ql: logging.handlers.QueueListener = None
+    handler: logging.StreamHandler = None
 
     # Used for logging
     _enqueue_counter: int = 0
