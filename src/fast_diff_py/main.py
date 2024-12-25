@@ -208,7 +208,8 @@ if __name__ == "__main__":
 
     # Setting the first loop config
     fdo.config.first_loop.compute_hash = args.hash
-    fdo.config.first_loop.shift_amount = args.shift_amount
+    if args.shift_amount is not None:
+        fdo.config.first_loop.shift_amount = args.shift_amount
     fdo.config.first_loop.compress = not args.no_compress
 
     # Setting second loop arguments
