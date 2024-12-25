@@ -2,8 +2,8 @@
 - [X] Implement no-rotation
 - [X] Arbitrary number of directories
 - [X] Union of Directories 
-- [ ] Implement moving of duplicate files to another location 
-- [ ] Implement deleting of files (with a prompt and without)
+- [X] Implement moving of duplicate files to another location 
+- [X] Implement deleting of files (with a prompt and without)
 - [X] Implement non-recursive search
 - [X] DB Keep track of non-used files
 - [X] DB Add column for partition
