@@ -30,15 +30,15 @@ those with an interruptible implementation.
 and errors encountered while comparing.
 
 ### Features of FastDifPy:
-- `Progress recovery` - The process can be interrupted and resumed at a later time. Also, the reimplementation of 
+- `Progress Recovery` - The process can be interrupted and resumed at a later time. Also, the reimplementation of 
 `dif.py` is capable of that.
 - `Limited RAM Footprint` - The images are first compressed and stored onto the file system. The main process then 
 subsequently loads all the images within a block and then schedules them to be compared by the worker processes
 - `DB Backend` - An `SQLite` DB is used to store all things. This helps with the small memory footprint as well as 
 allows the storing of enormous datasets.
-- `Extendable with user defined functions` - The hash function as well as the two compare functions can be overwritten 
+- `Extendable With User Defined Functions` - The hash function as well as the two compare functions can be overwritten 
 by the user. It is also possible to circumvent the integrated indexer and pass `FastDiffPy` a list of files directly. 
-Refer to the [User Extension Section](#User Extensions)
+Refer to the [User Extension Section](#User-Extension)
 - `GPU Support` - The GPU can be used. For now, only the mse computation is done on GPU. 
 `FEATURE`: Later Implementation will also move the image cache entirely onto the gpu leading to reduced memory traffic.
 - `Highly Customizable with Tunables` - FastDifPy has extensive configuration options. 
@@ -99,7 +99,7 @@ disallowed files from the directory table with `get_directory_disallowed`
 
 ### Configuration
 `FastDiffPy` can be configured using five different objects: 
-`Config`, `FirstLoopConfig`, `FirstLoopRuntimeConfig`, `SecondLoopConfig`, `SecondLoopRuntimeConfig`
+`Config`, `FirstLoopConfig`, `FirstLoopRuntimeConfig`, `SecondLoopConfig`, `SecondLoopRuntimeConfig`.
 The Configuration is implemented using Pydantic. 
 The `config.py` contains extensive documentation in the description fields.
 
@@ -111,7 +111,8 @@ Otherwise, only that directory is searched.
 - `rotate` - Images are rotated for both the comparison and for hashing. Can be disabled with this option.
 - `ignore_names` - Names of files or directories to be ignored. 
 - `ignore_paths` - All filepaths that have a prefix defined in this list will be ignored
-- `allowed_file_extensions` - Override if you want only a specific set of file extensions to be indexed. Keep the dot so `.png`
+- `allowed_file_extensions` - Override if you want only a specific set of file extensions to be indexed. Keep the dot 
+of the file extension so if you want to include png images add `.png`
 - `db_path` - File Path to the associated DB
 - `config_path` - Path to where this config object should be stored
 - `thumb_dir` - Path to where the compressed images are stored. 
@@ -193,6 +194,18 @@ their size or aspect ratios.
 4 will only increase the time it takes to drain the queue if you want to interrupt the process midway.
 - `elapsed_seconds` - Once the second loop completes, it will contain the number of second the second loop took.
 
+##### SecondLoopRuntimeConfig:
+Before the Second Loop is executed, the `second_loopo` config will be converted with defaults to a
+`SecondoLoopRuntimeConfig`. The `second_loop` function of the `FastDiffPy` object also provides an argument to overwrite 
+the config.
+- `cache_index` - Index of the next cache to be filled. (Uses the `blocks` attribute of the `FastDiffPy` object to 
+determine which images to load)
+- `finished_cache_index` - Highest cache key which was removed from RAM because all paris within that cache were computed.
+- `start_dt` - Used to compute the `elapsed_seconds` once the second loop is done.
+
+**INFO**: The reported `cache_index` in `Created Cache with key: ...` as well as `Pruning cache key: ...` is offset by 
+one compared to the config
+
 ### Logging
 FastDiffPy logs using the python logging library and uses QueueHandler and QueueListeners to join all logs into one.
 All Workers get their own logger named like `FirstLoopWorker_XXX` or `SecondLoopWorker_XXX` with `XXX` replacing its id.
@@ -206,19 +219,7 @@ In order to avoid errors, call the `FastDiffPy.cleanup()` method which stops the
 `FastDiffPy.test_cleanup` stops it as well. If you are doing something beyond the extent of the available functions, 
 call `FastDiffPy.qh.stop()` separately.
 
-##### SecondLoopRuntimeConfig:
-Before the Second Loop is executed, the `second_loopo` config will be converted with defaults to a
-`SecondoLoopRuntimeConfig`. The `second_loop` function of the `FastDiffPy` object also provides an argument to overwrite 
-the config.
-- `cache_index` - Index of the next cache to be filled. (Uses the `blocks` attribute of the `FastDiffPy` object to 
-determine which images to load)
-- `finished_cache_index` - Highest cache key which was removed from RAM because all paris within that cache were computed.
-- `start_dt` - Used to compute the `elapsed_seconds` once the second loop is done.
-
-**INFO**: The reported `cache_index` in `Created Cache with key: ...` as well as `Pruning cache key: ...` is offset by 
-one compared to the config
-
-### User Extension:
+### User Extension
 You as the user have the ability to provide your own functions to the FastDiffPy object.
 The functions you can provde are the following:
 - `hash_fn` Can either be a function taking an `np.ndarray` and outputting a hash string or (for backwards 
@@ -243,6 +244,82 @@ Additionally, if you do not set `delete_db` the db will remain after the `cleanu
 allowing you to connect to it later on to examine the duplicates you've found. This can be useful especially for large 
 datasets.
 
+### Benchmarking:
+For benchmarking, I used my Laptop with:
+- 16Gb RAM, 4Gb Swap
+- Ryzen 9 5900HS 
+- 1Tb SSD
+
+From the [IMDB Dataset](https://data.vision.ee.ethz.ch/cvl/rrothe/imdb-wiki/?ref=hackernoon.com), partitions were 
+generated using the [duplicate_generator.py](scripts/duplicate_generator.py) in partition mode. Datasets with sizes of 
+2000, 4000, 8000, 16000 and 32000 images were created for the benchmark. 
+
+To get some sense of the speeds present, I benchmarked the `build` and `search` operation of _difPy_ against the 
+`first_loop` and `second_loop` of _FastDiffPy_ in an isolated manner.
+
+To get a sense of the performance, I'm looking at worst case performance. That means, no optimizations using 
+image shape or no rotation. The only performance optimization I'm doing is checking equality of the two tensors. 
+
+##### Compression Benchmarks
+Both _difPy_ and _FastDiffPy_ compress the images in a first step from their original size to a common thumbnail size.
+Due to the time it takes to run the benchmarks, I start at a minimum of 4 processes and limit ourselves to a partition 
+size of 8000 images in place of 32000.
+The benchmarks were run with [benchmark_compression.py](scripts/benchmark_compression.py)
+Each benchmark was run three times for some statistical relevance and the first loop of *FastDiffPy* was run both with 
+the computation of the hashes of the thumbnails and without.
+
+![Compression Time vs Processes](plots/comp_time_all_vs_proc.png)
+
+![Speedup vs Processes](plots/comp_speedup_vs_proc.png)
+
+As can see from the plots, `FastDiffPy` is faster than `difPy`. Quite notable in the plot of the speedup is the 
+impact of hyper threading on performance:    
+The speedup without hash increases between 8 and 16 processes. This indicates an IO bottleneck. This confirms the 
+intuition, that writing the compressed thumbnails to disk is a IO bound operation. It can also observe the 
+performance dropping when computing hashes for the thumbnails which confirms the intuition that the computation of the 
+hashes takes more time than compressing and storing the image to disk. And since the hash computation is a compute 
+bound task,a negative impact of hyper threading on performance can be observed.
+
+##### Deduplication Benchmarks
+Deduplication is Benchmarked using the [benchmark_deduplication.py](scripts/benchmark_deduplicate.py)
+
+In Deduplication, FastDiffPy doesn't live up to its name and runs slower than difPy. This is not entirely unsurprising
+since FastDiffPy doesn't make the assumption of infinite RAM size. This causes overhead due to maintaining a subset of 
+images in RAM which need to be loaded, unloaded and copied into each process. Sadly, the shared RAM Cache also takes a 
+hefty performance penalty when adding and removing Blocks of images because all process synchronize for that operation.
+Additionally, FastDiffPy also maintains only the paris of images which have a delta less than the one specified. 
+This optimization is also made to be able to deduplicate massive datasets which surpass RAM size. But the operation of
+filtering and writing to the SQLite database i.e. writing to disk also costs performance.
+
+These graphs show a possible optimization that can be made in future iterations of the Framework. At the moment,
+each process takes one image from one partition and compares it against a series of images from the other partition. 
+This is not optimal in the sense of cache locality. Future implementations should schedule a block of multiple images 
+of partition a and partition b to the child processes. Within these blocks, the child process is then able to optimize 
+for cache locality which should speedup performance by some margin. 
+
+![Deduplication Time vs Processes](plots/dedup_all_vs_proc.png)
+![Speedup Deduplication vs Processes](plots/dedup_speedup_vs_proc.png)
+
+It is noteworthy that the performance penalty incurred by FastDiffPy is less substantial at with larger datasets. This 
+points again to the strength of FastDiffPy in cases of massive datasets where the cost of maintaining a RAM cache makes 
+sense.
+
+##### Overall Performance
+In a last step, I benchmarked the two `dif.py` scripts provided by *difPy* and *FastDiffPy*. The benchmark was performed
+using [benchmark_scaling,py](scripts/benchmark_scaling.py). Because the last benchmark with two partitions of 32000 
+images takes 6h to run, these benchmarks were only run once.
+
+![Time Taken vs Partition Size](plots/script_size_vs_time.png)
+![Time Delta vs Partition Size](plots/script_size_vs_delta.png)
+
+Using the full scripts, a performance improvement with larger datasets can once again be observed in favor of 
+FastDiffPy. It's also notable that the performance increases observed overall outstrip the ones observed in the 
+[Compression Benchmark](#Compression-Benchmarks). This indicates that the already reduced number of pairs stored in the
+db as well as the generation of the duplicate clusters using SQLite is more efficient than the pure python 
+implementation of *difPy*. The last and most striking observation is the limits of *difPy*: 
+At a size of 32000 images per partition, `difPy` runs into a RAM overflow. FastDiffPy handles that just fine because 
+of the RAM cache. This being the last pointer to the strength of FastDiffPy for enormous datasets.
+
 ### Appendix:
 As I've already mentioned. Sometimes the problem is already solved. So before you start implementing a high performing 
 deduplicator, consider looking at these two projects.
@@ -253,10 +330,7 @@ This allows you to generate duplicates from a given dataset. This script was use
 [IMDB Dataset](https://data.vision.ee.ethz.ch/cvl/rrothe/imdb-wiki/?ref=hackernoon.com) to generate test cases for to 
 benchmark different implementations and configurations of this Package.
 
-All scripts in this file are available in the `scripts/` directory. 
-
-##### Benchmarking:
-TODO: Run the benchmarks.
+All scripts in this file are available in the `scripts/` directory.
 
 ##### Table Definitions:
 **Directory Table**
