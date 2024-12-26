@@ -1321,6 +1321,7 @@ class FastDifPy(GracefulWorker):
 
         # Check the configuration
         if not self.check_second_loop_config(self.config.second_loop):
+            self.logger.info("Done with Second Loop")
             return
 
         # Need to populate the cache before the second loop workers are instantiated
