@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "fast-diff-py"
-version = "0.3.0"
+version = "1.0.1"
 description = "Multiprocessing implementation of difpy with a focus on performance, disk cache and progress retention."
 authors = ["AliSot2000 <alisot200@gmail.com>"]
 license = "MIT"
@@ -22,13 +22,13 @@ include = ["plots/"]
 
 [tool.poetry.dependencies]
 python = "^3.12"
-numpy = ">=2.1.2,<2.2.0"
-opencv-python = ">=4.10.0.84,<4.11.0.0"
-scikit-image = ">=0.24.0,<0.25.0"
-annotated-types = ">=0.7.0,<0.8.0"
-pydantic = ">=2.9.2,<2.10.0"
-matplotlib = "3.9.2"
 cupy = {version = ">=13.3.0,<13.4.0", optional = true}
+numpy = "^2.2.1"
+scikit-image = "^0.25.0"
+pydantic = "^2.10.4"
+matplotlib = "^3.10.0"
+annotated-types = "^0.7.0"
+opencv-python = "^4.10.0.84"
 
 [tool.poetry.group.dev.dependencies]
 jupyterlab = "4.3.4"
