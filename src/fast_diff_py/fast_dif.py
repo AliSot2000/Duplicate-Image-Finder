@@ -199,6 +199,7 @@ class FastDifPy(GracefulWorker):
         :param threshold: The threshold for the difference
         """
         self.db.drop_diff(threshold)
+        self.db.vacuum()
 
     def populate_partition(self, paths: Iterable[str], part_a: bool = True, check_ext: bool = False):
         """

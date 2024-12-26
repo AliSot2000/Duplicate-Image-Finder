@@ -166,3 +166,6 @@ class BaseSQliteDB:
         self.sq_con.close()
         self.sq_con = None
         self.sq_cur = None
+
+    def vacuum(self):
+        self.sq_cur.execute("VACUUM")
