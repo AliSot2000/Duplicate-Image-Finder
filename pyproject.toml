@@ -22,13 +22,13 @@ include = ["plots/"]
 
 [tool.poetry.dependencies]
 python = "^3.12"
-cupy = {version = ">=13.3.0,<13.4.0", optional = true}
 numpy = "^2.2.1"
 scikit-image = "^0.25.0"
 pydantic = "^2.10.4"
 matplotlib = "^3.10.0"
 annotated-types = "^0.7.0"
 opencv-python = "^4.10.0.84"
+cupy = {version = "^13.3.0", optional = true}
 
 [tool.poetry.group.dev.dependencies]
 jupyterlab = "4.3.4"
