@@ -1167,21 +1167,10 @@ class FastDifPy(GracefulWorker):
         if config is not None:
             self.config.first_loop = config
 
-        # Build runtime config if necessary
-        if not isinstance(self.config.first_loop, FirstLoopRuntimeConfig):
-            self.config.first_loop = self.build_first_loop_runtime_config(self.config.first_loop)
-        else:
-            # Factory not used -> set start_dt manually
-            self.config.first_loop.start_dt = datetime.datetime.now(datetime.timezone.utc)
-
-        # No computation required. Skip it.
-        if not (self.config.first_loop.compress or self.config.first_loop.compute_hash):
-            self.logger.info("No computation required. Skipping first loop")
+        # Validate the config
+        if not self.populate_first_loop_runtime_config(self.config.first_loop):
+            self.logger.info("Done with First Loop")
             return
-
-        # Disable parallel computation with only one process
-        if self.config.first_loop.cpu_proc == 1:
-            self.config.first_loop.parallel = False
 
         # Create hash table if necessary
         if self.config.first_loop.compute_hash:
