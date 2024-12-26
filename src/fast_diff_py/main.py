@@ -7,21 +7,20 @@ from fast_diff_py.fast_dif import FastDifPy
 import argparse
 
 
-def recover(path: str, output: str = None):
+def recover(path: str):
     """
     Recover computation from a given config or a given directory.
 
     :param path: Path to config or directory.
-    :param output: Path to output directory or output file to move db to in the end.
     """
     if os.path.isdir(path):
         local_fdo = FastDifPy(part_a=path)
     else:
         local_fdo = FastDifPy(part_a=os.path.dirname(path))
 
-    execute(local_fdo, output)
+    execute(local_fdo)
 
-def execute(_fdo: FastDifPy, output: str = None):
+def execute(_fdo: FastDifPy):
     """
     Run FastDiffPy and finally copy the database to the output path
     """
@@ -65,6 +64,10 @@ def execute(_fdo: FastDifPy, output: str = None):
 
     # We're done, clean up
     _fdo.commit()
+
+    # Getting possible output dir from config
+    cli_args = _fdo.config.cli_args if _fdo.config.cli_args is not None else {}
+    output = cli_args.get("output_dir")
 
     if output is not None:
         if os.path.isdir(output):
@@ -240,7 +243,9 @@ def main():
 
         fdo.config.second_loop.preload_count = args.cache_preload
 
-    execute(fdo, output=args.output_dir)
+    fdo.config.cli_args = args.__dict__
+
+    execute(fdo)
 
 
 if __name__ == "__main__":
