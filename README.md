@@ -57,9 +57,9 @@ value or, it shifts to the left using a negative value.
 
 ### Usage:
 FastDiffPy provides two scripts:
-- `dif.py` which implements the cli interface present in difPy with a few discrepancies. Refer to the 
+- `difpy` which implements the cli interface present in difPy with a few discrepancies. Refer to the 
 [Differences to difPy Section](#differences-to-the-original-difpy)
-- `main.py` which has its own cli interface to run the deduplication process and provide the user with a SQLite 
+- `fastdiffpy` which has its own cli interface to run the deduplication process and provide the user with a SQLite 
 database as a result.
 
 You can also write your own script to suit your needs like [this](scripts/Sample.py): 
