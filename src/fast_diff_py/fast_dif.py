@@ -9,7 +9,7 @@ import sys
 import time
 from logging.handlers import QueueListener
 from typing import List, Union, Callable, Dict, Optional, Tuple, Iterator, Type, Iterable
-
+import multiprocessing.connection as con
 import numpy as np
 
 import fast_diff_py.img_processing as imgp
@@ -18,7 +18,7 @@ from fast_diff_py.cache import ImageCache, BatchCache
 from fast_diff_py.child_processes import FirstLoopWorker, SecondLoopWorker
 from fast_diff_py.config import Config, Progress, FirstLoopConfig, SecondLoopConfig, SecondLoopRuntimeConfig, \
     FirstLoopRuntimeConfig
-from fast_diff_py.datatransfer import (PreprocessResult, SecondLoopArgs, SecondLoopResults)
+from fast_diff_py.datatransfer import (PreprocessResult, SecondLoopArgs, SecondLoopResults, Commands, ProgressReport)
 from fast_diff_py.sqlite_db import SQLiteDB
 from fast_diff_py.utils import sizeof_fmt, BlockProgress, build_start_blocks_a, build_start_blocks_ab
 
