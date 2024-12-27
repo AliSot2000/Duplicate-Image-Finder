@@ -104,6 +104,8 @@ if __name__ == "__main__":
 
     stats = {}
     worker = ["SecondLoopGPUWorker", "SecondLoopWorker"]
+    # worker = ["SecondLoopGPUWorker"]
+    # worker = ["SecondLoopWorker"]
 
     # Using not pretty but functional strategy
     for w in worker:

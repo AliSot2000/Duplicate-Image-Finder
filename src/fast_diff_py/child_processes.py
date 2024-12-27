@@ -565,7 +565,7 @@ class SecondLoopWorker(ChildProcess):
                             continue
 
                     # We have match-aspect of > 1.0 -> means match the aspect ratio
-                    if self.match_aspect_by is not None and self.match_aspect_by > 1.0:
+                    if self.match_aspect_by is not None and self.match_aspect_by >= 1.0:
                         if not self.match_aspect_ratio_by(arg.x_size, arg.y_size[i - start]):
                             diffs.append((arg.x, i, 3, -1.0))
                             continue
@@ -597,7 +597,8 @@ class SecondLoopWorker(ChildProcess):
         except Exception as e:
             self.logger.error(f"Error with image x in batch {arg.x}: {arg.cache_key}", exc_info=e)
             tb = traceback.format_exc()
-            errors = [(arg.x, -1, tb)]
+            # errors = [(arg.x, -1, tb)]
+            errors = [(arg.x, i, tb) for i in range(start, limit)]
             return SecondLoopResults(x=arg.x,
                                      cache_key=arg.cache_key,
                                      success=[],

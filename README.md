@@ -188,6 +188,8 @@ the config.
 **Config State Attributes**
 - `start_dt` - Used to compute the `elapsed_seconds` once the first loop is done. Will be set by the `first_loop` 
 function and cannot be overwritten.
+- `total` - Number of files to preprocess
+- `done` - Number of files preprocessed
 
 
 ##### SecondLoopConfig:
@@ -225,6 +227,8 @@ determine which images to load)
 - `finished_cache_index` - Highest cache key which was removed from RAM because all paris within that cache were computed.
 - `start_dt` - Used to compute the `elapsed_seconds` once the second loop is done. Will be set by the `second_loop` 
 function and cannot be overwritten.
+- `total` - Number of pairs to compare
+- `done` - Number of paris compared
 
 **INFO**: The reported `cache_index` in `Created Cache with key: ...` as well as `Pruning cache key: ...` is offset by 
 one compared to the config.
@@ -258,12 +262,13 @@ the delta on the gpu. The default `SecondLoopGPUWorker` also moves the entire ca
 movement. However, the `compare_fn` will still be set once the second loop is instantiating its workers. So put the 
 delta function you want to use in your gpu worker into the `gpu_diff` attribute of the `FastDiffPy` object. At the 
 point of writing a preliminary benchmark has shown that the GPU both with a custom worker and only with the mse computed 
-on the GPU is slower than the implementation using numpy. The `compression_target` was `64`. Benchmarks with the old 
-implementation from 2023 showed a speed improvement with the GPU if `compression_target >= 256`. 
-Benchmarks are to follow.
+on the GPU is slower than the implementation using numpy. The `compression_target` was `64`. Looking at the small 
+benchmark I did, the GPU certainly outperforms my CPU at a `compression_target = 256` and by the trend also above. 
+Look at the [GPU Performance Section](#gpu-performance)
 
 If you're not happy with the way the indexing is handled, you can use the `FastDiffPy.populate_partition` to provide 
-a list of files which are to be inserted into partition a and partition b.
+a list of files which are to be inserted into partition a and partition b. If you want to use `populate_partition`, call
+`FastDiffPy.index_preamble` before and `FastDiffPy.index_epilogue` once you're done
 
 You can also provide your own subclass of the `SQLiteDB`. For that you need to overwrite the `db_inst` class variable of 
 the `FastDiffPy` object.
@@ -277,6 +282,7 @@ For benchmarking, I used my Laptop with:
 - 16GB RAM, 4GB Swap
 - Ryzen 9 5900HS 8 Core, 16 Threads
 - 1TB NVME SSD
+- Nvidia RTX 3050 TI Mobile (4Gb VRAM)
 
 From the [IMDB Dataset](https://data.vision.ee.ethz.ch/cvl/rrothe/imdb-wiki/?ref=hackernoon.com), partitions were 
 generated using the [duplicate_generator.py](scripts/duplicate_generator.py) in partition mode. Datasets with sizes of 
@@ -311,10 +317,13 @@ bound task,a negative impact of hyper threading on performance can be observed.
 #### Deduplication Benchmarks
 Deduplication is Benchmarked using the [benchmark_deduplication.py](scripts/benchmark_deduplicate.py)
 
+![Performance Hit due to Cache Pruning](plots/Example_Cache_Prune.png)
+
 In Deduplication, FastDiffPy doesn't live up to its name and runs slower than difPy. This is not entirely surprising
 since FastDiffPy doesn't make the assumption of infinite RAM size. This causes overhead due to maintaining a subset of 
 images in RAM which need to be loaded, unloaded and copied into each process. Sadly, the shared RAM Cache also takes a 
-hefty performance penalty when adding and removing blocks of images because all process synchronize for that operation.
+hefty performance penalty when adding and removing blocks of images because all process synchronize for that operation
+(As can be seen in the image above, the repeated and simultanuous drops in performance).
 Additionally, FastDiffPy also maintains only the paris of images which have a delta less than the one specified. 
 This optimization is also made to be able to deduplicate massive datasets which surpass RAM size. But the operation of
 filtering and writing to the SQLite database i.e. writing to disk also costs performance.
@@ -347,6 +356,16 @@ db as well as the generation of the duplicate clusters using SQLite is more effi
 implementation of *difPy*. The last and most striking observation is the limits of *difPy*: 
 At a size of 32000 images per partition, `difPy` runs into a RAM overflow. FastDiffPy handles that just fine because 
 of the RAM cache. This being the last pointer to the strength of FastDiffPy for enormous datasets.
+
+##### GPU Performance
+The performance of the GPU wasn't explored in depth due to one benchmark with a partition size of 2000 already 
+taking between an hour and two hours. The parameters of the benchmark were also changed during its execution, 
+changing the number of gpu workers from 2 to 4 for the instance of a `compression_target = 256`. Additionally, 
+the performance with the `SecondLoopGPUWorker` was also only measured for the `compression_target = 256`. At this size, 
+the time taken to deduplicate went down from `4061.5s` to `3938.5s`. So only a very small improvement. 
+
+![Benchmark GPU](plots/gpu_cpu_perf.png)
+
 
 ### Appendix:
 With the previous implementation of the project, I found out later, that the goals I had were covered by other 

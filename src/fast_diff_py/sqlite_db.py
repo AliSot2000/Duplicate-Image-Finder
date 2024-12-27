@@ -325,7 +325,7 @@ class SQLiteDB(BaseSQliteDB):
         invert_partition = False
 
         # Make sure the smaller allowed partition is first
-        if dac < dbc:
+        if dac < dbc or dbc == 0:
             # Inserting the directory_b entries first
             stmt_asc= (f"INSERT INTO {tmp_tbl} "
                        f"(path, filename, error, success, px, py, allowed, file_size, created, dir_index, part_b, "
@@ -781,7 +781,7 @@ class SQLiteDB(BaseSQliteDB):
         elif part_a and include_hash_match and not include_deleted:
             stmt = ("SELECT dir.path, dif.dif "
                     "FROM dif_table AS dif JOIN directory AS dir ON dir.key = dif.key_b "
-                    "WHERE dif.key_a = ? AND dif.dif <= ? AND dif.success IN (1, 2) AND dir.deleted = 0"
+                    "WHERE dif.key_a = ? AND dif.dif <= ? AND dif.success IN (1, 2) AND dir.deleted = 0 "
                     "ORDER BY dir.file_Size DESC, dir.created ASC")
         elif part_a and not include_hash_match and include_deleted:
             stmt = ("SELECT dir.path, dif.dif "
@@ -791,7 +791,7 @@ class SQLiteDB(BaseSQliteDB):
         elif part_a and not include_hash_match and not include_deleted:
             stmt = ("SELECT dir.path, dif.dif "
                     "FROM dif_table AS dif JOIN directory AS dir ON dir.key = dif.key_b "
-                    "WHERE dif.key_a = ? AND dif.dif <= ? AND dif.success = 1 AND dir.deleted = 0"
+                    "WHERE dif.key_a = ? AND dif.dif <= ? AND dif.success = 1 AND dir.deleted = 0 "
                     "ORDER BY dir.file_Size DESC, dir.created ASC")
         elif not part_a and include_hash_match and include_deleted:
             stmt = ("SELECT dir.path, dif.dif "
@@ -801,7 +801,7 @@ class SQLiteDB(BaseSQliteDB):
         elif not part_a and include_hash_match and not include_deleted:
             stmt = ("SELECT dir.path, dif.dif "
                     "FROM dif_table AS dif JOIN directory AS dir ON dir.key = dif.key_a "
-                    "WHERE dif.key_b = ? AND dif.dif <= ? AND dif.success IN (1, 2) AND dir.deleted = 0"
+                    "WHERE dif.key_b = ? AND dif.dif <= ? AND dif.success IN (1, 2) AND dir.deleted = 0 "
                     "ORDER BY dir.file_Size DESC, dir.created ASC")
         elif not part_a and not include_hash_match and include_deleted:
             stmt = ("SELECT dir.path, dif.dif "
@@ -811,7 +811,7 @@ class SQLiteDB(BaseSQliteDB):
         elif not part_a and not include_hash_match and not include_deleted:
             stmt = ("SELECT dir.path, dif.dif "
                     "FROM dif_table AS dif JOIN directory AS dir ON dir.key = dif.key_a "
-                    "WHERE dif.key_b = ? AND dif.dif <= ? AND dif.success = 1 AND dir.deleted = 0"
+                    "WHERE dif.key_b = ? AND dif.dif <= ? AND dif.success = 1 AND dir.deleted = 0 "
                     "ORDER BY dir.file_Size DESC, dir.created ASC")
         else:
             raise ValueError("Tertiem Non Datur")

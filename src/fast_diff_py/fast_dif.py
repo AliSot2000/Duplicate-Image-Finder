@@ -9,7 +9,7 @@ import sys
 import time
 from logging.handlers import QueueListener
 from typing import List, Union, Callable, Dict, Optional, Tuple, Iterator, Type, Iterable
-
+import multiprocessing.connection as con
 import numpy as np
 
 import fast_diff_py.img_processing as imgp
@@ -18,7 +18,7 @@ from fast_diff_py.cache import ImageCache, BatchCache
 from fast_diff_py.child_processes import FirstLoopWorker, SecondLoopWorker
 from fast_diff_py.config import Config, Progress, FirstLoopConfig, SecondLoopConfig, SecondLoopRuntimeConfig, \
     FirstLoopRuntimeConfig
-from fast_diff_py.datatransfer import (PreprocessResult, SecondLoopArgs, SecondLoopResults)
+from fast_diff_py.datatransfer import (PreprocessResult, SecondLoopArgs, SecondLoopResults, Commands, ProgressReport)
 from fast_diff_py.sqlite_db import SQLiteDB
 from fast_diff_py.utils import sizeof_fmt, BlockProgress, build_start_blocks_a, build_start_blocks_ab
 
@@ -30,6 +30,7 @@ class FastDifPy(GracefulWorker):
     # Process related
     handles: Union[List[mp.Process], None] = None
     exit_counter: int = 0
+    com: Optional[con.Connection] = None
 
     # Child process perspective
     cmd_queue: Optional[mp.Queue] = None
@@ -74,6 +75,64 @@ class FastDifPy(GracefulWorker):
     # ==================================================================================================================
     # Util
     # ==================================================================================================================
+
+    def _handle_com(self):
+        """
+        Handle the communication with parent process to report progress.
+
+        PRECONDITION: self.com is not None
+        """
+        # Check whether there's something in the queue
+        if self.com.poll():
+            command = self.com.recv()
+
+            if not isinstance(command, Commands):
+                raise ValueError(f"Unsupported Command sent to FastDiffPy {command}")
+
+            if command == Commands.STOP:
+                self.run = False
+
+    def progress_report_indexing(self):
+        """
+        Handle progress reporting for indexing operation.
+        """
+        if self.com is None:
+            return
+
+        self._handle_com()
+
+        status = ProgressReport(
+            operation="Indexing Directories",
+            done=self._enqueue_counter
+        )
+        self.com.send(status)
+
+    def report_progress_loop(self, first_loop: bool = True):
+        """
+        Handle progres reporting for first loop operation.
+        """
+        if self.com is None:
+            return
+
+        self._handle_com()
+
+        if first_loop:
+            if self.run:
+                msg = "First Loop"
+            else:
+                msg = "Halt of First Loop"
+        else:
+            if self.run:
+                msg = "Second Loop"
+            else:
+                msg = "Halt of Second Loop"
+
+        status = ProgressReport(
+            operation=msg,
+            done=self.config.first_loop.done if first_loop else self.config.second_loop.done,
+            total=self.config.first_loop.total if first_loop else self.config.second_loop.total
+        )
+        self.com.send(status)
 
     def commit(self):
         """
@@ -250,6 +309,9 @@ class FastDifPy(GracefulWorker):
             if len(fpaths) > self.config.batch_size_dir:
                 self.db.bulk_insert_file_external(fpaths, allowed, fsize, create, part_a)
                 count += len(fpaths)
+                self._enqueue_counter += len(fpaths)
+                self.logger.info(f"Indexed {self._enqueue_counter} files")
+                self.progress_report_indexing()
 
                 fpaths = []
                 allowed = []
@@ -259,6 +321,9 @@ class FastDifPy(GracefulWorker):
         if len(fpaths) > 0:
             self.db.bulk_insert_file_external(fpaths, allowed, fsize, create, part_a)
             count += len(fpaths)
+            self._enqueue_counter += len(fpaths)
+            self.logger.info(f"Indexed {self._enqueue_counter} files")
+            self.progress_report_indexing()
 
         # Setting the number of seconds indexing the dirs took.
         self.config.dir_index_elapsed += (datetime.datetime.now(datetime.UTC) - start).total_seconds()
@@ -481,6 +546,11 @@ class FastDifPy(GracefulWorker):
         # Create the table
         self.db.create_directory_table_and_index()
 
+        # Reset the counters.
+        self._enqueue_counter = 0
+        self._dequeue_counter = 0
+        self._last_dequeue_counter = 0
+
     def index_epilogue(self):
         """
         Finish indexing operation - checkin partition sizes and switching partitions if necessary, and writing to disk.
@@ -600,10 +670,6 @@ class FastDifPy(GracefulWorker):
 
             self.cleanup()
             raise ValueError("The two provided subdirectories are subdirectories of each other. Cannot proceed")
-
-        self._enqueue_counter = 0
-        self._dequeue_counter = 0
-        self._last_dequeue_counter = 0
 
         self.logger.debug("Beginning indexing")
 
@@ -916,6 +982,7 @@ class FastDifPy(GracefulWorker):
                     self.logger.info(f"Enqueued: {self._enqueue_counter} {task}")
                     self.logger.info(f"Done with {self._dequeue_counter} {task}")
                     self._last_dequeue_counter = self._dequeue_counter
+                    self.report_progress_loop(first_iteration)
 
                 # Precondition -> Two times batch-size has been submitted to the queue
                 s = datetime.datetime.now(datetime.UTC)
@@ -936,6 +1003,7 @@ class FastDifPy(GracefulWorker):
                     self.logger.info(f"Enqueued: {self._enqueue_counter} {task}")
                     self.logger.info(f"Done with {self._dequeue_counter} {task}")
                     self._last_dequeue_counter = self._dequeue_counter
+                    self.report_progress_loop(first_iteration)
 
                 self.commit()
 
@@ -963,6 +1031,7 @@ class FastDifPy(GracefulWorker):
                 self.logger.info(f"Enqueued: {self._enqueue_counter} {task}")
                 self.logger.info(f"Done with {self._dequeue_counter} {task}")
                 self._last_dequeue_counter = self._dequeue_counter
+                self.report_progress_loop(first_iteration)
 
             # Precondition -> Two times batch-size has been submitted to the queue
             dequeue_fn()
@@ -979,6 +1048,7 @@ class FastDifPy(GracefulWorker):
                 self.logger.info(f"Enqueued: {self._enqueue_counter} {task}")
                 self.logger.info(f"Done with {self._dequeue_counter} {task}")
                 self._last_dequeue_counter = self._dequeue_counter
+                self.report_progress_loop(first_iteration)
 
             self.commit()
 
@@ -1000,6 +1070,7 @@ class FastDifPy(GracefulWorker):
         rtc = cfg
         if not isinstance(cfg, FirstLoopRuntimeConfig):
             rtc = FirstLoopRuntimeConfig.model_validate(cfg.model_dump())
+            rtc.total = self.db.get_partition_entry_count(False) + self.db.get_partition_entry_count(True)
         else:
             # Factory not used, setting start_dt manually
             self.config.first_loop.start_dt = datetime.datetime.now(datetime.timezone.utc)
@@ -1014,22 +1085,20 @@ class FastDifPy(GracefulWorker):
             self.logger.warning("Shift amount is 0, but hash computation is requested. "
                                 "Only exact Matches will be found")
 
-        todo = self.db.get_partition_entry_count(False) + self.db.get_partition_entry_count(True)
-
         # Don't overwrite the batch_size if it is provided already.
         if rtc.batch_size is None:
             # We are in a case where we have less than the number of CPUs
-            if todo < os.cpu_count():
+            if rtc.total < os.cpu_count():
                 self.logger.debug("Less than the number of CPUs available. Running sequentially")
                 rtc.parallel = False
 
             # We have less than a significant amount of batches, submission done separately
-            if todo / os.cpu_count() < 40:
+            if rtc.total / os.cpu_count() < 40:
                 self.logger.debug("Less than 40 images / cpu available. No batching")
                 rtc.batch_size = None
 
             else:
-                rtc.batch_size = min(self.config.batch_size_max_fl, int(todo / 4 / os.cpu_count()))
+                rtc.batch_size = min(self.config.batch_size_max_fl, int(rtc.total / 4 / os.cpu_count()))
                 self.logger.debug(f"Batch size set to: {rtc.batch_size}")
 
         # Setting the config
@@ -1133,6 +1202,7 @@ class FastDifPy(GracefulWorker):
 
             # Store the results
             self.store_batch_first_loop(results)
+            self.report_progress_loop(True)
             self.commit()
 
         self.cmd_queue = None
@@ -1282,6 +1352,8 @@ class FastDifPy(GracefulWorker):
                 res.hash_180 = lookup.get(res.hash_180)
                 res.hash_270 = lookup.get(res.hash_270)
 
+        # Storing progress
+        self.config.first_loop.done = self._dequeue_counter
         self.db.batch_of_first_loop_results(results, has_hash=self.config.first_loop.compute_hash)
 
     @staticmethod
@@ -1409,10 +1481,12 @@ class FastDifPy(GracefulWorker):
             self.dir_a_count = self.db.get_partition_entry_count(part_b=False, only_allowed=True)
             self.dir_b_count = self.db.get_partition_entry_count(part_b=True, only_allowed=True)
             self.blocks = build_start_blocks_ab(self.dir_a_count, self.dir_b_count, self.config.second_loop.batch_size)
+            self.config.second_loop.total = self.dir_a_count * self.dir_b_count
             self.logger.info(f"Created Blocks for A and B, number of blocks: {len(self.blocks)}")
         else:
             self.dir_a_count = self.db.get_partition_entry_count(part_b=False, only_allowed=True)
             self.blocks = build_start_blocks_a(self.dir_a_count, self.config.second_loop.batch_size)
+            self.config.second_loop.total = int(self.dir_a_count * (self.dir_a_count - 1) / 2)
             self.logger.info(f"Created Blocks for A , number of blocks: {len(self.blocks)}")
 
         # Reset the progress if we're coming from a in progress loop.
@@ -1522,6 +1596,7 @@ class FastDifPy(GracefulWorker):
                 error.extend(res.errors)
 
             self.dequeue_second_loop_batch(success=success, error=error)
+            self.report_progress_loop(False)
             self.commit()
 
         # Updating the time taken
@@ -1723,6 +1798,7 @@ class FastDifPy(GracefulWorker):
                 success.extend(res.success)
                 error.extend(res.errors)
 
+        self.config.second_loop.done += len(success) + len(error)
         success = list(filter(lambda x: x[3] <= self.config.second_loop.diff_threshold, success))
 
         if not self.config.second_loop.keep_non_matching_aspects:
