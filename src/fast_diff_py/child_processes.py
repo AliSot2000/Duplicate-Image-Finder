@@ -597,7 +597,8 @@ class SecondLoopWorker(ChildProcess):
         except Exception as e:
             self.logger.error(f"Error with image x in batch {arg.x}: {arg.cache_key}", exc_info=e)
             tb = traceback.format_exc()
-            errors = [(arg.x, -1, tb)]
+            # errors = [(arg.x, -1, tb)]
+            errors = [(arg.x, i, tb) for i in range(start, limit)]
             return SecondLoopResults(x=arg.x,
                                      cache_key=arg.cache_key,
                                      success=[],
