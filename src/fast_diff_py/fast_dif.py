@@ -671,10 +671,6 @@ class FastDifPy(GracefulWorker):
             self.cleanup()
             raise ValueError("The two provided subdirectories are subdirectories of each other. Cannot proceed")
 
-        self._enqueue_counter = 0
-        self._dequeue_counter = 0
-        self._last_dequeue_counter = 0
-
         self.logger.debug("Beginning indexing")
 
         # Fetching the list of dirs
