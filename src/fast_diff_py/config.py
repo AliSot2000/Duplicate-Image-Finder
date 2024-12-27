@@ -48,6 +48,10 @@ class FirstLoopRuntimeConfig(FirstLoopConfig):
                                         description="The batch size for the first loop")
     start_dt: datetime.datetime = Field(default_factory=lambda: datetime.datetime.now(datetime.UTC),
                                         description="Datetime at which the first loop started")
+    total: int = Field(0,
+                       description="Total number of files to process.")
+    done: int = Field(0,
+                      description="Number of files processed.")
 
 class SecondLoopConfig(BaseModel):
     # Because of batching this doesn't make much sense.
@@ -99,6 +103,10 @@ class SecondLoopRuntimeConfig(SecondLoopConfig):
                                                 description="Index of the cache field we're done with")
     start_dt: datetime.datetime = Field(default_factory=lambda: datetime.datetime.now(datetime.UTC),
                                         description="Datetime at which the second loop started")
+    total: int = Field(0,
+                       description="Total number of files to process.")
+    done: int = Field(0,
+                      description="Number of files processed.")
 
 class Config(BaseModel):
     compression_target: int = Field(64,
