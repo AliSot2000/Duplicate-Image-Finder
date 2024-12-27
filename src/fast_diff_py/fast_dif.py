@@ -982,6 +982,7 @@ class FastDifPy(GracefulWorker):
                     self.logger.info(f"Enqueued: {self._enqueue_counter} {task}")
                     self.logger.info(f"Done with {self._dequeue_counter} {task}")
                     self._last_dequeue_counter = self._dequeue_counter
+                    self.report_progress_loop(first_iteration)
 
                 # Precondition -> Two times batch-size has been submitted to the queue
                 s = datetime.datetime.now(datetime.UTC)
@@ -1002,6 +1003,7 @@ class FastDifPy(GracefulWorker):
                     self.logger.info(f"Enqueued: {self._enqueue_counter} {task}")
                     self.logger.info(f"Done with {self._dequeue_counter} {task}")
                     self._last_dequeue_counter = self._dequeue_counter
+                    self.report_progress_loop(first_iteration)
 
                 self.commit()
 
@@ -1029,6 +1031,7 @@ class FastDifPy(GracefulWorker):
                 self.logger.info(f"Enqueued: {self._enqueue_counter} {task}")
                 self.logger.info(f"Done with {self._dequeue_counter} {task}")
                 self._last_dequeue_counter = self._dequeue_counter
+                self.report_progress_loop(first_iteration)
 
             # Precondition -> Two times batch-size has been submitted to the queue
             dequeue_fn()
@@ -1045,6 +1048,7 @@ class FastDifPy(GracefulWorker):
                 self.logger.info(f"Enqueued: {self._enqueue_counter} {task}")
                 self.logger.info(f"Done with {self._dequeue_counter} {task}")
                 self._last_dequeue_counter = self._dequeue_counter
+                self.report_progress_loop(first_iteration)
 
             self.commit()
 
@@ -1199,6 +1203,7 @@ class FastDifPy(GracefulWorker):
 
             # Store the results
             self.store_batch_first_loop(results)
+            self.report_progress_loop(True)
             self.commit()
 
         self.cmd_queue = None
@@ -1588,6 +1593,7 @@ class FastDifPy(GracefulWorker):
                 error.extend(res.errors)
 
             self.dequeue_second_loop_batch(success=success, error=error)
+            self.report_progress_loop(False)
             self.commit()
 
         # Updating the time taken
