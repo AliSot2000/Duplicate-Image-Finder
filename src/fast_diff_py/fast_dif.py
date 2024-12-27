@@ -309,6 +309,9 @@ class FastDifPy(GracefulWorker):
             if len(fpaths) > self.config.batch_size_dir:
                 self.db.bulk_insert_file_external(fpaths, allowed, fsize, create, part_a)
                 count += len(fpaths)
+                self._enqueue_counter += len(fpaths)
+                self.logger.info(f"Indexed {self._enqueue_counter} files")
+                self.progress_report_indexing()
 
                 fpaths = []
                 allowed = []
@@ -318,6 +321,9 @@ class FastDifPy(GracefulWorker):
         if len(fpaths) > 0:
             self.db.bulk_insert_file_external(fpaths, allowed, fsize, create, part_a)
             count += len(fpaths)
+            self._enqueue_counter += len(fpaths)
+            self.logger.info(f"Indexed {self._enqueue_counter} files")
+            self.progress_report_indexing()
 
         # Setting the number of seconds indexing the dirs took.
         self.config.dir_index_elapsed += (datetime.datetime.now(datetime.UTC) - start).total_seconds()
