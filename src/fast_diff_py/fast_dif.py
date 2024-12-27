@@ -1070,6 +1070,7 @@ class FastDifPy(GracefulWorker):
         rtc = cfg
         if not isinstance(cfg, FirstLoopRuntimeConfig):
             rtc = FirstLoopRuntimeConfig.model_validate(cfg.model_dump())
+            rtc.total = self.db.get_partition_entry_count(False) + self.db.get_partition_entry_count(True)
         else:
             # Factory not used, setting start_dt manually
             self.config.first_loop.start_dt = datetime.datetime.now(datetime.timezone.utc)
@@ -1084,17 +1085,15 @@ class FastDifPy(GracefulWorker):
             self.logger.warning("Shift amount is 0, but hash computation is requested. "
                                 "Only exact Matches will be found")
 
-        todo = self.db.get_partition_entry_count(False) + self.db.get_partition_entry_count(True)
-
         # Don't overwrite the batch_size if it is provided already.
         if rtc.batch_size is None:
             # We are in a case where we have less than the number of CPUs
-            if todo < os.cpu_count():
+            if self.config.first_loop.total < os.cpu_count():
                 self.logger.debug("Less than the number of CPUs available. Running sequentially")
                 rtc.parallel = False
 
             # We have less than a significant amount of batches, submission done separately
-            if todo / os.cpu_count() < 40:
+            if self.config.first_loop.total / os.cpu_count() < 40:
                 self.logger.debug("Less than 40 images / cpu available. No batching")
                 rtc.batch_size = None
 
