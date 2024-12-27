@@ -1352,6 +1352,8 @@ class FastDifPy(GracefulWorker):
                 res.hash_180 = lookup.get(res.hash_180)
                 res.hash_270 = lookup.get(res.hash_270)
 
+        # Storing progress
+        self.config.first_loop.done = self._dequeue_counter
         self.db.batch_of_first_loop_results(results, has_hash=self.config.first_loop.compute_hash)
 
     @staticmethod
