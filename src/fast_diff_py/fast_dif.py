@@ -546,6 +546,11 @@ class FastDifPy(GracefulWorker):
         # Create the table
         self.db.create_directory_table_and_index()
 
+        # Reset the counters.
+        self._enqueue_counter = 0
+        self._dequeue_counter = 0
+        self._last_dequeue_counter = 0
+
     def index_epilogue(self):
         """
         Finish indexing operation - checkin partition sizes and switching partitions if necessary, and writing to disk.
