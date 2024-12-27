@@ -113,10 +113,10 @@ class Config(BaseModel):
                                     description="The target size of compressed images i.e. "
                                                 "size = (compression_target * compression_target)")
 
-    part_a: List[str] | str = Field(...,
+    part_a: Union[List[str], str] = Field(...,
                                     min_length=1,
                                     description="Directory or List of Directories to be added to partition a")
-    part_b: List[str] | str = Field([],
+    part_b: Union[List[str], str] = Field(default_factory=lambda: [],
                                               description="Directory or List of Directories to be added to partition b")
 
     dir_index_lookup: Optional[List[str]] = Field(None,
@@ -138,17 +138,18 @@ class Config(BaseModel):
     thumb_dir: Optional[str] = Field(None,
                             description="The directory to store the thumbnails")
 
-    ignore_names: List[str] = Field([],
+    ignore_names: List[str] = Field(default_factory=lambda: [],
                                     description="The names of the directories or files to ignore")
-    ignore_paths: List[str] = Field([],
+    ignore_paths: List[str] = Field(default_factory=lambda: [],
                                     description="The paths of the directories or files to ignore")
     allowed_file_extensions: List[str] = Field(
-        default=['.apng', '.bw', '.cdf', '.cur', '.dcx', '.dds', '.dib', '.emf', '.eps', '.fli', '.flc', '.fpx',
-                 '.ftex', '.fits', '.gd', '.gd2', '.gif', '.gbr', '.icb', '.icns', '.iim', '.ico', '.im', '.imt',
-                 '.j2k', '.jfif', '.jfi', '.jif', '.jp2', '.jpe', '.jpeg', '.jpg', '.jpm', '.jpf', '.jpx', '.jpeg',
-                 '.mic', '.mpo', '.msp', '.nc', '.pbm', '.pcd', '.pcx', '.pgm', '.png', '.ppm', '.psd', '.pixar',
-                 '.ras', '.rgb', '.rgba', '.sgi', '.spi', '.spider', '.sun', '.tga', '.tif', '.tiff', '.vda', '.vst',
-                 '.wal', '.webp', '.xbm', '.xpm'],
+        default_factory=lambda : ['.apng', '.bw', '.cdf', '.cur', '.dcx', '.dds', '.dib', '.emf', '.eps', '.fli',
+                                  '.flc', '.fpx', '.ftex', '.fits', '.gd', '.gd2', '.gif', '.gbr', '.icb', '.icns',
+                                  '.iim', '.ico', '.im', '.imt', '.j2k', '.jfif', '.jfi', '.jif', '.jp2', '.jpe',
+                                  '.jpeg', '.jpg', '.jpm', '.jpf', '.jpx', '.jpeg', '.mic', '.mpo', '.msp', '.nc',
+                                  '.pbm', '.pcd', '.pcx', '.pgm', '.png', '.ppm', '.psd', '.pixar', '.ras', '.rgb',
+                                  '.rgba', '.sgi', '.spi', '.spider', '.sun', '.tga', '.tif', '.tiff', '.vda', '.vst',
+                                  '.wal', '.webp', '.xbm', '.xpm'],
         description="The allowed file extensions for the images")
 
     batch_size_dir: int = Field(1000,
