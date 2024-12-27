@@ -565,7 +565,7 @@ class SecondLoopWorker(ChildProcess):
                             continue
 
                     # We have match-aspect of > 1.0 -> means match the aspect ratio
-                    if self.match_aspect_by is not None and self.match_aspect_by > 1.0:
+                    if self.match_aspect_by is not None and self.match_aspect_by >= 1.0:
                         if not self.match_aspect_ratio_by(arg.x_size, arg.y_size[i - start]):
                             diffs.append((arg.x, i, 3, -1.0))
                             continue
