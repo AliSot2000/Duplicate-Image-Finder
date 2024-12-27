@@ -1,0 +1,8 @@
+,operation,partition size,method,processes,iteration,target size,time
+0,deduplication,2k,cpu,16,0,64,115.811935
+1,deduplication,2k,cpu,16,0,128,602.014187
+2,deduplication,2k,cpu,16,0,256,11768.673155
+3,deduplication,2k,gpu_mse,2,0,64,2858.012947
+4,deduplication,2k,gpu_mse,2,0,128,3673.237859
+5,deduplication,2k,gpu_mse,4,0,256,4061.526177
+6,deduplication,2k,gpu_worker,4,0,256,3938.48098
