@@ -267,7 +267,8 @@ implementation from 2023 showed a speed improvement with the GPU if `compression
 Benchmarks are to follow.
 
 If you're not happy with the way the indexing is handled, you can use the `FastDiffPy.populate_partition` to provide 
-a list of files which are to be inserted into partition a and partition b.
+a list of files which are to be inserted into partition a and partition b. If you want to use `populate_partition`, call
+`FastDiffPy.index_preamble` before and `FastDiffPy.index_epilogue` once you're done
 
 You can also provide your own subclass of the `SQLiteDB`. For that you need to overwrite the `db_inst` class variable of 
 the `FastDiffPy` object.
