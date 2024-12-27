@@ -1481,10 +1481,12 @@ class FastDifPy(GracefulWorker):
             self.dir_a_count = self.db.get_partition_entry_count(part_b=False, only_allowed=True)
             self.dir_b_count = self.db.get_partition_entry_count(part_b=True, only_allowed=True)
             self.blocks = build_start_blocks_ab(self.dir_a_count, self.dir_b_count, self.config.second_loop.batch_size)
+            self.config.second_loop.total = self.dir_a_count * self.dir_b_count
             self.logger.info(f"Created Blocks for A and B, number of blocks: {len(self.blocks)}")
         else:
             self.dir_a_count = self.db.get_partition_entry_count(part_b=False, only_allowed=True)
             self.blocks = build_start_blocks_a(self.dir_a_count, self.config.second_loop.batch_size)
+            self.config.second_loop.total = int(self.dir_a_count * (self.dir_a_count - 1) / 2)
             self.logger.info(f"Created Blocks for A , number of blocks: {len(self.blocks)}")
 
         # Reset the progress if we're coming from a in progress loop.
