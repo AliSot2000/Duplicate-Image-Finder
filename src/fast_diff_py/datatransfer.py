@@ -2,6 +2,8 @@ from typing import Optional, List, Dict, Union, Tuple
 
 from pydantic import BaseModel, Field, ConfigDict
 
+import enum
+
 class PreprocessArg(BaseModel):
     """
     Args for the preprocess function
@@ -93,6 +95,22 @@ class SecondLoopResults(BaseModel):
     success: List[Tuple[int, int, int, float]] = Field(default_factory=lambda: [],
                                                        description="Success of the comparison,"
                                                                    " key_x, key_y, success_type, diff")
+
+    model_config = ConfigDict(
+        populate_by_name=True
+    )
+
+
+class Commands(str, enum.Enum):
+    STOP = "stop"
+
+
+class ProgressReport(BaseModel):
+    operation: str
+    total: Optional[int] = Field(None,
+                                 description="The total number of things to process.")
+    done: Optional[int] = Field(None,
+                                description="The number of things processed so far.")
 
     model_config = ConfigDict(
         populate_by_name=True
