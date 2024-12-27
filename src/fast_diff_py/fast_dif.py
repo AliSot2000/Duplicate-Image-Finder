@@ -1088,12 +1088,12 @@ class FastDifPy(GracefulWorker):
         # Don't overwrite the batch_size if it is provided already.
         if rtc.batch_size is None:
             # We are in a case where we have less than the number of CPUs
-            if self.config.first_loop.total < os.cpu_count():
+            if rtc.total < os.cpu_count():
                 self.logger.debug("Less than the number of CPUs available. Running sequentially")
                 rtc.parallel = False
 
             # We have less than a significant amount of batches, submission done separately
-            if self.config.first_loop.total / os.cpu_count() < 40:
+            if rtc.total / os.cpu_count() < 40:
                 self.logger.debug("Less than 40 images / cpu available. No batching")
                 rtc.batch_size = None
 
