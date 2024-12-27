@@ -325,7 +325,7 @@ class SQLiteDB(BaseSQliteDB):
         invert_partition = False
 
         # Make sure the smaller allowed partition is first
-        if dac < dbc:
+        if dac < dbc or dbc == 0:
             # Inserting the directory_b entries first
             stmt_asc= (f"INSERT INTO {tmp_tbl} "
                        f"(path, filename, error, success, px, py, allowed, file_size, created, dir_index, part_b, "
