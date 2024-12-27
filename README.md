@@ -188,6 +188,8 @@ the config.
 **Config State Attributes**
 - `start_dt` - Used to compute the `elapsed_seconds` once the first loop is done. Will be set by the `first_loop` 
 function and cannot be overwritten.
+- `total` - Number of files to preprocess
+- `done` - Number of files preprocessed
 
 
 ##### SecondLoopConfig:
@@ -225,6 +227,8 @@ determine which images to load)
 - `finished_cache_index` - Highest cache key which was removed from RAM because all paris within that cache were computed.
 - `start_dt` - Used to compute the `elapsed_seconds` once the second loop is done. Will be set by the `second_loop` 
 function and cannot be overwritten.
+- `total` - Number of pairs to compare
+- `done` - Number of paris compared
 
 **INFO**: The reported `cache_index` in `Created Cache with key: ...` as well as `Pruning cache key: ...` is offset by 
 one compared to the config.
