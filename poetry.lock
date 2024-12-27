@@ -512,7 +512,7 @@ test-no-images = ["pytest", "pytest-cov", "pytest-rerunfailures", "pytest-xdist"
 name = "cupy"
 version = "13.3.0"
 description = "CuPy: NumPy & SciPy for GPU"
-optional = true
+optional = false
 python-versions = ">=3.9"
 files = [
     {file = "cupy-13.3.0.tar.gz", hash = "sha256:9a2a17af2b99cce91dd1366939c3805e3f51f9de5046df64f29ccbad3bdf78ed"},
@@ -646,7 +646,7 @@ devel = ["colorama", "json-spec", "jsonschema", "pylint", "pytest", "pytest-benc
 name = "fastrlock"
 version = "0.8.3"
 description = "Fast, re-entrant optimistic lock implemented in Cython"
-optional = true
+optional = false
 python-versions = "*"
 files = [
     {file = "fastrlock-0.8.3-cp27-cp27m-manylinux_2_5_i686.manylinux1_i686.whl", hash = "sha256:bbbe31cb60ec32672969651bf68333680dacaebe1a1ec7952b8f5e6e23a70aa5"},
@@ -3110,4 +3110,4 @@ test = ["websockets"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.12"
-content-hash = "28112bdf3b0d2a9e60071d2f6795969e3dae060f2f6bed9d1027aa99ee57df53"
+content-hash = "c5177a090fb5fcf6190232f7655cdb74a8e667c3ecfa48571dbf89d8c0a4cc71"
