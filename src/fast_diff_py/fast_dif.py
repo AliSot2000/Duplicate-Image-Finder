@@ -30,6 +30,7 @@ class FastDifPy(GracefulWorker):
     # Process related
     handles: Union[List[mp.Process], None] = None
     exit_counter: int = 0
+    com: Optional[con.Connection] = None
 
     # Child process perspective
     cmd_queue: Optional[mp.Queue] = None
@@ -74,6 +75,64 @@ class FastDifPy(GracefulWorker):
     # ==================================================================================================================
     # Util
     # ==================================================================================================================
+
+    def _handle_com(self):
+        """
+        Handle the communication with parent process to report progress.
+
+        PRECONDITION: self.com is not None
+        """
+        # Check whether there's something in the queue
+        if self.com.poll():
+            command = self.com.recv()
+
+            if not isinstance(command, Commands):
+                raise ValueError(f"Unsupported Command sent to FastDiffPy {command}")
+
+            if command == Commands.STOP:
+                self.run = False
+
+    def progress_report_indexing(self):
+        """
+        Handle progress reporting for indexing operation.
+        """
+        if self.com is None:
+            return
+
+        self._handle_com()
+
+        status = ProgressReport(
+            operation="Indexing Directories",
+            done=self._enqueue_counter
+        )
+        self.com.send(status)
+
+    def report_progress_loop(self, first_loop: bool = True):
+        """
+        Handle progres reporting for first loop operation.
+        """
+        if self.com is None:
+            return
+
+        self._handle_com()
+
+        if first_loop:
+            if self.run:
+                msg = "First Loop"
+            else:
+                msg = "Halt of First Loop"
+        else:
+            if self.run:
+                msg = "Second Loop"
+            else:
+                msg = "Halt of Second Loop"
+
+        status = ProgressReport(
+            operation=msg,
+            done=self.config.first_loop.done if first_loop else self.config.second_loop.done,
+            total=self.config.first_loop.total if first_loop else self.config.second_loop.total
+        )
+        self.com.send(status)
 
     def commit(self):
         """
