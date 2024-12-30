@@ -44,7 +44,7 @@ allows the storing of enormous datasets.
 - `Extendable With User Defined Functions` - The hash function as well as the two compare functions can be overwritten 
 by the user. It is also possible to circumvent the integrated indexer and pass FastDiffPy a list of files directly. 
 Refer to the [User Extension Section](#User-Extension)
-- `GPU Support` - The GPU can be used. For now, only the mse computation is done on GPU. 
+- `GPU Support` - The GPU can be used. Install like `pip install fast-diff-py[cuda]` 
 - `GPU Worker` - For even higher performance, you can implement a worker that is tailored to run fully on the gpu. 
 - `Highly Customizable with Tunables` - FastDifPy has extensive configuration options. 
 Refer to the [Configuration Section](#Configuration).
